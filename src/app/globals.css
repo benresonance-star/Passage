@@ -1,0 +1,54 @@
+@import "tailwindcss";
+
+@theme {
+  --color-background: #000000;
+  --color-foreground: #f4f4f5;
+}
+
+@layer base {
+  @supports (padding: env(safe-area-inset-top)) {
+    .pt-safe {
+      padding-top: env(safe-area-inset-top);
+    }
+    .pb-safe {
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+  }
+
+  /* Allow selection in specific areas like the practice/type recall */
+  .selectable {
+    user-select: text;
+  }
+
+  input, textarea {
+    user-select: text;
+  }
+
+  h1, h2, h3, h4 {
+    font-weight: 600;
+    letter-spacing: -0.025em;
+  }
+}
+
+@layer components {
+  .chunk-text {
+    font-size: 18px;
+    line-height: 1.625;
+    transition-property: all;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 300ms;
+  }
+
+  .chunk-text-bold {
+    font-size: 20px;
+    font-weight: 700;
+    color: white;
+  }
+}
