@@ -74,6 +74,7 @@ export default function PracticePage() {
     if (mode === "read") setMode("cloze");
     else if (mode === "cloze") setMode("type");
     else if (mode === "type") {
+      if (!activeChunk) return;
       const results = calculateDiff(activeChunk.text, typedText);
       setDiffResults(results);
       setMode("result");
@@ -143,14 +144,14 @@ export default function PracticePage() {
             {mode === "read" ? "Read Mode" : mode === "cloze" ? "Cloze Mode" : mode === "type" ? "Recall Mode" : "Results"}
           </h1>
           <p className="text-[10px] text-zinc-500 uppercase tracking-tight">
-            Verses {activeChunk.verseRange} • {chapter.title}
+            Verses {activeChunk?.verseRange} • {chapter?.title}
           </p>
         </div>
         <div className="w-10" />
       </header>
 
       <div className="flex-1 flex flex-col justify-center py-8">
-        {mode === "read" && (
+        {mode === "read" && activeChunk && (
           <div className="space-y-8 animate-in fade-in duration-500">
             <div className="chunk-text-bold text-center leading-relaxed">
               {activeChunk.verses.map((v, idx) => (
@@ -171,7 +172,7 @@ export default function PracticePage() {
           </div>
         )}
 
-        {mode === "cloze" && (
+        {mode === "cloze" && activeChunk && (
           <div className="space-y-8 animate-in fade-in duration-500">
             <p className="chunk-text-bold text-center leading-relaxed font-mono tracking-tight">
               {hideWords(activeChunk.text, state.settings.clozeLevel, activeChunk.id)}

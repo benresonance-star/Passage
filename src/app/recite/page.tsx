@@ -137,7 +137,7 @@ export default function RecitePage() {
         <div className="text-center">
           <h1 className="text-sm font-bold uppercase tracking-widest text-orange-500">Recite Mode</h1>
           <p className="text-[10px] text-zinc-500 uppercase tracking-tight">
-            Verses {activeChunk.verseRange} • {chapter.title}
+            Verses {activeChunk?.verseRange} • {chapter?.title}
           </p>
         </div>
         <button onClick={() => setRevealedLines(new Set(lines.map((_, i) => i)))} className="text-zinc-500 p-2 -mr-2">
