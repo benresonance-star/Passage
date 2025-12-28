@@ -20,18 +20,21 @@ export function BCMProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const saved = loadState();
     
-    // Check for streak reset on load
-    if (saved.stats.lastActivity) {
-      const now = new Date();
-      const lastActivity = new Date(saved.stats.lastActivity);
-      const nowDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-      const lastDate = new Date(lastActivity.getFullYear(), lastActivity.getMonth(), lastActivity.getDate());
-      const diffInDays = Math.floor((nowDate.getTime() - lastDate.getTime()) / (1000 * 60 * 60 * 24));
-      
-      if (diffInDays > 1) {
-        saved.stats.streak = 0;
+    // Check for streak reset on load for all chapters
+    Object.keys(saved.stats).forEach(chapterId => {
+      const stats = saved.stats[chapterId];
+      if (stats.lastActivity) {
+        const now = new Date();
+        const lastActivity = new Date(stats.lastActivity);
+        const nowDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const lastDate = new Date(lastActivity.getFullYear(), lastActivity.getMonth(), lastActivity.getDate());
+        const diffInDays = Math.floor((nowDate.getTime() - lastDate.getTime()) / (1000 * 60 * 60 * 24));
+        
+        if (diffInDays > 1) {
+          stats.streak = 0;
+        }
       }
-    }
+    });
     
     setState(saved);
     setIsHydrated(true);
@@ -58,4 +61,3 @@ export function useBCM() {
   }
   return context;
 }
-
