@@ -41,7 +41,7 @@ export interface BCMState {
     lastActivity: string | null;
   }>; // Keyed by chapterId
   settings: {
-    clozeLevel: 20 | 40 | 60 | 80;
+    clozeLevel: 0 | 20 | 40 | 60 | 80;
     showHeadings: boolean;
     showMemorised: boolean;
     activeChunkId: Record<string, string | null>; // Keyed by chapterId

@@ -178,7 +178,7 @@ export default function PracticePage() {
               {hideWords(activeChunk.text, state.settings.clozeLevel, activeChunk.id)}
             </p>
             <div className="flex justify-center gap-2">
-              {[20, 40, 60, 80].map((level) => (
+              {[0, 20, 40, 60, 80].map((level) => (
                 <button
                   key={level}
                   onClick={() => setState(p => ({ ...p, settings: { ...p.settings, clozeLevel: level as any } }))}
