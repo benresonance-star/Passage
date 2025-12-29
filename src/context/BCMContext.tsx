@@ -281,13 +281,52 @@ export function BCMProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  // Load state on mount
   useEffect(() => {
     const saved = loadState();
     
-    // Check for streak reset on load for all chapters
-    Object.keys(saved.stats).forEach(chapterId => {
-      const stats = saved.stats[chapterId];
+    // Migration: Convert old timestamp IDs to stable Slug IDs
+    const migratedState = { ...saved };
+    let hasChanges = false;
+
+    Object.entries(saved.chapters).forEach(([oldId, chapter]) => {
+      if (oldId.startsWith('chapter-')) {
+        const newId = chapter.title.toLowerCase().replace(/[^a-z0-9]/g, '-');
+        if (newId !== oldId) {
+          // Move chapter
+          delete migratedState.chapters[oldId];
+          migratedState.chapters[newId] = { ...chapter, id: newId };
+          
+          // Move cards
+          if (migratedState.cards[oldId]) {
+            migratedState.cards[newId] = migratedState.cards[oldId];
+            delete migratedState.cards[oldId];
+          }
+
+          // Move stats
+          if (migratedState.stats[oldId]) {
+            migratedState.stats[newId] = migratedState.stats[oldId];
+            delete migratedState.stats[oldId];
+          }
+
+          // Move active chunk settings
+          if (migratedState.settings.activeChunkId[oldId]) {
+            migratedState.settings.activeChunkId[newId] = migratedState.settings.activeChunkId[oldId];
+            delete migratedState.settings.activeChunkId[oldId];
+          }
+
+          // Update selected chapter if it was this one
+          if (migratedState.selectedChapterId === oldId) {
+            migratedState.selectedChapterId = newId;
+          }
+
+          hasChanges = true;
+        }
+      }
+    });
+
+    // Check for streak reset on load
+    Object.keys(migratedState.stats).forEach(chapterId => {
+      const stats = migratedState.stats[chapterId];
       if (stats.lastActivity) {
         const now = new Date();
         const lastActivity = new Date(stats.lastActivity);
@@ -301,7 +340,7 @@ export function BCMProvider({ children }: { children: React.ReactNode }) {
       }
     });
     
-    setState(saved);
+    setState(migratedState);
     setIsHydrated(true);
   }, []);
 

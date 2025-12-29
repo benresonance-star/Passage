@@ -24,7 +24,7 @@ export const INITIAL_STATE: BCMState = {
 function seedData(state: BCMState): BCMState {
   const { title, verses } = parseChapter(ROMANS_8_SEED.fullText!);
   const chunks = chunkVerses(verses);
-  const chapterId = "romans-8-starter";
+  const chapterId = "romans-8";
   const now = new Date().toISOString();
 
   const initialCards: Record<string, SM2Card> = {};
@@ -79,7 +79,7 @@ export function loadState(): BCMState {
 
     // Migration for v1 (single chapter) to v2 (multi-chapter)
     if (parsed.chapter && !parsed.chapters) {
-      const chapterId = `chapter-${Date.now()}`;
+      const chapterId = parsed.chapter.title.toLowerCase().replace(/[^a-z0-9]/g, '-');
       const migratedState: BCMState = {
         ...INITIAL_STATE,
         chapters: {
