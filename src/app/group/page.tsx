@@ -193,6 +193,32 @@ export default function GroupPage() {
     }
   };
 
+  const handleRemoveMember = async (targetUserId: string, targetName: string) => {
+    if (!user || !group) return;
+    if (targetUserId === user.id) return; // Can't remove self from here
+    
+    if (!confirm(`Are you sure you want to remove ${targetName || 'this student'} from the group?`)) return;
+
+    setLoading(true);
+    try {
+      const { error } = await supabase
+        .from('group_members')
+        .delete()
+        .eq('group_id', group.id)
+        .eq('user_id', targetUserId);
+
+      if (error) throw error;
+
+      await fetchProfileAndGroup();
+      alert("Member removed successfully.");
+    } catch (err: any) {
+      console.error("Remove member error:", err);
+      alert(`Failed to remove member: ${err.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const copyGroupId = () => {
     if (!group) return;
     navigator.clipboard.writeText(group.id);
@@ -413,11 +439,22 @@ export default function GroupPage() {
                             </div>
                           </div>
                         </div>
-                        {m.role === 'admin' && (
-                          <span className="text-[9px] font-bold uppercase tracking-tighter px-2 py-0.5 bg-zinc-800 text-zinc-400 rounded-full border border-white/5">
-                            Admin
-                          </span>
-                        )}
+                        <div className="flex items-center gap-2">
+                          {m.role === 'admin' ? (
+                            <span className="text-[9px] font-bold uppercase tracking-tighter px-2 py-0.5 bg-zinc-800 text-zinc-400 rounded-full border border-white/5">
+                              Admin
+                            </span>
+                          ) : (
+                            group.admin_id === user.id && (
+                              <button 
+                                onClick={() => handleRemoveMember(m.user_id, m.profiles.display_name)}
+                                className="p-2 text-zinc-600 hover:text-red-500 transition-colors bg-zinc-800/50 rounded-lg border border-white/5"
+                              >
+                                <X size={14} />
+                              </button>
+                            )
+                          )}
+                        </div>
                       </div>
                     ))}
                   </div>
