@@ -11,10 +11,10 @@ import Link from "next/link";
 export default function ImportPage() {
   const [text, setText] = useState("");
   const [stripRefs, setStripRefs] = useState(true);
-  const { setState } = useBCM();
+  const { setState, pushChapter } = useBCM();
   const router = useRouter();
 
-  const handleImport = () => {
+  const handleImport = async () => {
     if (!text.trim()) return;
 
     const { title, verses } = parseChapter(text, stripRefs);
@@ -70,6 +70,9 @@ export default function ImportPage() {
         },
       },
     }));
+
+    // Cloud Sync
+    await pushChapter(newChapter);
 
     router.push("/");
   };

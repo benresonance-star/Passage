@@ -9,7 +9,7 @@ import { supabase } from "@/lib/supabase";
 
 export default function GroupPage() {
   const { user, signIn, verifyOtp, signOut, loading: authLoading } = useAuth();
-  const { state, syncAllMemorised } = useBCM();
+  const { state, syncAllMemorised, pullVault } = useBCM();
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
   const [step, setStep] = useState<"email" | "otp">("email");

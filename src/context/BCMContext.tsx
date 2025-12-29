@@ -13,6 +13,8 @@ interface BCMContextType {
   userGroupId: string | null;
   syncProgress: (chapterTitle: string, chunkId: string, isMemorised: boolean) => Promise<void>;
   syncAllMemorised: () => Promise<void>;
+  pushChapter: (chapter: any) => Promise<void>;
+  pullVault: () => Promise<void>;
 }
 
 const BCMContext = createContext<BCMContextType | undefined>(undefined);
@@ -23,18 +25,22 @@ export function BCMProvider({ children }: { children: React.ReactNode }) {
   const [userGroupId, setUserGroupId] = useState<string | null>(null);
   const { user } = useAuth();
 
-  // Load group ID if logged in
+  // Load group ID and pull vault if logged in
   useEffect(() => {
     if (user && supabase) {
-      const fetchGroupId = async () => {
+      const initCloud = async () => {
+        // 1. Fetch Group ID
         const { data } = await supabase
           .from('group_members')
           .select('group_id')
           .eq('user_id', user.id)
           .maybeSingle();
         if (data) setUserGroupId(data.group_id);
+
+        // 2. Pull Personal Vault
+        await pullVault();
       };
-      fetchGroupId();
+      initCloud();
     } else {
       setUserGroupId(null);
     }
@@ -44,6 +50,7 @@ export function BCMProvider({ children }: { children: React.ReactNode }) {
     if (!user || !supabase) return;
 
     try {
+      // 1. Sync to Public Team Board
       let gid = userGroupId;
       if (!gid) {
         const { data } = await supabase
@@ -67,8 +74,93 @@ export function BCMProvider({ children }: { children: React.ReactNode }) {
           updated_at: new Date().toISOString()
         }, { onConflict: 'group_id,user_id,chapter_title,chunk_id' });
       }
+
+      // 2. Sync to Personal Vault
+      const chapterId = Object.entries(state.chapters).find(([_, ch]) => ch.title === chapterTitle)?.[0];
+      if (chapterId) {
+        const card = state.cards[chapterId]?.[chunkId];
+        if (card) {
+          await supabase.from('user_cards').upsert({
+            user_id: user.id,
+            chapter_id: chapterId,
+            chunk_id: chunkId,
+            data: card,
+            updated_at: new Date().toISOString()
+          }, { onConflict: 'user_id,chapter_id,chunk_id' });
+        }
+
+        // Also sync stats
+        const stats = state.stats[chapterId];
+        if (stats) {
+          await supabase.from('user_stats').upsert({
+            user_id: user.id,
+            chapter_id: chapterId,
+            data: stats,
+            updated_at: new Date().toISOString()
+          }, { onConflict: 'user_id,chapter_id' });
+        }
+      }
     } catch (err) {
       console.error("Sync error:", err);
+    }
+  };
+
+  const pushChapter = async (chapter: any) => {
+    if (!user || !supabase) return;
+    try {
+      await supabase.from('user_chapters').upsert({
+        user_id: user.id,
+        chapter_id: chapter.id,
+        data: chapter,
+        updated_at: new Date().toISOString()
+      }, { onConflict: 'user_id,chapter_id' });
+    } catch (err) {
+      console.error("Push chapter error:", err);
+    }
+  };
+
+  const pullVault = async () => {
+    if (!user || !supabase) return;
+
+    try {
+      console.log("Pulling personal vault...");
+      
+      // 1. Pull Chapters
+      const { data: chapters } = await supabase.from('user_chapters').select('*').eq('user_id', user.id);
+      
+      // 2. Pull Cards
+      const { data: cards } = await supabase.from('user_cards').select('*').eq('user_id', user.id);
+      
+      // 3. Pull Stats
+      const { data: stats } = await supabase.from('user_stats').select('*').eq('user_id', user.id);
+
+      if (!chapters && !cards && !stats) return;
+
+      setState(prev => {
+        const newState = { ...prev };
+        
+        // Merge chapters
+        chapters?.forEach(row => {
+          newState.chapters[row.chapter_id] = row.data;
+        });
+
+        // Merge cards
+        cards?.forEach(row => {
+          if (!newState.cards[row.chapter_id]) newState.cards[row.chapter_id] = {};
+          newState.cards[row.chapter_id][row.chunk_id] = row.data;
+        });
+
+        // Merge stats
+        stats?.forEach(row => {
+          newState.stats[row.chapter_id] = row.data;
+        });
+
+        return newState;
+      });
+
+      console.log("Vault pulled and merged.");
+    } catch (err) {
+      console.error("Pull vault error:", err);
     }
   };
 
@@ -160,7 +252,7 @@ export function BCMProvider({ children }: { children: React.ReactNode }) {
   }, [state, isHydrated, user]);
 
   return (
-    <BCMContext.Provider value={{ state, setState, isHydrated, userGroupId, syncProgress, syncAllMemorised }}>
+    <BCMContext.Provider value={{ state, setState, isHydrated, userGroupId, syncProgress, syncAllMemorised, pushChapter, pullVault }}>
       {children}
     </BCMContext.Provider>
   );
