@@ -41,3 +41,4 @@ export function updateCard(card: SM2Card, score: number): SM2Card {
   return newCard;
 }
 
+
