@@ -45,7 +45,7 @@ export function TeamBoard({ groupId, chapterTitle, totalChunks }: { groupId: str
         .eq('is_memorised', true);
 
       const memberList: MemberProgress[] = membersData.map((m: any) => {
-        const userProgress = progressData?.filter(p => p.user_id === m.user_id).length || 0;
+        const userProgress = (progressData as any[])?.filter((p: any) => p.user_id === m.user_id).length || 0;
         return {
           user_id: m.user_id,
           display_name: m.profiles.display_name || "Student",
