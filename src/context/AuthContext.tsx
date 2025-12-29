@@ -18,6 +18,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!supabase) {
+      setLoading(false);
+      return;
+    }
+
     // Check active sessions and sets the user
     const getSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
@@ -37,15 +42,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const signIn = async (email: string) => {
+    if (!supabase) return { error: { message: "Supabase not initialized" } };
     return await supabase.auth.signInWithOtp({
       email,
       options: {
-        emailRedirectTo: window.location.origin,
+        emailRedirectTo: typeof window !== 'undefined' ? window.location.origin : '',
       },
     });
   };
 
   const signOut = async () => {
+    if (!supabase) return { error: { message: "Supabase not initialized" } };
     return await supabase.auth.signOut();
   };
 
@@ -63,4 +70,3 @@ export function useAuth() {
   }
   return context;
 }
-

@@ -16,6 +16,11 @@ export function TeamBoard({ groupId, chapterTitle, totalChunks }: { groupId: str
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!supabase) {
+      setLoading(false);
+      return;
+    }
+
     const fetchProgress = async () => {
       // 1. Get all members of the group
       const { data: membersData } = await supabase
@@ -26,7 +31,10 @@ export function TeamBoard({ groupId, chapterTitle, totalChunks }: { groupId: str
         `)
         .eq('group_id', groupId);
 
-      if (!membersData) return;
+      if (!membersData) {
+        setLoading(false);
+        return;
+      }
 
       // 2. Get progress for the current chapter for these users
       const { data: progressData } = await supabase
@@ -119,4 +127,3 @@ export function TeamBoard({ groupId, chapterTitle, totalChunks }: { groupId: str
     </div>
   );
 }
-

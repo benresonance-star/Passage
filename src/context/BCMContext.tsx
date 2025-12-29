@@ -49,7 +49,7 @@ export function BCMProvider({ children }: { children: React.ReactNode }) {
       saveState(state);
 
       // Sync to Supabase if logged in
-      if (user) {
+      if (user && supabase) {
         // De-bounce theme sync to prevent excessive calls
         const syncTheme = setTimeout(() => {
           if (state.settings.theme) {
