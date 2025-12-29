@@ -19,7 +19,7 @@ Implement a fast, offline-capable iPhone-first PWA for memorising Bible chapters
 - **State**: Single `localStorage` key (`bcm_v1_state`) + **Supabase Cloud Sync**
 - **Auth**: Passwordless Magic Link Authentication via Supabase
 - **PWA**: `@ducanh2912/next-pwa` with manifest and service worker
-- **Icons**: Lucide React + Custom Orange/Black Branding
+- **Icons**: Lucide React + Custom Orange Branding
 
 ## 3. Data Schema (Cloud Model)
 The app utilizes a hybrid Local/Cloud state.
@@ -43,8 +43,10 @@ interface BCMState {
 
 ### A. Passage v2.0 Social
 - **Magic Link Login**: Passwordless email authentication for frictionless iPhone onboarding.
+- **URL Sanitizer**: Automatically wipes access tokens from the browser hash (`#access_token=...`) upon successful login to prevent session conflicts and allow clean navigation.
 - **Study Groups**: Users can create or join groups using a unique Group ID.
-- **Team Progress Board**: Real-time leaderboard on the home screen showing group members' mastery percentages.
+- **Team Progress Board**: Real-time leaderboard on the home screen showing group members' mastery percentages via Supabase Realtime subscriptions.
+- **Member Management**: Study group members can set custom **Display Names** and view a full directory of the group, including the Admin and member status.
 - **Cloud Sync**: Personal themes, profile settings, and "Memorised" progress are automatically backed up to Supabase.
 
 ### B. Learning Loop
@@ -60,7 +62,7 @@ interface BCMState {
 ### C. Appearance & Customization
 - **Theme Engine**: Users can override background and text colors.
 - **Smart Contrast**: UI elements (borders, subtext, inputs) automatically adjust their brightness based on the selected background color.
-- **Branding**: Consistent use of the "BookOpen" icon across library and app headers.
+- **Branding**: Balanced home screen header with a `52px` `BookOpen` icon aligned to title text.
 
 ## 5. UI/UX Refinements
 - **iPhone-First**: Optimized for notch, safe areas, and one-thumb navigation.
@@ -71,4 +73,5 @@ interface BCMState {
 - **Git/GitHub**: Hosted at `benresonance-star/Passage.git`. 
 - **CI/CD**: Vercel for automated builds.
 - **Backend**: Supabase handles Auth, Postgres Database, and Realtime progress subscriptions.
+- **Build Safety**: Supabase client initialization is guarded to return `null` during server-side prerendering, preventing "URL required" build errors.
 - **Environment**: Keys (`NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`) must be configured in Vercel.
