@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
-import { Users, Loader2, RefreshCw } from "lucide-react";
+import { Users, Loader2 } from "lucide-react";
 
 import { useAuth } from "@/context/AuthContext";
 import { useBCM } from "@/context/BCMContext";
@@ -115,16 +115,10 @@ export function TeamBoard({ groupId, groupName, chapterTitle, totalChunks }: { g
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center px-1">
-        <h3 className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest flex items-center gap-2">
-          <Users size={12} />
-          {groupName} • Team Progress
+        <h3 className="text-sm font-medium text-zinc-500 uppercase tracking-wider flex items-center gap-2">
+          <Users size={14} />
+          {groupName}
         </h3>
-        <button 
-          onClick={() => setRefreshCount(prev => prev + 1)}
-          className="text-zinc-500 hover:text-orange-500 transition-colors"
-        >
-          <RefreshCw size={12} className={loading ? "animate-spin" : ""} />
-        </button>
       </div>
       <div className="bg-zinc-900 border border-zinc-800 rounded-3xl overflow-hidden shadow-xl">
         <div className="divide-y divide-zinc-800">

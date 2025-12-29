@@ -204,6 +204,15 @@ export default function Home() {
             </div>
           </div>
 
+          {groupId && selectedChapter && (
+            <TeamBoard 
+              groupId={groupId} 
+              groupName={groupName || "Group"}
+              chapterTitle={selectedChapter.title} 
+              totalChunks={selectedChapter.chunks.length} 
+            />
+          )}
+
           <div className="space-y-3">
             <h3 className="text-sm font-medium text-zinc-500 uppercase tracking-wider px-1">Library</h3>
             <div className="grid gap-3">
@@ -244,15 +253,6 @@ export default function Home() {
               </Link>
             </div>
           </div>
-
-          {groupId && selectedChapter && (
-            <TeamBoard 
-              groupId={groupId} 
-              groupName={groupName || "Group"}
-              chapterTitle={selectedChapter.title} 
-              totalChunks={selectedChapter.chunks.length} 
-            />
-          )}
 
           {memorisedChapters.length > 0 && (
             <div className="space-y-3">
