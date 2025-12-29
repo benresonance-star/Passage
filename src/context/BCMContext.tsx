@@ -140,18 +140,18 @@ export function BCMProvider({ children }: { children: React.ReactNode }) {
         const newState = { ...prev };
         
         // Merge chapters
-        chapters?.forEach(row => {
+        chapters?.forEach((row: any) => {
           newState.chapters[row.chapter_id] = row.data;
         });
 
         // Merge cards
-        cards?.forEach(row => {
+        cards?.forEach((row: any) => {
           if (!newState.cards[row.chapter_id]) newState.cards[row.chapter_id] = {};
           newState.cards[row.chapter_id][row.chunk_id] = row.data;
         });
 
         // Merge stats
-        stats?.forEach(row => {
+        stats?.forEach((row: any) => {
           newState.stats[row.chapter_id] = row.data;
         });
 
