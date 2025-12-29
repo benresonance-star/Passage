@@ -33,9 +33,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     getSession();
 
     // Listen for changes on auth state (logged in, signed out, etc.)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event: string, session: any) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event: string, session: any) => {
       setUser(session?.user ?? null);
       setLoading(false);
+
+      // Clean the URL if we just signed in via a Magic Link
+      if (event === "SIGNED_IN" || event === "INITIAL_SESSION") {
+        if (typeof window !== "undefined" && window.location.hash.includes("access_token")) {
+          window.history.replaceState(null, "", window.location.pathname);
+        }
+      }
     });
 
     return () => subscription.unsubscribe();
