@@ -89,10 +89,7 @@ export default function Home() {
     <div className="space-y-8 py-6">
       <header className="flex justify-between items-start">
         <div className="flex items-center gap-4">
-          <svg width="42" height="42" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-orange-500">
-            <path d="M128 160C128 142.327 142.327 128 160 128H240V384H160C142.327 384 128 369.673 128 352V160Z" fill="currentColor"/>
-            <path d="M384 160C384 142.327 369.673 128 352 128H272V384H352C369.673 384 384 369.673 384 352V160Z" fill="currentColor"/>
-          </svg>
+          <BookOpen size={42} className="text-orange-500" />
           <div className="space-y-1">
             <h1 className="text-3xl font-bold tracking-[0.05em]">Passage</h1>
             <p className="text-zinc-500">Bible Chapter Memoriser</p>
