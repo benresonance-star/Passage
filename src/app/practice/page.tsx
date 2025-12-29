@@ -7,12 +7,14 @@ import { hideWords, generateMnemonic } from "@/lib/cloze";
 import { calculateDiff, DiffResult } from "@/lib/diff";
 import { updateCard } from "@/lib/scheduler";
 import { useWakeLock } from "@/hooks/useWakeLock";
+import { useAuth } from "@/context/AuthContext";
 import { ArrowLeft, RefreshCw, CheckCircle2, AlertCircle } from "lucide-react";
 
 type PracticeMode = "read" | "cloze" | "type" | "result";
 
 export default function PracticePage() {
-  const { state, setState, isHydrated } = useBCM();
+  const { state, setState, isHydrated, syncProgress } = useBCM();
+  const { user } = useAuth();
   const router = useRouter();
   const [mode, setMode] = useState<PracticeMode>("read");
   const [typedText, setTypedText] = useState("");
@@ -70,7 +72,7 @@ export default function PracticePage() {
 
   if (!isHydrated || !activeChunk || !chapterId) return null;
 
-  const handleNextMode = () => {
+  const handleNextMode = async () => {
     if (mode === "read") setMode("cloze");
     else if (mode === "cloze") setMode("type");
     else if (mode === "type") {
@@ -122,6 +124,11 @@ export default function PracticePage() {
             }
           };
         });
+
+        // Cloud Sync
+        if (user && chapter) {
+          await syncProgress(chapter.title, activeChunk.id, updatedCard);
+        }
       }
     }
   };

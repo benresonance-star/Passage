@@ -41,20 +41,18 @@ export default function ReviewPage() {
   };
 
   const handleToggleMemorised = async (chunkId: string) => {
-    const nextIsMemorised = !state.cards[chapterId][chunkId].isMemorised;
+    const currentCard = state.cards[chapterId][chunkId];
+    const nextIsMemorised = !currentCard.isMemorised;
+    const updatedCard = { ...currentCard, isMemorised: nextIsMemorised };
     
     setState(prev => {
-      const currentCard = prev.cards[chapterId][chunkId];
       return {
         ...prev,
         cards: {
           ...prev.cards,
           [chapterId]: {
             ...prev.cards[chapterId],
-            [chunkId]: {
-              ...currentCard,
-              isMemorised: nextIsMemorised
-            }
+            [chunkId]: updatedCard
           }
         }
       };
@@ -62,7 +60,7 @@ export default function ReviewPage() {
 
     // Cloud Sync
     if (user && chapter) {
-      await syncProgress(chapter.title, chunkId, nextIsMemorised);
+      await syncProgress(chapter.title, chunkId, updatedCard);
     }
   };
 

@@ -11,7 +11,7 @@ interface BCMContextType {
   setState: React.Dispatch<React.SetStateAction<BCMState>>;
   isHydrated: boolean;
   userGroupId: string | null;
-  syncProgress: (chapterTitle: string, chunkId: string, isMemorised: boolean) => Promise<void>;
+  syncProgress: (chapterTitle: string, chunkId: string, card: any) => Promise<void>;
   syncAllMemorised: () => Promise<void>;
   pushChapter: (chapter: any) => Promise<void>;
   pullVault: () => Promise<void>;
@@ -24,6 +24,7 @@ export function BCMProvider({ children }: { children: React.ReactNode }) {
   const [isHydrated, setIsHydrated] = useState(false);
   const [userGroupId, setUserGroupId] = useState<string | null>(null);
   const { user } = useAuth();
+  const lastUpdateRef = React.useRef<Record<string, number>>({});
 
   // Load group ID and pull vault if logged in
   useEffect(() => {
@@ -79,8 +80,11 @@ export function BCMProvider({ children }: { children: React.ReactNode }) {
     };
   }, [user]);
 
-  const syncProgress = async (chapterTitle: string, chunkId: string, isMemorised: boolean) => {
+  const syncProgress = async (chapterTitle: string, chunkId: string, card: any) => {
     if (!user || !supabase) return;
+
+    // Track local update time to prevent "echo" overwrites
+    lastUpdateRef.current[`card_${chunkId}`] = Date.now();
 
     try {
       // 1. Sync to Public Team Board
@@ -103,7 +107,7 @@ export function BCMProvider({ children }: { children: React.ReactNode }) {
           user_id: user.id,
           chapter_title: chapterTitle,
           chunk_id: chunkId,
-          is_memorised: isMemorised,
+          is_memorised: card.isMemorised,
           updated_at: new Date().toISOString()
         }, { onConflict: 'group_id,user_id,chapter_title,chunk_id' });
       }
@@ -111,16 +115,13 @@ export function BCMProvider({ children }: { children: React.ReactNode }) {
       // 2. Sync to Personal Vault
       const chapterId = Object.entries(state.chapters).find(([_, ch]) => ch.title === chapterTitle)?.[0];
       if (chapterId) {
-        const card = state.cards[chapterId]?.[chunkId];
-        if (card) {
-          await supabase.from('user_cards').upsert({
-            user_id: user.id,
-            chapter_id: chapterId,
-            chunk_id: chunkId,
-            data: card,
-            updated_at: new Date().toISOString()
-          }, { onConflict: 'user_id,chapter_id,chunk_id' });
-        }
+        await supabase.from('user_cards').upsert({
+          user_id: user.id,
+          chapter_id: chapterId,
+          chunk_id: chunkId,
+          data: card,
+          updated_at: new Date().toISOString()
+        }, { onConflict: 'user_id,chapter_id,chunk_id' });
 
         // Also sync stats
         const stats = state.stats[chapterId];
@@ -158,29 +159,31 @@ export function BCMProvider({ children }: { children: React.ReactNode }) {
     try {
       console.log("Pulling personal vault...");
       
-      // 1. Pull Chapters
       const { data: chapters } = await supabase.from('user_chapters').select('*').eq('user_id', user.id);
-      
-      // 2. Pull Cards
       const { data: cards } = await supabase.from('user_cards').select('*').eq('user_id', user.id);
-      
-      // 3. Pull Stats
       const { data: stats } = await supabase.from('user_stats').select('*').eq('user_id', user.id);
 
       if (!chapters && !cards && !stats) return;
 
       setState(prev => {
         const newState = { ...prev };
+        const now = Date.now();
         
         // Merge chapters
         chapters?.forEach((row: any) => {
           newState.chapters[row.chapter_id] = row.data;
         });
 
-        // Merge cards
+        // Merge cards with conflict resolution
         cards?.forEach((row: any) => {
-          if (!newState.cards[row.chapter_id]) newState.cards[row.chapter_id] = {};
-          newState.cards[row.chapter_id][row.chunk_id] = row.data;
+          const lastLocal = lastUpdateRef.current[`card_${row.chunk_id}`] || 0;
+          const cloudTime = new Date(row.updated_at).getTime();
+          
+          // Only merge if cloud data is newer than our last local update (+ small buffer)
+          if (cloudTime > lastLocal + 2000) {
+            if (!newState.cards[row.chapter_id]) newState.cards[row.chapter_id] = {};
+            newState.cards[row.chapter_id][row.chunk_id] = row.data;
+          }
         });
 
         // Merge stats

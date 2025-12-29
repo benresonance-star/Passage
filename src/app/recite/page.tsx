@@ -9,7 +9,8 @@ import { useWakeLock } from "@/hooks/useWakeLock";
 import { ArrowLeft, Eye, EyeOff, Check, AlertCircle, XCircle } from "lucide-react";
 
 export default function RecitePage() {
-  const { state, setState, isHydrated } = useBCM();
+  const { state, setState, isHydrated, syncProgress } = useBCM();
+  const { user } = useAuth();
   const router = useRouter();
   const [revealedLines, setRevealedLines] = useState<Set<number>>(new Set());
   const [isGraded, setIsGraded] = useState(false);
@@ -91,7 +92,7 @@ export default function RecitePage() {
     }
   };
 
-  const handleGrade = (score: number) => {
+  const handleGrade = async (score: number) => {
     const currentCard = state.cards[chapterId]?.[activeChunk.id];
     if (currentCard) {
       const updatedCard = updateCard(currentCard, score);
@@ -134,6 +135,11 @@ export default function RecitePage() {
           }
         };
       });
+
+      // Cloud Sync
+      if (user && chapter) {
+        await syncProgress(chapter.title, activeChunk.id, updatedCard);
+      }
     }
     setIsGraded(true);
   };
