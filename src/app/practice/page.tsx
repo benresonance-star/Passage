@@ -213,21 +213,22 @@ export default function PracticePage() {
               autoFocus
               value={typedText}
               onChange={(e) => setTypedText(e.target.value)}
-              className="w-full h-64 bg-zinc-900 border border-zinc-800 rounded-2xl p-6 text-xl leading-relaxed focus:outline-none focus:ring-2 focus:ring-orange-500/50 resize-none"
+              className="w-full h-64 bg-[var(--theme-ui-bg)] border border-[var(--theme-ui-border)] rounded-2xl p-6 text-xl leading-relaxed focus:outline-none focus:ring-2 focus:ring-orange-500/50 resize-none color-inherit"
               placeholder="Type from memory..."
+              style={{ color: 'inherit' }}
             />
           </div>
         )}
 
         {mode === "result" && diffResults && (
           <div className="space-y-8 animate-in zoom-in-95 duration-300">
-            <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-6 space-y-6">
+            <div className="bg-[var(--theme-ui-bg)] border border-[var(--theme-ui-border)] rounded-3xl p-6 space-y-6">
               <div className="flex justify-between items-center">
                 <div className="flex items-center gap-2">
                   <CheckCircle2 size={20} className="text-green-500" />
                   <span className="text-2xl font-bold">{diffResults.accuracy}%</span>
                 </div>
-                <div className="text-zinc-500 text-sm">Accuracy</div>
+                <div className="text-[var(--theme-ui-subtext)] text-sm">Accuracy</div>
               </div>
 
               <div className="flex flex-wrap gap-x-2 gap-y-1 text-lg leading-relaxed">
@@ -236,7 +237,7 @@ export default function PracticePage() {
                     key={i}
                     className={`${
                       res.status === "correct" 
-                        ? "text-zinc-200" 
+                        ? "" 
                         : res.status === "wrong" 
                         ? "text-red-500 underline decoration-red-500/50 underline-offset-4" 
                         : res.status === "missing" 
@@ -255,7 +256,7 @@ export default function PracticePage() {
                 setTypedText("");
                 setMode("read");
               }}
-              className="w-full py-4 bg-zinc-800 text-white font-bold rounded-2xl flex items-center justify-center gap-2"
+              className="w-full py-4 bg-[var(--theme-ui-bg)] font-bold rounded-2xl flex items-center justify-center gap-2 border border-[var(--theme-ui-border)]"
             >
               <RefreshCw size={18} />
               Try Again

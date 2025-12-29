@@ -99,15 +99,15 @@ export default function ReviewPage() {
                   }
                 }));
               }}
-              className={`bg-zinc-900 border transition-all duration-300 rounded-2xl p-5 space-y-4 shadow-lg cursor-pointer ${
-                isActive ? "ring-2 ring-white border-white/40" : (isMemorised ? "border-amber-500/20" : "border-zinc-800")
+              className={`bg-[var(--theme-ui-bg)] border transition-all duration-300 rounded-2xl p-5 space-y-4 shadow-lg cursor-pointer ${
+                isActive ? "ring-2 ring-[var(--theme-text)] border-transparent" : (isMemorised ? "border-amber-500/20" : "border-[var(--theme-ui-border)]")
               }`}
             >
               <div className="flex justify-between items-start">
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
                     <span className={`text-[10px] font-bold uppercase tracking-wider ${
-                      isMemorised ? "text-amber-500/60" : "text-zinc-500"
+                      isMemorised ? "text-amber-500/60" : "text-[var(--theme-ui-subtext)]"
                     }`}>
                       Verse {chunk.verseRange}
                     </span>

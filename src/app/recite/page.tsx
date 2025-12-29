@@ -156,10 +156,10 @@ export default function RecitePage() {
             <div
               key={i}
               onClick={() => toggleLine(i)}
-              className={`p-4 rounded-xl transition-all duration-300 cursor-pointer ${
+              className={`p-4 rounded-xl transition-all duration-300 cursor-pointer border ${
                 revealedLines.has(i)
-                  ? "bg-zinc-900 text-white shadow-lg"
-                  : "bg-zinc-900/40 text-transparent border border-white/5"
+                  ? "bg-[var(--theme-ui-bg)] shadow-lg border-[var(--theme-ui-border)]"
+                  : "bg-[var(--theme-ui-bg)] text-transparent border-transparent opacity-40"
               }`}
             >
               <p className="text-lg leading-relaxed select-none">

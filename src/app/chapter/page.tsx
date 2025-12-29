@@ -87,19 +87,19 @@ export default function ChapterPage() {
           <div className="flex gap-2">
             <button 
               onClick={() => setShowThemeModal(true)}
-              className="p-2 rounded-xl transition-colors text-zinc-500 bg-zinc-900/50"
+              className="p-2 rounded-xl transition-colors text-zinc-500 bg-[var(--theme-ui-bg)]"
             >
               <Palette size={20} />
             </button>
             <button 
               onClick={toggleHeadings}
-              className={`p-2 rounded-xl transition-colors ${state.settings.showHeadings ? "text-orange-500 bg-orange-500/10" : "text-zinc-500 bg-zinc-900/50"}`}
+              className={`p-2 rounded-xl transition-colors ${state.settings.showHeadings ? "text-orange-500 bg-orange-500/10" : "text-zinc-500 bg-[var(--theme-ui-bg)]"}`}
             >
               {state.settings.showHeadings ? <Eye size={20} /> : <EyeOff size={20} />}
             </button>
             <button 
               onClick={toggleMemorised}
-              className={`p-2 rounded-xl transition-colors ${state.settings.showMemorised ? "text-amber-400 bg-amber-400/10" : "text-zinc-500 bg-zinc-900/50"}`}
+              className={`p-2 rounded-xl transition-colors ${state.settings.showMemorised ? "text-amber-400 bg-amber-400/10" : "text-zinc-500 bg-[var(--theme-ui-bg)]"}`}
             >
               <Award size={20} />
             </button>
@@ -179,24 +179,24 @@ export default function ChapterPage() {
               onClick={() => setActiveChunk(chunk.id)}
               className={`group relative space-y-3 transition-all duration-300 rounded-2xl p-4 -mx-4 ${
                 isActive 
-                  ? "bg-zinc-900/40 ring-1 ring-white/10 shadow-xl" 
-                  : "active:bg-zinc-900/20"
+                  ? "bg-[var(--theme-ui-bg)] ring-1 ring-[var(--theme-ui-border)] shadow-xl" 
+                  : "active:bg-[var(--theme-ui-bg)]"
               }`}
             >
               <div className="flex justify-between items-center">
                 <span className={`text-[10px] font-bold uppercase tracking-[0.2em] ${
-                  isActive ? "text-orange-500" : showAsMemorised ? "text-amber-500/80" : "text-zinc-600"
+                  isActive ? "text-orange-500" : showAsMemorised ? "text-amber-500/80" : "text-[var(--theme-ui-subtext)]"
                 }`}>
                   Verse {chunk.verseRange}
                 </span>
               </div>
               
-              <div className={`chunk-text ${isActive ? "chunk-text-bold" : showAsMemorised ? "text-amber-200/90 opacity-80" : "opacity-90"}`}>
+              <div className={`chunk-text ${isActive ? "chunk-text-bold" : showAsMemorised ? "text-amber-500/80 opacity-80" : "opacity-90"}`}>
                 {chunk.verses.map((v, idx) => (
                   <div key={idx} className={v.type === "heading" ? "w-full text-center" : "inline"}>
                     {v.type === "heading" ? (
                       state.settings.showHeadings && (
-                        <h3 className={`text-[11px] font-bold uppercase tracking-[0.2em] my-4 block w-full ${showAsMemorised ? "text-amber-500/50" : "text-zinc-500"}`}>
+                        <h3 className={`text-[11px] font-bold uppercase tracking-[0.2em] my-4 block w-full ${showAsMemorised ? "text-amber-500/50" : "text-[var(--theme-ui-subtext)]"}`}>
                           {v.text}
                         </h3>
                       )
