@@ -7,7 +7,7 @@ import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/lib/supabase";
 
 export default function ReviewPage() {
-  const { state, setState, isHydrated } = useBCM();
+  const { state, setState, isHydrated, syncProgress } = useBCM();
   const { user } = useAuth();
   const router = useRouter();
 
@@ -62,23 +62,7 @@ export default function ReviewPage() {
 
     // Cloud Sync
     if (user && chapter) {
-      const { data: memberData } = await supabase
-        .from('group_members')
-        .select('group_id')
-        .eq('user_id', user.id);
-
-      if (memberData && memberData.length > 0) {
-        for (const member of memberData) {
-          await supabase.from('shared_progress').upsert({
-            group_id: member.group_id,
-            user_id: user.id,
-            chapter_title: chapter.title,
-            chunk_id: chunkId,
-            is_memorised: nextIsMemorised,
-            updated_at: new Date().toISOString()
-          }, { onConflict: 'group_id,user_id,chapter_title,chunk_id' });
-        }
-      }
+      await syncProgress(chapter.title, chunkId, nextIsMemorised);
     }
   };
 

@@ -10,6 +10,8 @@ interface BCMContextType {
   state: BCMState;
   setState: React.Dispatch<React.SetStateAction<BCMState>>;
   isHydrated: boolean;
+  syncProgress: (chapterTitle: string, chunkId: string, isMemorised: boolean) => Promise<void>;
+  syncAllMemorised: () => Promise<void>;
 }
 
 const BCMContext = createContext<BCMContextType | undefined>(undefined);
@@ -18,6 +20,74 @@ export function BCMProvider({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<BCMState>(INITIAL_STATE);
   const [isHydrated, setIsHydrated] = useState(false);
   const { user } = useAuth();
+
+  const syncProgress = async (chapterTitle: string, chunkId: string, isMemorised: boolean) => {
+    if (!user || !supabase) return;
+
+    try {
+      const { data: memberData } = await supabase
+        .from('group_members')
+        .select('group_id')
+        .eq('user_id', user.id);
+
+      if (memberData && memberData.length > 0) {
+        const syncs = memberData.map((member: any) => 
+          supabase.from('shared_progress').upsert({
+            group_id: member.group_id,
+            user_id: user.id,
+            chapter_title: chapterTitle,
+            chunk_id: chunkId,
+            is_memorised: isMemorised,
+            updated_at: new Date().toISOString()
+          }, { onConflict: 'group_id,user_id,chapter_title,chunk_id' })
+        );
+        await Promise.all(syncs);
+      }
+    } catch (err) {
+      console.error("Sync error:", err);
+    }
+  };
+
+  const syncAllMemorised = async () => {
+    if (!user || !supabase) return;
+
+    try {
+      const { data: memberData } = await supabase
+        .from('group_members')
+        .select('group_id')
+        .eq('user_id', user.id);
+
+      if (!memberData || memberData.length === 0) return;
+
+      const allSyncs: any[] = [];
+      
+      Object.entries(state.chapters).forEach(([chapterId, chapter]) => {
+        const chapterCards = state.cards[chapterId] || {};
+        Object.entries(chapterCards).forEach(([chunkId, card]) => {
+          if (card.isMemorised) {
+            memberData.forEach((member: any) => {
+              allSyncs.push(
+                supabase.from('shared_progress').upsert({
+                  group_id: member.group_id,
+                  user_id: user.id,
+                  chapter_title: chapter.title,
+                  chunk_id: chunkId,
+                  is_memorised: true,
+                  updated_at: new Date().toISOString()
+                }, { onConflict: 'group_id,user_id,chapter_title,chunk_id' })
+              );
+            });
+          }
+        });
+      });
+
+      if (allSyncs.length > 0) {
+        await Promise.all(allSyncs);
+      }
+    } catch (err) {
+      console.error("Bulk sync error:", err);
+    }
+  };
 
   // Load state on mount
   useEffect(() => {
@@ -66,7 +136,7 @@ export function BCMProvider({ children }: { children: React.ReactNode }) {
   }, [state, isHydrated, user]);
 
   return (
-    <BCMContext.Provider value={{ state, setState, isHydrated }}>
+    <BCMContext.Provider value={{ state, setState, isHydrated, syncProgress, syncAllMemorised }}>
       {children}
     </BCMContext.Provider>
   );

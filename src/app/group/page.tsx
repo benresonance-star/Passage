@@ -9,7 +9,7 @@ import { supabase } from "@/lib/supabase";
 
 export default function GroupPage() {
   const { user, signIn, signOut, loading: authLoading } = useAuth();
-  const { state } = useBCM();
+  const { state, syncAllMemorised } = useBCM();
   const [email, setEmail] = useState("");
   const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -122,6 +122,7 @@ export default function GroupPage() {
 
         // 3. Refresh UI
         await fetchProfileAndGroup();
+        await syncAllMemorised();
         alert("Group created successfully!");
       }
     } catch (err: any) {
@@ -149,6 +150,7 @@ export default function GroupPage() {
       if (joinError) throw joinError;
 
       await fetchProfileAndGroup();
+      await syncAllMemorised();
       setJoinGroupId("");
       alert("Joined group successfully!");
     } catch (err: any) {

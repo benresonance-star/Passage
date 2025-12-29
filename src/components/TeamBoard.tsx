@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
-import { Users, Loader2 } from "lucide-react";
+import { Users, Loader2, RefreshCw } from "lucide-react";
 
 interface MemberProgress {
   user_id: string;
@@ -15,6 +15,7 @@ interface MemberProgress {
 export function TeamBoard({ groupId, chapterTitle, totalChunks }: { groupId: string, chapterTitle: string, totalChunks: number }) {
   const [members, setMembers] = useState<MemberProgress[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshCount, setRefreshCount] = useState(0);
 
   useEffect(() => {
     if (!supabase) {
@@ -23,62 +24,73 @@ export function TeamBoard({ groupId, chapterTitle, totalChunks }: { groupId: str
     }
 
     const fetchProgress = async () => {
-      // 1. Get all members of the group
-      const { data: membersData } = await supabase
-        .from('group_members')
-        .select(`
-          user_id,
-          profiles:user_id (display_name, last_active)
-        `)
-        .eq('group_id', groupId);
+      try {
+        // 1. Get all members of the group
+        const { data: membersData, error: mError } = await supabase
+          .from('group_members')
+          .select(`
+            user_id,
+            profiles:user_id (display_name, last_active)
+          `)
+          .eq('group_id', groupId);
 
-      if (!membersData) {
+        if (mError) throw mError;
+        if (!membersData) {
+          setLoading(false);
+          return;
+        }
+
+        // 2. Get progress for the current chapter for these users
+        const { data: progressData, error: pError } = await supabase
+          .from('shared_progress')
+          .select('user_id, is_memorised')
+          .eq('group_id', groupId)
+          .eq('chapter_title', chapterTitle)
+          .eq('is_memorised', true);
+
+        if (pError) throw pError;
+
+        const memberList: MemberProgress[] = membersData.map((m: any) => {
+          const userProgress = (progressData as any[])?.filter((p: any) => p.user_id === m.user_id).length || 0;
+          return {
+            user_id: m.user_id,
+            display_name: (m.profiles as any)?.display_name || "Student",
+            progress: totalChunks > 0 ? (userProgress / totalChunks) * 100 : 0,
+            memorisedCount: userProgress,
+            last_active: (m.profiles as any)?.last_active
+          };
+        });
+
+        setMembers(memberList.sort((a, b) => b.progress - a.progress));
+      } catch (err) {
+        console.error("TeamBoard fetch error:", err);
+      } finally {
         setLoading(false);
-        return;
       }
-
-      // 2. Get progress for the current chapter for these users
-      const { data: progressData } = await supabase
-        .from('shared_progress')
-        .select('user_id, is_memorised')
-        .eq('group_id', groupId)
-        .eq('chapter_title', chapterTitle)
-        .eq('is_memorised', true);
-
-      const memberList: MemberProgress[] = membersData.map((m: any) => {
-        const userProgress = (progressData as any[])?.filter((p: any) => p.user_id === m.user_id).length || 0;
-        return {
-          user_id: m.user_id,
-          display_name: m.profiles.display_name || "Student",
-          progress: totalChunks > 0 ? (userProgress / totalChunks) * 100 : 0,
-          memorisedCount: userProgress,
-          last_active: m.profiles.last_active
-        };
-      });
-
-      setMembers(memberList.sort((a, b) => b.progress - a.progress));
-      setLoading(false);
     };
 
     fetchProgress();
 
     // Subscribe to realtime progress updates
     const subscription = supabase
-      .channel('progress_updates')
+      .channel(`progress_updates_${groupId}`)
       .on('postgres_changes', { 
         event: '*', 
         schema: 'public', 
         table: 'shared_progress',
         filter: `group_id=eq.${groupId}`
-      }, () => {
+      }, (payload) => {
+        console.log("Realtime update received:", payload);
         fetchProgress();
       })
-      .subscribe();
+      .subscribe((status) => {
+        console.log("Realtime subscription status:", status);
+      });
 
     return () => {
       subscription.unsubscribe();
     };
-  }, [groupId, chapterTitle, totalChunks]);
+  }, [groupId, chapterTitle, totalChunks, refreshCount]);
 
   if (loading) return (
     <div className="flex justify-center p-8">
@@ -90,10 +102,18 @@ export function TeamBoard({ groupId, chapterTitle, totalChunks }: { groupId: str
 
   return (
     <div className="space-y-4">
-      <h3 className="text-sm font-medium text-zinc-500 uppercase tracking-wider px-1 flex items-center gap-2">
-        <Users size={14} />
-        Team Progress Board
-      </h3>
+      <div className="flex justify-between items-center px-1">
+        <h3 className="text-sm font-medium text-zinc-500 uppercase tracking-wider flex items-center gap-2">
+          <Users size={14} />
+          Team Progress Board
+        </h3>
+        <button 
+          onClick={() => setRefreshCount(prev => prev + 1)}
+          className="text-zinc-500 hover:text-orange-500 transition-colors"
+        >
+          <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
+        </button>
+      </div>
       <div className="bg-zinc-900 border border-zinc-800 rounded-3xl overflow-hidden shadow-xl">
         <div className="divide-y divide-zinc-800">
           {members.map((member) => (
