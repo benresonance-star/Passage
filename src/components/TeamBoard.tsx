@@ -12,7 +12,7 @@ interface MemberProgress {
   last_active: string;
 }
 
-export function TeamBoard({ groupId, chapterTitle, totalChunks }: { groupId: string, chapterTitle: string, totalChunks: number }) {
+export function TeamBoard({ groupId, groupName, chapterTitle, totalChunks }: { groupId: string, groupName: string, chapterTitle: string, totalChunks: number }) {
   const [members, setMembers] = useState<MemberProgress[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshCount, setRefreshCount] = useState(0);
@@ -103,15 +103,15 @@ export function TeamBoard({ groupId, chapterTitle, totalChunks }: { groupId: str
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center px-1">
-        <h3 className="text-sm font-medium text-zinc-500 uppercase tracking-wider flex items-center gap-2">
-          <Users size={14} />
-          Team Progress Board
+        <h3 className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest flex items-center gap-2">
+          <Users size={12} />
+          {groupName} • Team Progress
         </h3>
         <button 
           onClick={() => setRefreshCount(prev => prev + 1)}
           className="text-zinc-500 hover:text-orange-500 transition-colors"
         >
-          <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
+          <RefreshCw size={12} className={loading ? "animate-spin" : ""} />
         </button>
       </div>
       <div className="bg-zinc-900 border border-zinc-800 rounded-3xl overflow-hidden shadow-xl">
@@ -126,7 +126,7 @@ export function TeamBoard({ groupId, chapterTitle, totalChunks }: { groupId: str
                   <div>
                     <p className="font-bold text-sm text-white">{member.display_name}</p>
                     <p className="text-[10px] text-zinc-500 uppercase tracking-widest font-bold">
-                      {member.memorisedCount} / {totalChunks} Chunks • {Math.round(member.progress)}% Mastered
+                      {member.memorisedCount} / {totalChunks} Chunks
                     </p>
                   </div>
                 </div>

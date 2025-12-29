@@ -45,6 +45,7 @@ export default function Home() {
   const { user } = useAuth();
   const [showInfo, setShowInfo] = useState(false);
   const [groupId, setGroupId] = useState<string | null>(null);
+  const [groupName, setGroupName] = useState<string | null>(null);
 
   useEffect(() => {
     if (user) {
@@ -52,13 +53,16 @@ export default function Home() {
         try {
           const { data, error } = await supabase
             .from('group_members')
-            .select('group_id')
+            .select('group_id, groups(name)')
             .eq('user_id', user.id)
             .limit(1)
             .maybeSingle();
           
           if (error) throw error;
-          if (data) setGroupId(data.group_id);
+          if (data) {
+            setGroupId(data.group_id);
+            setGroupName((data.groups as any)?.name || null);
+          }
         } catch (err) {
           console.error("Home group fetch error:", err);
         }
@@ -244,6 +248,7 @@ export default function Home() {
           {groupId && selectedChapter && (
             <TeamBoard 
               groupId={groupId} 
+              groupName={groupName || "Group"}
               chapterTitle={selectedChapter.title} 
               totalChunks={selectedChapter.chunks.length} 
             />
