@@ -3,7 +3,11 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useBCM } from "@/context/BCMContext";
-import { Play, BookOpen, Upload, ChevronRight, Award, Trash2, Trophy, Info, X } from "lucide-react";
+import { Play, BookOpen, Upload, ChevronRight, Award, Trash2, Trophy, Info, X, Users } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
+import { supabase } from "@/lib/supabase";
+import { useEffect } from "react";
+import { TeamBoard } from "@/components/TeamBoard";
 
 const GUIDE_ITEMS = [
   {
@@ -38,7 +42,23 @@ const GUIDE_ITEMS = [
 
 export default function Home() {
   const { state, setState, isHydrated } = useBCM();
+  const { user } = useAuth();
   const [showInfo, setShowInfo] = useState(false);
+  const [groupId, setGroupId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (user) {
+      const fetchGroup = async () => {
+        const { data } = await supabase
+          .from('group_members')
+          .select('group_id')
+          .limit(1)
+          .single();
+        if (data) setGroupId(data.group_id);
+      };
+      fetchGroup();
+    }
+  }, [user]);
 
   if (!isHydrated) return null;
 
@@ -95,12 +115,20 @@ export default function Home() {
             <p className="text-zinc-500">Bible Chapter Memoriser</p>
           </div>
         </div>
-        <button 
-          onClick={() => setShowInfo(true)}
-          className="p-2 text-zinc-500 hover:text-white transition-colors bg-zinc-900 rounded-full border border-white/5"
-        >
-          <Info size={20} />
-        </button>
+        <div className="flex gap-2">
+          <Link 
+            href="/group"
+            className={`p-2 transition-colors rounded-full border border-white/5 ${user ? "text-orange-500 bg-orange-500/10" : "text-zinc-500 bg-zinc-900"}`}
+          >
+            <Users size={20} />
+          </Link>
+          <button 
+            onClick={() => setShowInfo(true)}
+            className="p-2 text-zinc-500 hover:text-white transition-colors bg-zinc-900 rounded-full border border-white/5"
+          >
+            <Info size={20} />
+          </button>
+        </div>
       </header>
 
       {/* Info Modal */}
@@ -205,6 +233,14 @@ export default function Home() {
               </Link>
             </div>
           </div>
+
+          {groupId && selectedChapter && (
+            <TeamBoard 
+              groupId={groupId} 
+              chapterTitle={selectedChapter.title} 
+              totalChunks={selectedChapter.chunks.length} 
+            />
+          )}
 
           {memorisedChapters.length > 0 && (
             <div className="space-y-3">

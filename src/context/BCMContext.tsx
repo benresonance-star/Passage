@@ -3,6 +3,8 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { BCMState } from "@/types";
 import { INITIAL_STATE, loadState, saveState } from "@/lib/storage";
+import { supabase } from "@/lib/supabase";
+import { useAuth } from "./AuthContext";
 
 interface BCMContextType {
   state: BCMState;
@@ -15,6 +17,7 @@ const BCMContext = createContext<BCMContextType | undefined>(undefined);
 export function BCMProvider({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<BCMState>(INITIAL_STATE);
   const [isHydrated, setIsHydrated] = useState(false);
+  const { user } = useAuth();
 
   // Load state on mount
   useEffect(() => {
@@ -44,8 +47,23 @@ export function BCMProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (isHydrated) {
       saveState(state);
+
+      // Sync to Supabase if logged in
+      if (user) {
+        // De-bounce theme sync to prevent excessive calls
+        const syncTheme = setTimeout(() => {
+          if (state.settings.theme) {
+            supabase.from('profiles').update({ 
+              theme: state.settings.theme,
+              last_active: new Date().toISOString()
+            }).eq('id', user.id).then();
+          }
+        }, 2000);
+
+        return () => clearTimeout(syncTheme);
+      }
     }
-  }, [state, isHydrated]);
+  }, [state, isHydrated, user]);
 
   return (
     <BCMContext.Provider value={{ state, setState, isHydrated }}>

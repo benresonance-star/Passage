@@ -3,9 +3,12 @@
 import { useBCM } from "@/context/BCMContext";
 import { useRouter } from "next/navigation";
 import { Play, Mic, Calendar, Clock, AlertTriangle, Award } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
+import { supabase } from "@/lib/supabase";
 
 export default function ReviewPage() {
   const { state, setState, isHydrated } = useBCM();
+  const { user } = useAuth();
   const router = useRouter();
 
   const chapterId = state.selectedChapterId;
@@ -37,7 +40,9 @@ export default function ReviewPage() {
     router.push(path);
   };
 
-  const handleToggleMemorised = (chunkId: string) => {
+  const handleToggleMemorised = async (chunkId: string) => {
+    const nextIsMemorised = !state.cards[chapterId][chunkId].isMemorised;
+    
     setState(prev => {
       const currentCard = prev.cards[chapterId][chunkId];
       return {
@@ -48,12 +53,33 @@ export default function ReviewPage() {
             ...prev.cards[chapterId],
             [chunkId]: {
               ...currentCard,
-              isMemorised: !currentCard.isMemorised
+              isMemorised: nextIsMemorised
             }
           }
         }
       };
     });
+
+    // Cloud Sync
+    if (user && chapter) {
+      const { data: memberData } = await supabase
+        .from('group_members')
+        .select('group_id')
+        .eq('user_id', user.id);
+
+      if (memberData && memberData.length > 0) {
+        for (const member of memberData) {
+          await supabase.from('shared_progress').upsert({
+            group_id: member.group_id,
+            user_id: user.id,
+            chapter_title: chapter.title,
+            chunk_id: chunkId,
+            is_memorised: nextIsMemorised,
+            updated_at: new Date().toISOString()
+          }, { onConflict: 'group_id,user_id,chapter_title,chunk_id' });
+        }
+      }
+    }
   };
 
   const activeChunkId = chapterId ? state.settings.activeChunkId[chapterId] : null;
@@ -148,7 +174,10 @@ export default function ReviewPage() {
                   Recite
                 </button>
                 <button
-                  onClick={() => handleToggleMemorised(chunk.id)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleToggleMemorised(chunk.id);
+                  }}
                   className={`col-span-2 flex items-center justify-center gap-2 py-3 text-sm font-bold rounded-xl border transition-all active:scale-95 ${
                     isMemorised 
                       ? "bg-amber-500 text-zinc-950 border-amber-400" 

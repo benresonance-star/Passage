@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { BCMProvider } from "@/context/BCMContext";
+import { AuthProvider } from "@/context/AuthContext";
 import { ThemeContent } from "@/components/layout/ThemeContent";
 
 export const metadata: Metadata = {
@@ -30,9 +31,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark">
-      <BCMProvider>
-        <ThemeContent>{children}</ThemeContent>
-      </BCMProvider>
+      <AuthProvider>
+        <BCMProvider>
+          <ThemeContent>{children}</ThemeContent>
+        </BCMProvider>
+      </AuthProvider>
     </html>
   );
 }
