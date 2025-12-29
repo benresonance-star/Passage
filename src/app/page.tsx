@@ -109,7 +109,7 @@ export default function Home() {
     <div className="space-y-8 py-6">
       <header className="flex justify-between items-start">
         <div className="flex items-center gap-4">
-          <BookOpen size={42} className="text-orange-500" />
+          <BookOpen size={52} className="text-orange-500" />
           <div className="space-y-1">
             <h1 className="text-3xl font-bold tracking-[0.05em]">Passage</h1>
             <p className="text-zinc-500">Bible Chapter Memoriser</p>
