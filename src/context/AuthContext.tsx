@@ -8,6 +8,7 @@ interface AuthContextType {
   user: User | null;
   loading: boolean;
   signIn: (email: string) => Promise<{ error: any }>;
+  verifyOtp: (email: string, token: string) => Promise<{ error: any }>;
   signOut: () => Promise<{ error: any }>;
 }
 
@@ -58,13 +59,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
   };
 
+  const verifyOtp = async (email: string, token: string) => {
+    if (!supabase) return { error: { message: "Supabase not initialized" } };
+    return await supabase.auth.verifyOtp({
+      email,
+      token,
+      type: 'magiclink',
+    });
+  };
+
   const signOut = async () => {
     if (!supabase) return { error: { message: "Supabase not initialized" } };
     return await supabase.auth.signOut();
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, signIn, signOut }}>
+    <AuthContext.Provider value={{ user, loading, signIn, verifyOtp, signOut }}>
       {children}
     </AuthContext.Provider>
   );

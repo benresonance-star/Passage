@@ -8,10 +8,11 @@ import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 
 export default function GroupPage() {
-  const { user, signIn, signOut, loading: authLoading } = useAuth();
+  const { user, signIn, verifyOtp, signOut, loading: authLoading } = useAuth();
   const { state, syncAllMemorised } = useBCM();
   const [email, setEmail] = useState("");
-  const [sent, setSent] = useState(false);
+  const [otp, setOtp] = useState("");
+  const [step, setStep] = useState<"email" | "otp">("email");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [profile, setProfile] = useState<any>(null);
@@ -87,7 +88,18 @@ export default function GroupPage() {
     if (error) {
       setError(error.message);
     } else {
-      setSent(true);
+      setStep("otp");
+    }
+    setLoading(false);
+  };
+
+  const handleVerifyOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+    const { error } = await verifyOtp(email, otp);
+    if (error) {
+      setError(error.message);
     }
     setLoading(false);
   };
@@ -197,7 +209,7 @@ export default function GroupPage() {
             </div>
           </div>
 
-          {!sent ? (
+          {step === "email" ? (
             <form onSubmit={handleSignIn} className="space-y-4">
               <div className="space-y-2">
                 <label className="text-xs font-bold uppercase tracking-widest text-zinc-500 ml-1">Email Address</label>
@@ -218,27 +230,52 @@ export default function GroupPage() {
                 disabled={loading}
                 className="w-full py-4 bg-orange-500 text-white font-bold rounded-2xl shadow-lg shadow-orange-500/20 active:scale-95 transition-transform disabled:opacity-50"
               >
-                {loading ? "Sending..." : "Send Magic Link"}
+                {loading ? "Sending..." : "Send Magic Link / Code"}
               </button>
             </form>
           ) : (
-            <div className="flex flex-col items-center text-center space-y-6 py-4 animate-in zoom-in-95 duration-300">
-              <div className="w-12 h-12 bg-green-500/10 rounded-full flex items-center justify-center text-green-500">
-                <CheckCircle2 size={24} />
+            <form onSubmit={handleVerifyOtp} className="space-y-6 animate-in zoom-in-95 duration-300">
+              <div className="flex flex-col items-center text-center space-y-4">
+                <div className="w-12 h-12 bg-green-500/10 rounded-full flex items-center justify-center text-green-500">
+                  <CheckCircle2 size={24} />
+                </div>
+                <div className="space-y-2">
+                  <h3 className="font-bold">Enter Verification Code</h3>
+                  <p className="text-zinc-500 text-sm">
+                    We sent a code to <span className="text-white font-medium">{email}</span>.
+                  </p>
+                </div>
               </div>
-              <div className="space-y-2">
-                <h3 className="font-bold">Check your email</h3>
-                <p className="text-zinc-500 text-sm">
-                  We sent a magic link to <span className="text-white font-medium">{email}</span>. Click it to sign in.
-                </p>
+
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <label className="text-xs font-bold uppercase tracking-widest text-zinc-500 ml-1 text-center block">6-Digit Code</label>
+                  <input 
+                    type="text"
+                    required
+                    maxLength={6}
+                    value={otp}
+                    onChange={(e) => setOtp(e.target.value)}
+                    className="w-full bg-black border border-zinc-800 rounded-2xl py-4 text-center text-2xl font-bold tracking-[0.5em] text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50 transition-all"
+                    placeholder="000000"
+                  />
+                </div>
+                {error && <p className="text-red-500 text-xs text-center">{error}</p>}
+                <button 
+                  disabled={loading}
+                  className="w-full py-4 bg-orange-500 text-white font-bold rounded-2xl shadow-lg shadow-orange-500/20 active:scale-95 transition-transform disabled:opacity-50"
+                >
+                  {loading ? "Verifying..." : "Verify & Sign In"}
+                </button>
+                <button 
+                  type="button"
+                  onClick={() => setStep("email")}
+                  className="w-full text-zinc-500 text-xs font-bold uppercase tracking-widest"
+                >
+                  Back to Email
+                </button>
               </div>
-              <button 
-                onClick={() => setSent(false)}
-                className="text-zinc-500 text-xs font-bold uppercase tracking-widest"
-              >
-                Back to Sign In
-              </button>
-            </div>
+            </form>
           )}
         </div>
       ) : (
