@@ -18,8 +18,8 @@ export default function ImportPage() {
     if (!text.trim()) return;
 
     const { title, verses } = parseChapter(text, stripRefs);
-    const chunks = chunkVerses(verses);
-    const chapterId = title.toLowerCase().replace(/[^a-z0-9]/g, '-');
+    const chunks = chunkVerses(verses, title);
+    const chapterId = getChapterSlug(title);
 
     const initialCards: Record<string, SM2Card> = {};
     const now = new Date().toISOString();

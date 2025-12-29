@@ -289,37 +289,65 @@ export function BCMProvider({ children }: { children: React.ReactNode }) {
 
     Object.entries(saved.chapters).forEach(([oldId, chapter]) => {
       const newId = getChapterSlug(chapter.title);
+      let chapterWasMigrated = false;
+
+      // 1. Migrate Chapter ID if needed
       if (newId !== oldId) {
-        console.log(`Migrating ${oldId} -> ${newId}`);
-        // Move chapter
+        console.log(`Migrating Chapter: ${oldId} -> ${newId}`);
         delete migratedState.chapters[oldId];
         migratedState.chapters[newId] = { ...chapter, id: newId };
         
-        // Move cards
         if (migratedState.cards[oldId]) {
           migratedState.cards[newId] = migratedState.cards[oldId];
           delete migratedState.cards[oldId];
         }
-
-        // Move stats
         if (migratedState.stats[oldId]) {
           migratedState.stats[newId] = migratedState.stats[oldId];
           delete migratedState.stats[oldId];
         }
-
-        // Move active chunk settings
         if (migratedState.settings.activeChunkId[oldId]) {
           migratedState.settings.activeChunkId[newId] = migratedState.settings.activeChunkId[oldId];
           delete migratedState.settings.activeChunkId[oldId];
         }
-
-        // Update selected chapter
         if (migratedState.selectedChapterId === oldId) {
           migratedState.selectedChapterId = newId;
         }
-
+        chapterWasMigrated = true;
         hasChanges = true;
       }
+
+      // 2. Migrate Chunk IDs within the chapter
+      const currentChapter = migratedState.chapters[newId];
+      const oldCards = { ...(migratedState.cards[newId] || {}) };
+      let chunksWereMigrated = false;
+
+      currentChapter.chunks.forEach((chunk, index) => {
+        const startVerse = chunk.verses.filter(v => v.type === "scripture")[0]?.number;
+        const lastVerse = chunk.verses.filter(v => v.type === "scripture").slice(-1)[0]?.number;
+        const verseRange = startVerse === lastVerse ? `${startVerse}` : `${startVerse}-${lastVerse}`;
+        const newChunkId = `${newId}-v${verseRange}`;
+
+        if (chunk.id !== newChunkId) {
+          console.log(`Migrating Chunk: ${chunk.id} -> ${newChunkId}`);
+          const oldChunkId = chunk.id;
+          chunk.id = newChunkId;
+          
+          // Migrate card data for this chunk
+          if (oldCards[oldChunkId]) {
+            if (!migratedState.cards[newId]) migratedState.cards[newId] = {};
+            migratedState.cards[newId][newChunkId] = { ...oldCards[oldChunkId], id: newChunkId };
+            delete migratedState.cards[newId][oldChunkId];
+          }
+
+          // Update active chunk if needed
+          if (migratedState.settings.activeChunkId[newId] === oldChunkId) {
+            migratedState.settings.activeChunkId[newId] = newChunkId;
+          }
+
+          chunksWereMigrated = true;
+          hasChanges = true;
+        }
+      });
     });
 
     // Check for streak reset on load

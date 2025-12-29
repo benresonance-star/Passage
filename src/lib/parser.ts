@@ -68,7 +68,7 @@ export function getChapterSlug(title: string): string {
     .replace(/^-+|-+$/g, ""); // remove leading/trailing hyphens
 }
 
-export function chunkVerses(verses: Verse[], maxVersesPerChunk: number = 4): Chunk[] {
+export function chunkVerses(verses: Verse[], title: string, maxVersesPerChunk: number = 4): Chunk[] {
   const chunks: Chunk[] = [];
   let currentBatch: Verse[] = [];
   let scriptureCount = 0;
@@ -107,10 +107,12 @@ export function chunkVerses(verses: Verse[], maxVersesPerChunk: number = 4): Chu
       if (scriptureVerses.length > 0) {
         const startVerse = scriptureVerses[0].number;
         const endVerse = scriptureVerses[scriptureVerses.length - 1].number;
+        const verseRange = startVerse === endVerse ? `${startVerse}` : `${startVerse}-${endVerse}`;
+        const chapterId = getChapterSlug(title);
         
         chunks.push({
-          id: `chunk-${startVerse}-${endVerse}-${Date.now()}-${chunks.length}`,
-          verseRange: startVerse === endVerse ? `${startVerse}` : `${startVerse}-${endVerse}`,
+          id: `${chapterId}-v${verseRange}`,
+          verseRange,
           verses: currentBatch.map(bv => ({
             ...bv,
             text: bv.text.replace("[PARAGRAPH] ", "").trim()

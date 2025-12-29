@@ -23,8 +23,9 @@ export const INITIAL_STATE: BCMState = {
 
 function seedData(state: BCMState): BCMState {
   const { title, verses } = parseChapter(ROMANS_8_SEED.fullText!);
-  const chunks = chunkVerses(verses);
-  const chapterId = "romans-8";
+  const finalTitle = title || "Romans 8";
+  const chunks = chunkVerses(verses, finalTitle);
+  const chapterId = getChapterSlug(finalTitle);
   const now = new Date().toISOString();
 
   const initialCards: Record<string, SM2Card> = {};
