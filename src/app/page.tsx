@@ -46,6 +46,7 @@ export default function Home() {
   const [showInfo, setShowInfo] = useState(false);
   const [groupId, setGroupId] = useState<string | null>(null);
   const [groupName, setGroupName] = useState<string | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -53,7 +54,7 @@ export default function Home() {
         try {
           const { data, error } = await supabase
             .from('group_members')
-            .select('group_id, groups(name)')
+            .select('group_id, role, groups(name, admin_id)')
             .eq('user_id', user.id)
             .limit(1)
             .maybeSingle();
@@ -62,12 +63,15 @@ export default function Home() {
           if (data) {
             setGroupId(data.group_id);
             setGroupName((data.groups as any)?.name || null);
+            setIsAdmin(data.role === 'admin' || (data.groups as any)?.admin_id === user.id);
           }
         } catch (err) {
           console.error("Home group fetch error:", err);
         }
       };
       fetchGroup();
+    } else {
+      setIsAdmin(true); // If not logged in (local mode), user is their own admin
     }
   }, [user]);
 
@@ -94,7 +98,7 @@ export default function Home() {
 
   const handleDelete = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    if (!confirm("Delete this chapter and all its progress?")) return;
+    if (!confirm("⚠️ CAUTION: Do you really want to delete this chapter and all its progress? This action cannot be undone.")) return;
     
     setState(prev => {
       const { [id]: _, ...remainingChapters } = prev.chapters;
@@ -239,9 +243,11 @@ export default function Home() {
                       </p>
                     </div>
                   </div>
-                  <button onClick={(e) => handleDelete(ch.id, e)} className="p-2 text-zinc-700 hover:text-red-500 transition-colors">
-                    <Trash2 size={18} />
-                  </button>
+                  {isAdmin && (
+                    <button onClick={(e) => handleDelete(ch.id, e)} className="p-2 text-zinc-700 hover:text-red-500 transition-colors">
+                      <Trash2 size={18} />
+                    </button>
+                  )}
                 </div>
               ))}
               <Link
