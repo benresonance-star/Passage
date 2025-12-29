@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useBCM } from "@/context/BCMContext";
-import { Users, Mail, ArrowLeft, LogOut, CheckCircle2, Loader2, Trophy, Plus, Copy, Check } from "lucide-react";
+import { Users, Mail, ArrowLeft, LogOut, CheckCircle2, Loader2, Trophy, Plus, Copy, Check, X } from "lucide-react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 
