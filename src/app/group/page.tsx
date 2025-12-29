@@ -16,8 +16,11 @@ export default function GroupPage() {
   const [error, setError] = useState<string | null>(null);
   const [profile, setProfile] = useState<any>(null);
   const [group, setGroup] = useState<any>(null);
+  const [members, setMembers] = useState<any[]>([]);
   const [copied, setCopied] = useState(false);
   const [joinGroupId, setJoinGroupId] = useState("");
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [newName, setNewName] = useState("");
 
   useEffect(() => {
     if (user) {
@@ -33,6 +36,7 @@ export default function GroupPage() {
       .eq('id', user?.id)
       .single();
     setProfile(profileData);
+    if (profileData?.display_name) setNewName(profileData.display_name);
 
     // Fetch Group (User as member)
     const { data: memberData } = await supabase
@@ -43,7 +47,36 @@ export default function GroupPage() {
     
     if (memberData) {
       setGroup(memberData.groups);
+      // Fetch all members of this group
+      const { data: groupMembers } = await supabase
+        .from('group_members')
+        .select(`
+          user_id,
+          role,
+          profiles:user_id (display_name, email, last_active)
+        `)
+        .eq('group_id', memberData.group_id);
+      
+      if (groupMembers) {
+        setMembers(groupMembers);
+      }
     }
+  };
+
+  const handleUpdateName = async () => {
+    if (!user || !newName.trim()) return;
+    setLoading(true);
+    const { error } = await supabase
+      .from('profiles')
+      .update({ display_name: newName.trim() })
+      .eq('id', user.id);
+    
+    if (!error) {
+      setProfile({ ...profile, display_name: newName.trim() });
+      setIsEditingName(false);
+      fetchProfileAndGroup();
+    }
+    setLoading(false);
   };
 
   const handleSignIn = async (e: React.FormEvent) => {
@@ -194,12 +227,34 @@ export default function GroupPage() {
             <div className="flex justify-between items-start">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 bg-orange-500 rounded-2xl flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-orange-500/20">
-                  {profile?.display_name?.charAt(0) || user.email?.charAt(0).toUpperCase()}
+                  {(profile?.display_name || user.email)?.charAt(0).toUpperCase()}
                 </div>
-                <div>
-                  <h2 className="font-bold text-lg">{profile?.display_name || "New Student"}</h2>
-                  <p className="text-zinc-500 text-xs">{user.email}</p>
-                </div>
+                {isEditingName ? (
+                  <div className="flex gap-2 items-center">
+                    <input 
+                      autoFocus
+                      value={newName}
+                      onChange={(e) => setNewName(e.target.value)}
+                      className="bg-black border border-zinc-700 rounded-lg px-3 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-orange-500 w-32"
+                    />
+                    <button onClick={handleUpdateName} className="p-1 text-green-500">
+                      <Check size={18} />
+                    </button>
+                    <button onClick={() => setIsEditingName(false)} className="p-1 text-zinc-500">
+                      <X size={18} />
+                    </button>
+                  </div>
+                ) : (
+                  <div onClick={() => setIsEditingName(true)} className="cursor-pointer group">
+                    <div className="flex items-center gap-2">
+                      <h2 className="font-bold text-lg group-hover:text-orange-500 transition-colors">
+                        {profile?.display_name || "Set Name..."}
+                      </h2>
+                      <Plus size={14} className="text-zinc-600 group-hover:text-orange-500" />
+                    </div>
+                    <p className="text-zinc-500 text-xs">{user.email}</p>
+                  </div>
+                )}
               </div>
               <button 
                 onClick={() => signOut()}
@@ -215,31 +270,65 @@ export default function GroupPage() {
             <h3 className="text-sm font-medium text-zinc-500 uppercase tracking-wider px-1">My Group</h3>
             
             {group ? (
-              <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-6 space-y-6 shadow-xl">
-                <div className="flex justify-between items-center">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-orange-500/10 rounded-xl flex items-center justify-center text-orange-500 border border-orange-500/20">
-                      <Users size={20} />
+              <div className="space-y-4">
+                <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-6 space-y-6 shadow-xl">
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-orange-500/10 rounded-xl flex items-center justify-center text-orange-500 border border-orange-500/20">
+                        <Users size={20} />
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-white">{group.name}</h4>
+                        <p className="text-[10px] text-zinc-500 uppercase tracking-widest font-bold">
+                          {group.admin_id === user.id ? "Admin" : "Member"}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <h4 className="font-bold text-white">{group.name}</h4>
-                      <p className="text-[10px] text-zinc-500 uppercase tracking-widest font-bold">Member</p>
+                  </div>
+
+                  <div className="pt-4 border-t border-zinc-800 space-y-3">
+                    <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest ml-1">Invite Friends (Group ID)</p>
+                    <div className="flex gap-2">
+                      <div className="flex-1 bg-black border border-zinc-800 rounded-xl px-4 py-3 text-zinc-400 font-mono text-xs overflow-hidden text-ellipsis whitespace-nowrap">
+                        {group.id}
+                      </div>
+                      <button 
+                        onClick={copyGroupId}
+                        className={`p-3 rounded-xl border transition-all ${copied ? "bg-green-500/10 border-green-500/20 text-green-500" : "bg-zinc-800 border-white/5 text-zinc-400"}`}
+                      >
+                        {copied ? <Check size={18} /> : <Copy size={18} />}
+                      </button>
                     </div>
                   </div>
                 </div>
 
-                <div className="pt-4 border-t border-zinc-800 space-y-3">
-                  <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest ml-1">Invite Friends (Group ID)</p>
-                  <div className="flex gap-2">
-                    <div className="flex-1 bg-black border border-zinc-800 rounded-xl px-4 py-3 text-zinc-400 font-mono text-xs overflow-hidden text-ellipsis whitespace-nowrap">
-                      {group.id}
-                    </div>
-                    <button 
-                      onClick={copyGroupId}
-                      className={`p-3 rounded-xl border transition-all ${copied ? "bg-green-500/10 border-green-500/20 text-green-500" : "bg-zinc-800 border-white/5 text-zinc-400"}`}
-                    >
-                      {copied ? <Check size={18} /> : <Copy size={18} />}
-                    </button>
+                {/* Member List */}
+                <div className="bg-zinc-900 border border-zinc-800 rounded-3xl overflow-hidden shadow-xl">
+                  <div className="p-4 border-b border-zinc-800 bg-black/20">
+                    <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Group Members ({members.length})</p>
+                  </div>
+                  <div className="divide-y divide-zinc-800">
+                    {members.map((m: any) => (
+                      <div key={m.user_id} className="p-4 flex justify-between items-center">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-lg bg-zinc-800 border border-white/5 flex items-center justify-center text-xs font-bold text-zinc-500">
+                            {m.profiles.display_name?.charAt(0).toUpperCase() || "S"}
+                          </div>
+                          <div>
+                            <p className="text-sm font-bold text-white">
+                              {m.profiles.display_name || "Student"}
+                              {m.user_id === user.id && <span className="text-orange-500 ml-2 text-[10px] uppercase font-bold">(You)</span>}
+                            </p>
+                            <p className="text-[10px] text-zinc-500">{m.profiles.email}</p>
+                          </div>
+                        </div>
+                        {m.role === 'admin' && (
+                          <span className="text-[9px] font-bold uppercase tracking-tighter px-2 py-0.5 bg-zinc-800 text-zinc-400 rounded-full border border-white/5">
+                            Admin
+                          </span>
+                        )}
+                      </div>
+                    ))}
                   </div>
                 </div>
               </div>
