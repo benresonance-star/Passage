@@ -46,7 +46,7 @@ interface BCMState {
 - **URL Sanitizer**: Automatically wipes access tokens from the browser hash (`#access_token=...`) upon successful login to prevent session conflicts and allow clean navigation.
 - **Study Groups**: Users can create or join groups using a unique Group ID.
 - **Robust Group Lifecycle**: Explicit membership filtering and instant UI refresh logic ensuring group context is preserved and accurately displayed across all screens.
-- **Team Progress Board**: Real-time leaderboard on the home screen showing group members' mastery percentages via Supabase Realtime subscriptions.
+- **Team Progress Board**: Real-time leaderboard on the home screen showing group members' chunk progress and mastery percentages via Supabase Realtime subscriptions.
 - **Member Management**: Study group members can set custom **Display Names** and view a full directory of the group, including the Admin and member status.
 - **Cloud Sync**: Personal themes, profile settings, and "Memorised" progress are automatically backed up to Supabase.
 - **Error Feedback**: Comprehensive success/error alerts for all cloud operations (Auth, Group Management, Sync).

@@ -8,6 +8,7 @@ interface MemberProgress {
   user_id: string;
   display_name: string;
   progress: number; // percentage
+  memorisedCount: number;
   last_active: string;
 }
 
@@ -50,6 +51,7 @@ export function TeamBoard({ groupId, chapterTitle, totalChunks }: { groupId: str
           user_id: m.user_id,
           display_name: m.profiles.display_name || "Student",
           progress: totalChunks > 0 ? (userProgress / totalChunks) * 100 : 0,
+          memorisedCount: userProgress,
           last_active: m.profiles.last_active
         };
       });
@@ -104,7 +106,7 @@ export function TeamBoard({ groupId, chapterTitle, totalChunks }: { groupId: str
                   <div>
                     <p className="font-bold text-sm text-white">{member.display_name}</p>
                     <p className="text-[10px] text-zinc-500 uppercase tracking-widest font-bold">
-                      {Math.round(member.progress)}% Mastered
+                      {member.memorisedCount} / {totalChunks} Chunks • {Math.round(member.progress)}% Mastered
                     </p>
                   </div>
                 </div>
