@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useBCM } from "@/context/BCMContext";
+import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import { splitIntoLines } from "@/lib/parser";
 import { updateCard } from "@/lib/scheduler";
