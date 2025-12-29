@@ -55,6 +55,19 @@ export function parseChapter(text: string, stripRefs: boolean = true): { title: 
   return { title, verses };
 }
 
+/**
+ * Generates a stable, deterministic ID from a chapter title.
+ * Used to ensure all devices use the same key for the same content.
+ */
+export function getChapterSlug(title: string): string {
+  return title
+    .toLowerCase()
+    .trim()
+    .replace(/[^\w\s-]/g, "") // remove special chars
+    .replace(/[\s_-]+/g, "-") // replace spaces/underscores with hyphens
+    .replace(/^-+|-+$/g, ""); // remove leading/trailing hyphens
+}
+
 export function chunkVerses(verses: Verse[], maxVersesPerChunk: number = 4): Chunk[] {
   const chunks: Chunk[] = [];
   let currentBatch: Verse[] = [];

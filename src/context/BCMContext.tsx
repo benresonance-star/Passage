@@ -5,6 +5,7 @@ import { BCMState } from "@/types";
 import { INITIAL_STATE, loadState, saveState } from "@/lib/storage";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "./AuthContext";
+import { getChapterSlug } from "@/lib/parser";
 
 interface BCMContextType {
   state: BCMState;
@@ -116,6 +117,8 @@ export function BCMProvider({ children }: { children: React.ReactNode }) {
   const syncProgress = async (chapterTitle: string, chunkId: string, card: any) => {
     if (!user || !supabase) return;
 
+    const chapterId = getChapterSlug(chapterTitle);
+    
     // Track local update time to prevent "echo" overwrites
     lastUpdateRef.current[`card_${chunkId}`] = Date.now();
 
@@ -146,31 +149,27 @@ export function BCMProvider({ children }: { children: React.ReactNode }) {
       }
 
       // 2. Sync to Personal Vault
-      const chapterId = Object.entries(state.chapters).find(([_, ch]) => ch.title === chapterTitle)?.[0];
-      if (chapterId) {
-        const { data: cardData, error: cardError } = await supabase.from('user_cards').upsert({
+      const { data: cardData } = await supabase.from('user_cards').upsert({
+        user_id: user.id,
+        chapter_id: chapterId,
+        chunk_id: chunkId,
+        data: card,
+        updated_at: new Date().toISOString()
+      }, { onConflict: 'user_id,chapter_id,chunk_id' }).select('updated_at').single();
+
+      if (cardData) {
+        lastUpdateRef.current[`card_${chunkId}`] = new Date(cardData.updated_at).getTime();
+      }
+
+      // Also sync stats
+      const stats = state.stats[chapterId];
+      if (stats) {
+        await supabase.from('user_stats').upsert({
           user_id: user.id,
           chapter_id: chapterId,
-          chunk_id: chunkId,
-          data: card,
+          data: stats,
           updated_at: new Date().toISOString()
-        }, { onConflict: 'user_id,chapter_id,chunk_id' }).select('updated_at').single();
-
-        if (cardData) {
-          // Align local sync time with exact cloud timestamp
-          lastUpdateRef.current[`card_${chunkId}`] = new Date(cardData.updated_at).getTime();
-        }
-
-        // Also sync stats
-        const stats = state.stats[chapterId];
-        if (stats) {
-          await supabase.from('user_stats').upsert({
-            user_id: user.id,
-            chapter_id: chapterId,
-            data: stats,
-            updated_at: new Date().toISOString()
-          }, { onConflict: 'user_id,chapter_id' });
-        }
+        }, { onConflict: 'user_id,chapter_id' });
       }
     } catch (err) {
       console.error("Sync error:", err);
@@ -284,43 +283,42 @@ export function BCMProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const saved = loadState();
     
-    // Migration: Convert old timestamp IDs to stable Slug IDs
+    // Authoritative Migration: Force all chapters to use Title Slugs as IDs
     const migratedState = { ...saved };
     let hasChanges = false;
 
     Object.entries(saved.chapters).forEach(([oldId, chapter]) => {
-      if (oldId.startsWith('chapter-')) {
-        const newId = chapter.title.toLowerCase().replace(/[^a-z0-9]/g, '-');
-        if (newId !== oldId) {
-          // Move chapter
-          delete migratedState.chapters[oldId];
-          migratedState.chapters[newId] = { ...chapter, id: newId };
-          
-          // Move cards
-          if (migratedState.cards[oldId]) {
-            migratedState.cards[newId] = migratedState.cards[oldId];
-            delete migratedState.cards[oldId];
-          }
-
-          // Move stats
-          if (migratedState.stats[oldId]) {
-            migratedState.stats[newId] = migratedState.stats[oldId];
-            delete migratedState.stats[oldId];
-          }
-
-          // Move active chunk settings
-          if (migratedState.settings.activeChunkId[oldId]) {
-            migratedState.settings.activeChunkId[newId] = migratedState.settings.activeChunkId[oldId];
-            delete migratedState.settings.activeChunkId[oldId];
-          }
-
-          // Update selected chapter if it was this one
-          if (migratedState.selectedChapterId === oldId) {
-            migratedState.selectedChapterId = newId;
-          }
-
-          hasChanges = true;
+      const newId = getChapterSlug(chapter.title);
+      if (newId !== oldId) {
+        console.log(`Migrating ${oldId} -> ${newId}`);
+        // Move chapter
+        delete migratedState.chapters[oldId];
+        migratedState.chapters[newId] = { ...chapter, id: newId };
+        
+        // Move cards
+        if (migratedState.cards[oldId]) {
+          migratedState.cards[newId] = migratedState.cards[oldId];
+          delete migratedState.cards[oldId];
         }
+
+        // Move stats
+        if (migratedState.stats[oldId]) {
+          migratedState.stats[newId] = migratedState.stats[oldId];
+          delete migratedState.stats[oldId];
+        }
+
+        // Move active chunk settings
+        if (migratedState.settings.activeChunkId[oldId]) {
+          migratedState.settings.activeChunkId[newId] = migratedState.settings.activeChunkId[oldId];
+          delete migratedState.settings.activeChunkId[oldId];
+        }
+
+        // Update selected chapter
+        if (migratedState.selectedChapterId === oldId) {
+          migratedState.selectedChapterId = newId;
+        }
+
+        hasChanges = true;
       }
     });
 

@@ -1,6 +1,6 @@
 import { BCMState, SM2Card, Chapter } from "@/types";
 import { ROMANS_8_SEED } from "./seed";
-import { parseChapter, chunkVerses } from "./parser";
+import { parseChapter, chunkVerses, getChapterSlug } from "./parser";
 
 const STORAGE_KEY = "bcm_v1_state";
 
@@ -79,7 +79,7 @@ export function loadState(): BCMState {
 
     // Migration for v1 (single chapter) to v2 (multi-chapter)
     if (parsed.chapter && !parsed.chapters) {
-      const chapterId = parsed.chapter.title.toLowerCase().replace(/[^a-z0-9]/g, '-');
+      const chapterId = getChapterSlug(parsed.chapter.title);
       const migratedState: BCMState = {
         ...INITIAL_STATE,
         chapters: {
