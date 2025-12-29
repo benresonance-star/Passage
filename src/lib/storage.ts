@@ -14,6 +14,10 @@ export const INITIAL_STATE: BCMState = {
     showHeadings: true,
     showMemorised: true,
     activeChunkId: {},
+    theme: {
+      bg: "#000000",
+      text: "#f4f4f5",
+    },
   },
 };
 

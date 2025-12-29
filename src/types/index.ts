@@ -45,6 +45,10 @@ export interface BCMState {
     showHeadings: boolean;
     showMemorised: boolean;
     activeChunkId: Record<string, string | null>; // Keyed by chapterId
+    theme?: {
+      bg: string;
+      text: string;
+    };
   };
 }
 
