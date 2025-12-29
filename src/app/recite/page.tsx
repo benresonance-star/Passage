@@ -27,6 +27,8 @@ export default function RecitePage() {
     .join(" ") || "";
   const lines = scriptureText ? splitIntoLines(scriptureText) : [];
 
+  const isAllRevealed = revealedLines.size === lines.length && lines.length > 0;
+
   useEffect(() => {
     const handleReset = () => {
       setRevealedLines(new Set());
@@ -79,6 +81,14 @@ export default function RecitePage() {
       newRevealed.add(index);
     }
     setRevealedLines(newRevealed);
+  };
+
+  const handleRevealToggle = () => {
+    if (isAllRevealed) {
+      setRevealedLines(new Set());
+    } else {
+      setRevealedLines(new Set(lines.map((_, i) => i)));
+    }
   };
 
   const handleGrade = (score: number) => {
@@ -140,8 +150,8 @@ export default function RecitePage() {
             Verses {activeChunk?.verseRange} • {chapter?.title}
           </p>
         </div>
-        <button onClick={() => setRevealedLines(new Set(lines.map((_, i) => i)))} className="text-zinc-500 p-2 -mr-2">
-          <Eye size={20} />
+        <button onClick={handleRevealToggle} className="text-zinc-500 p-2 -mr-2">
+          {isAllRevealed ? <EyeOff size={20} /> : <Eye size={20} />}
         </button>
       </header>
 
