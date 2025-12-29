@@ -49,13 +49,19 @@ export default function Home() {
   useEffect(() => {
     if (user) {
       const fetchGroup = async () => {
-        const { data } = await supabase
-          .from('group_members')
-          .select('group_id')
-          .eq('user_id', user.id)
-          .limit(1)
-          .maybeSingle();
-        if (data) setGroupId(data.group_id);
+        try {
+          const { data, error } = await supabase
+            .from('group_members')
+            .select('group_id')
+            .eq('user_id', user.id)
+            .limit(1)
+            .maybeSingle();
+          
+          if (error) throw error;
+          if (data) setGroupId(data.group_id);
+        } catch (err) {
+          console.error("Home group fetch error:", err);
+        }
       };
       fetchGroup();
     }

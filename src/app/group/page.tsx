@@ -94,50 +94,69 @@ export default function GroupPage() {
 
   const handleCreateGroup = async () => {
     if (!user) return;
-    setLoading(true);
     const groupName = prompt("Enter a name for your Study Group:");
-    if (!groupName) {
+    if (!groupName) return;
+
+    setLoading(true);
+    try {
+      // 1. Create the group
+      const { data: newGroup, error: groupError } = await supabase
+        .from('groups')
+        .insert({ name: groupName, admin_id: user.id })
+        .select()
+        .single();
+
+      if (groupError) throw groupError;
+
+      if (newGroup) {
+        // 2. Add creator as admin member
+        const { error: memberError } = await supabase
+          .from('group_members')
+          .insert({
+            group_id: newGroup.id,
+            user_id: user.id,
+            role: 'admin'
+          });
+
+        if (memberError) throw memberError;
+
+        // 3. Refresh UI
+        await fetchProfileAndGroup();
+        alert("Group created successfully!");
+      }
+    } catch (err: any) {
+      console.error("Group creation error:", err);
+      alert(`Failed to create group: ${err.message || "Unknown error"}`);
+    } finally {
       setLoading(false);
-      return;
     }
-
-    const { data: newGroup, error: groupError } = await supabase
-      .from('groups')
-      .insert({ name: groupName, admin_id: user.id })
-      .select()
-      .single();
-
-    if (newGroup) {
-      await supabase.from('group_members').insert({
-        group_id: newGroup.id,
-        user_id: user.id,
-        role: 'admin'
-      });
-      fetchProfileAndGroup();
-    }
-    setLoading(false);
   };
 
   const handleJoinGroup = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user || !joinGroupId) return;
-    setLoading(true);
+    if (!user || !joinGroupId.trim()) return;
     
-    const { error: joinError } = await supabase
-      .from('group_members')
-      .insert({
-        group_id: joinGroupId,
-        user_id: user.id,
-        role: 'member'
-      });
+    setLoading(true);
+    try {
+      const { error: joinError } = await supabase
+        .from('group_members')
+        .insert({
+          group_id: joinGroupId.trim(),
+          user_id: user.id,
+          role: 'member'
+        });
 
-    if (joinError) {
-      alert("Invalid Group ID or you are already a member.");
-    } else {
-      fetchProfileAndGroup();
+      if (joinError) throw joinError;
+
+      await fetchProfileAndGroup();
       setJoinGroupId("");
+      alert("Joined group successfully!");
+    } catch (err: any) {
+      console.error("Join group error:", err);
+      alert(`Failed to join group: ${err.message || "Invalid Group ID"}`);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const copyGroupId = () => {
