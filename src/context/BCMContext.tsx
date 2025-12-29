@@ -27,6 +27,9 @@ export function BCMProvider({ children }: { children: React.ReactNode }) {
 
   // Load group ID and pull vault if logged in
   useEffect(() => {
+    let cardSubscription: any = null;
+    let chapterSubscription: any = null;
+
     if (user && supabase) {
       const initCloud = async () => {
         // 1. Fetch Group ID
@@ -37,13 +40,43 @@ export function BCMProvider({ children }: { children: React.ReactNode }) {
           .maybeSingle();
         if (data) setUserGroupId(data.group_id);
 
-        // 2. Pull Personal Vault
+        // 2. Initial Pull
         await pullVault();
+
+        // 3. Subscribe to Realtime Vault Changes
+        cardSubscription = supabase
+          .channel(`vault_cards_${user.id}`)
+          .on('postgres_changes', { 
+            event: '*', 
+            schema: 'public', 
+            table: 'user_cards',
+            filter: `user_id=eq.${user.id}`
+          }, () => {
+            pullVault(); // Re-sync when cards change on another device
+          })
+          .subscribe();
+
+        chapterSubscription = supabase
+          .channel(`vault_chapters_${user.id}`)
+          .on('postgres_changes', { 
+            event: '*', 
+            schema: 'public', 
+            table: 'user_chapters',
+            filter: `user_id=eq.${user.id}`
+          }, () => {
+            pullVault(); // Re-sync when library changes on another device
+          })
+          .subscribe();
       };
       initCloud();
     } else {
       setUserGroupId(null);
     }
+
+    return () => {
+      if (cardSubscription) cardSubscription.unsubscribe();
+      if (chapterSubscription) chapterSubscription.unsubscribe();
+    };
   }, [user]);
 
   const syncProgress = async (chapterTitle: string, chunkId: string, isMemorised: boolean) => {
