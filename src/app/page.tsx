@@ -250,13 +250,15 @@ export default function Home() {
                   )}
                 </div>
               ))}
-              <Link
-                href="/import"
-                className="flex items-center justify-center gap-3 p-4 bg-zinc-900/50 border border-dashed border-zinc-800 rounded-xl text-zinc-500 hover:text-orange-500 hover:border-orange-500/50 transition-all"
-              >
-                <Upload size={20} />
-                <span className="font-bold">Add New Chapter</span>
-              </Link>
+              {isAdmin && (
+                <Link
+                  href="/import"
+                  className="flex items-center justify-center gap-3 p-4 bg-zinc-900/50 border border-dashed border-zinc-800 rounded-xl text-zinc-500 hover:text-orange-500 hover:border-orange-500/50 transition-all"
+                >
+                  <Upload size={20} />
+                  <span className="font-bold">Add New Chapter</span>
+                </Link>
+              )}
             </div>
           </div>
 
@@ -295,15 +297,19 @@ export default function Home() {
           <div className="space-y-2">
             <h2 className="text-xl font-bold">Your Library is Empty</h2>
             <p className="text-zinc-500 max-w-[240px] mx-auto">
-              Import your first Bible chapter to begin.
+              {isAdmin 
+                ? "Import your first Bible chapter to begin." 
+                : "Waiting for group administrator to add chapters."}
             </p>
           </div>
-          <Link
-            href="/import"
-            className="px-8 py-4 bg-orange-500 text-white font-bold rounded-xl shadow-lg shadow-orange-500/20 active:scale-95 transition-transform"
-          >
-            Import Chapter
-          </Link>
+          {isAdmin && (
+            <Link
+              href="/import"
+              className="px-8 py-4 bg-orange-500 text-white font-bold rounded-xl shadow-lg shadow-orange-500/20 active:scale-95 transition-transform"
+            >
+              Import Chapter
+            </Link>
+          )}
         </div>
       )}
     </div>
