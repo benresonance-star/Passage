@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useBCM } from "@/context/BCMContext";
-import { parseChapter, chunkVerses } from "@/lib/parser";
+import { parseChapter, chunkVerses, getChapterSlug } from "@/lib/parser";
 import { SM2Card, Chapter } from "@/types";
 import { ArrowLeft, Save, AlertTriangle, Check } from "lucide-react";
 import Link from "next/link";
