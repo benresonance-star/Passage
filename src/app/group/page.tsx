@@ -249,15 +249,15 @@ export default function GroupPage() {
 
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <label className="text-xs font-bold uppercase tracking-widest text-zinc-500 ml-1 text-center block">6-Digit Code</label>
+                  <label className="text-xs font-bold uppercase tracking-widest text-zinc-500 ml-1 text-center block">Verification Code</label>
                   <input 
                     type="text"
                     required
-                    maxLength={6}
+                    maxLength={8}
                     value={otp}
                     onChange={(e) => setOtp(e.target.value)}
-                    className="w-full bg-black border border-zinc-800 rounded-2xl py-4 text-center text-2xl font-bold tracking-[0.5em] text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50 transition-all"
-                    placeholder="000000"
+                    className="w-full bg-black border border-zinc-800 rounded-2xl py-4 text-center text-2xl font-bold tracking-[0.3em] text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50 transition-all"
+                    placeholder="00000000"
                   />
                 </div>
                 {error && <p className="text-red-500 text-xs text-center">{error}</p>}

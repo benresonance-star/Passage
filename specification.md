@@ -42,7 +42,7 @@ interface BCMState {
 ## 4. Key Features & Learning Modes
 
 ### A. Passage v2.0 Social
-- **OTP & Magic Link Login**: Passwordless email authentication for frictionless iPhone onboarding. Supports both direct Magic Link clicks and 6-digit OTP verification for PWA persistence.
+- **OTP & Magic Link Login**: Passwordless email authentication for frictionless iPhone onboarding. Supports both direct Magic Link clicks and 8-digit OTP verification for PWA persistence.
 - **URL Sanitizer**: Automatically wipes access tokens from the browser hash (`#access_token=...`) upon successful login to prevent session conflicts and allow clean navigation.
 - **Study Groups**: Users can create or join groups using a unique Group ID.
 - **Robust Group Lifecycle**: Explicit membership filtering and instant UI refresh logic ensuring group context is preserved and accurately displayed across all screens.
