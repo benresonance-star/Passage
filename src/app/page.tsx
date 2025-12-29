@@ -52,8 +52,9 @@ export default function Home() {
         const { data } = await supabase
           .from('group_members')
           .select('group_id')
+          .eq('user_id', user.id)
           .limit(1)
-          .single();
+          .maybeSingle();
         if (data) setGroupId(data.group_id);
       };
       fetchGroup();
