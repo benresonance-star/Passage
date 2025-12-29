@@ -79,11 +79,11 @@ export function TeamBoard({ groupId, chapterTitle, totalChunks }: { groupId: str
         schema: 'public', 
         table: 'shared_progress',
         filter: `group_id=eq.${groupId}`
-      }, (payload) => {
+      }, (payload: any) => {
         console.log("Realtime update received:", payload);
         fetchProgress();
       })
-      .subscribe((status) => {
+      .subscribe((status: any) => {
         console.log("Realtime subscription status:", status);
       });
 
