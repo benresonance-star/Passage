@@ -35,9 +35,10 @@ export function hideWords(text: string, percentage: number, chunkId: string): st
 
   return words.map((w, i) => {
     if (hiddenIndices.has(i)) {
-      return "_".repeat(Math.max(3, w.length));
+      return "_".repeat(w.length);
     }
     return w;
   }).join("");
 }
+
 
