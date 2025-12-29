@@ -2,7 +2,7 @@
 
 import { useBCM } from "@/context/BCMContext";
 import { useRouter } from "next/navigation";
-import { Play, Mic, Calendar, Clock, AlertTriangle, Award } from "lucide-react";
+import { Play, Mic, Award } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/lib/supabase";
 
@@ -16,8 +16,6 @@ export default function ReviewPage() {
 
   if (!isHydrated || !chapter || !chapterId) return null;
 
-  const now = new Date();
-  
   const allChunks = chapter.chunks.map(chunk => ({
     chunk,
     card: state.cards[chapterId]?.[chunk.id]
@@ -88,8 +86,6 @@ export default function ReviewPage() {
       <div className="space-y-4">
         {allChunks.map(({ chunk, card }) => {
           const isMemorised = card?.isMemorised;
-          const isHard = card?.hardUntilAt && new Date(card.hardUntilAt) > now;
-          const isDue = !isMemorised && new Date(card?.nextDueAt || 0) <= now;
           const isActive = chunk.id === effectiveActiveChunkId;
           
           return (
@@ -119,18 +115,6 @@ export default function ReviewPage() {
                     }`}>
                       Verse {chunk.verseRange}
                     </span>
-                    {isHard && !isMemorised && (
-                      <span className="flex items-center gap-1 px-2 py-0.5 bg-red-500/10 text-red-500 text-[10px] font-bold uppercase rounded-full border border-red-500/20">
-                        <AlertTriangle size={10} />
-                        Hard
-                      </span>
-                    )}
-                    {isDue && (
-                      <span className="flex items-center gap-1 px-2 py-0.5 bg-orange-500/10 text-orange-500 text-[10px] font-bold uppercase rounded-full border border-orange-500/20">
-                        <Clock size={10} />
-                        Due
-                      </span>
-                    )}
                   </div>
                   <p className={`text-sm mt-2 leading-relaxed line-clamp-2 transition-colors ${
                     isMemorised ? "text-amber-200/40" : "text-zinc-300"
