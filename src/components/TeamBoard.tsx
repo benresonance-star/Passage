@@ -4,6 +4,9 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { Users, Loader2, RefreshCw } from "lucide-react";
 
+import { useAuth } from "@/context/AuthContext";
+import { useBCM } from "@/context/BCMContext";
+
 interface MemberProgress {
   user_id: string;
   display_name: string;
@@ -13,6 +16,8 @@ interface MemberProgress {
 }
 
 export function TeamBoard({ groupId, groupName, chapterTitle, totalChunks }: { groupId: string, groupName: string, chapterTitle: string, totalChunks: number }) {
+  const { user } = useAuth();
+  const { state } = useBCM();
   const [members, setMembers] = useState<MemberProgress[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshCount, setRefreshCount] = useState(0);
@@ -51,7 +56,14 @@ export function TeamBoard({ groupId, groupName, chapterTitle, totalChunks }: { g
         if (pError) throw pError;
 
         const memberList: MemberProgress[] = membersData.map((m: any) => {
-          const userProgress = (progressData as any[])?.filter((p: any) => p.user_id === m.user_id).length || 0;
+          let userProgress = (progressData as any[])?.filter((p: any) => p.user_id === m.user_id).length || 0;
+          
+          // Override with local state for current user to avoid sync lag
+          if (user && m.user_id === user.id && state.selectedChapterId) {
+            const localCards = state.cards[state.selectedChapterId] || {};
+            userProgress = Object.values(localCards).filter(c => c.isMemorised).length;
+          }
+
           return {
             user_id: m.user_id,
             display_name: (m.profiles as any)?.display_name || "Student",

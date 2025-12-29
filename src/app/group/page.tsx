@@ -18,16 +18,17 @@ export default function GroupPage() {
   const [profile, setProfile] = useState<any>(null);
   const [group, setGroup] = useState<any>(null);
   const [members, setMembers] = useState<any[]>([]);
+  const [memberProgress, setMemberProgress] = useState<Record<string, number>>({});
   const [copied, setCopied] = useState(false);
   const [joinGroupId, setJoinGroupId] = useState("");
   const [isEditingName, setIsEditingName] = useState(false);
   const [newName, setNewName] = useState("");
 
   useEffect(() => {
-    if (user) {
+    if (user && state.selectedChapterId) {
       fetchProfileAndGroup();
     }
-  }, [user]);
+  }, [user, state.selectedChapterId]);
 
   const fetchProfileAndGroup = async () => {
     // Fetch Profile
@@ -60,6 +61,25 @@ export default function GroupPage() {
       
       if (groupMembers) {
         setMembers(groupMembers);
+
+        // Fetch progress for all members if a chapter is selected
+        if (state.selectedChapterId) {
+          const chapter = state.chapters[state.selectedChapterId];
+          const { data: progress } = await supabase
+            .from('shared_progress')
+            .select('user_id, is_memorised')
+            .eq('group_id', memberData.group_id)
+            .eq('chapter_title', chapter.title)
+            .eq('is_memorised', true);
+          
+          if (progress) {
+            const counts: Record<string, number> = {};
+            progress.forEach((p: any) => {
+              counts[p.user_id] = (counts[p.user_id] || 0) + 1;
+            });
+            setMemberProgress(counts);
+          }
+        }
       }
     }
   };
@@ -377,7 +397,20 @@ export default function GroupPage() {
                               {m.profiles.display_name || "Student"}
                               {m.user_id === user.id && <span className="text-orange-500 ml-2 text-[10px] uppercase font-bold">(You)</span>}
                             </p>
-                            <p className="text-[10px] text-zinc-500">{m.profiles.email}</p>
+                            <div className="flex items-center gap-2">
+                              <p className="text-[10px] text-zinc-500">{m.profiles.email}</p>
+                              {state.selectedChapterId && (
+                                <>
+                                  <span className="text-zinc-700 text-[10px]">•</span>
+                                  <p className="text-[10px] text-orange-500/80 font-bold uppercase tracking-tight">
+                                    {(user && m.user_id === user.id) 
+                                      ? Object.values(state.cards[state.selectedChapterId] || {}).filter(c => c.isMemorised).length 
+                                      : (memberProgress[m.user_id] || 0)
+                                    } / {state.chapters[state.selectedChapterId].chunks.length} Chunks
+                                  </p>
+                                </>
+                              )}
+                            </div>
                           </div>
                         </div>
                         {m.role === 'admin' && (

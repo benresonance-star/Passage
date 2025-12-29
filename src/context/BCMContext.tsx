@@ -10,6 +10,7 @@ interface BCMContextType {
   state: BCMState;
   setState: React.Dispatch<React.SetStateAction<BCMState>>;
   isHydrated: boolean;
+  userGroupId: string | null;
   syncProgress: (chapterTitle: string, chunkId: string, isMemorised: boolean) => Promise<void>;
   syncAllMemorised: () => Promise<void>;
 }
@@ -19,29 +20,52 @@ const BCMContext = createContext<BCMContextType | undefined>(undefined);
 export function BCMProvider({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<BCMState>(INITIAL_STATE);
   const [isHydrated, setIsHydrated] = useState(false);
+  const [userGroupId, setUserGroupId] = useState<string | null>(null);
   const { user } = useAuth();
+
+  // Load group ID if logged in
+  useEffect(() => {
+    if (user && supabase) {
+      const fetchGroupId = async () => {
+        const { data } = await supabase
+          .from('group_members')
+          .select('group_id')
+          .eq('user_id', user.id)
+          .maybeSingle();
+        if (data) setUserGroupId(data.group_id);
+      };
+      fetchGroupId();
+    } else {
+      setUserGroupId(null);
+    }
+  }, [user]);
 
   const syncProgress = async (chapterTitle: string, chunkId: string, isMemorised: boolean) => {
     if (!user || !supabase) return;
 
     try {
-      const { data: memberData } = await supabase
-        .from('group_members')
-        .select('group_id')
-        .eq('user_id', user.id);
+      let gid = userGroupId;
+      if (!gid) {
+        const { data } = await supabase
+          .from('group_members')
+          .select('group_id')
+          .eq('user_id', user.id)
+          .maybeSingle();
+        if (data) {
+          gid = data.group_id;
+          setUserGroupId(gid);
+        }
+      }
 
-      if (memberData && memberData.length > 0) {
-        const syncs = memberData.map((member: any) => 
-          supabase.from('shared_progress').upsert({
-            group_id: member.group_id,
-            user_id: user.id,
-            chapter_title: chapterTitle,
-            chunk_id: chunkId,
-            is_memorised: isMemorised,
-            updated_at: new Date().toISOString()
-          }, { onConflict: 'group_id,user_id,chapter_title,chunk_id' })
-        );
-        await Promise.all(syncs);
+      if (gid) {
+        await supabase.from('shared_progress').upsert({
+          group_id: gid,
+          user_id: user.id,
+          chapter_title: chapterTitle,
+          chunk_id: chunkId,
+          is_memorised: isMemorised,
+          updated_at: new Date().toISOString()
+        }, { onConflict: 'group_id,user_id,chapter_title,chunk_id' });
       }
     } catch (err) {
       console.error("Sync error:", err);
@@ -136,7 +160,7 @@ export function BCMProvider({ children }: { children: React.ReactNode }) {
   }, [state, isHydrated, user]);
 
   return (
-    <BCMContext.Provider value={{ state, setState, isHydrated, syncProgress, syncAllMemorised }}>
+    <BCMContext.Provider value={{ state, setState, isHydrated, userGroupId, syncProgress, syncAllMemorised }}>
       {children}
     </BCMContext.Provider>
   );
