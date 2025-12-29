@@ -41,4 +41,18 @@ export function hideWords(text: string, percentage: number, chunkId: string): st
   }).join("");
 }
 
+export function generateMnemonic(text: string): string {
+  const words = text.split(/(\s+)/);
+  
+  return words.map((w) => {
+    if (/\w+/.test(w)) {
+      // Keep first character, underscore the rest
+      const firstChar = w.charAt(0);
+      const rest = "_".repeat(w.length - 1);
+      return firstChar + rest;
+    }
+    return w;
+  }).join("");
+}
+
 

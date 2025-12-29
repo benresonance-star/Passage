@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useBCM } from "@/context/BCMContext";
 import { useRouter } from "next/navigation";
-import { hideWords } from "@/lib/cloze";
+import { hideWords, generateMnemonic } from "@/lib/cloze";
 import { calculateDiff, DiffResult } from "@/lib/diff";
 import { updateCard } from "@/lib/scheduler";
 import { useWakeLock } from "@/hooks/useWakeLock";
@@ -175,9 +175,11 @@ export default function PracticePage() {
         {mode === "cloze" && activeChunk && (
           <div className="space-y-8 animate-in fade-in duration-500">
             <p className="chunk-text-bold text-center leading-relaxed font-mono tracking-tight">
-              {hideWords(activeChunk.text, state.settings.clozeLevel, activeChunk.id)}
+              {state.settings.clozeLevel === "mnemonic" 
+                ? generateMnemonic(activeChunk.text)
+                : hideWords(activeChunk.text, state.settings.clozeLevel as number, activeChunk.id)}
             </p>
-            <div className="flex justify-center gap-2">
+            <div className="flex justify-center gap-2 flex-wrap px-4">
               {[0, 20, 40, 60, 80].map((level) => (
                 <button
                   key={level}
@@ -191,6 +193,16 @@ export default function PracticePage() {
                   {level}%
                 </button>
               ))}
+              <button
+                onClick={() => setState(p => ({ ...p, settings: { ...p.settings, clozeLevel: "mnemonic" } }))}
+                className={`px-3 py-1 rounded-full text-xs font-bold transition-colors uppercase tracking-widest ${
+                  state.settings.clozeLevel === "mnemonic" 
+                    ? "bg-amber-500 text-black" 
+                    : "bg-zinc-900 text-zinc-500 border border-zinc-800"
+                }`}
+              >
+                Abc
+              </button>
             </div>
           </div>
         )}
