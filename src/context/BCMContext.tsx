@@ -52,8 +52,31 @@ export function BCMProvider({ children }: { children: React.ReactNode }) {
             schema: 'public', 
             table: 'user_cards',
             filter: `user_id=eq.${user.id}`
-          }, () => {
-            pullVault(); // Re-sync when cards change on another device
+          }, (payload: any) => {
+            if (payload.new && payload.new.data) {
+              const updatedCard = payload.new.data;
+              const chapterId = payload.new.chapter_id;
+              const chunkId = payload.new.chunk_id;
+              const cloudUpdatedAt = new Date(payload.new.updated_at).getTime();
+              const lastLocal = lastUpdateRef.current[`card_${chunkId}`] || 0;
+
+              // Authoritative Mirroring: Cloud wins if it's newer than our last action on this chunk
+              if (cloudUpdatedAt > lastLocal) {
+                setState(prev => {
+                  if (JSON.stringify(prev.cards[chapterId]?.[chunkId]) === JSON.stringify(updatedCard)) return prev;
+                  return {
+                    ...prev,
+                    cards: {
+                      ...prev.cards,
+                      [chapterId]: {
+                        ...(prev.cards[chapterId] || {}),
+                        [chunkId]: updatedCard
+                      }
+                    }
+                  };
+                });
+              }
+            }
           })
           .subscribe();
 
@@ -64,8 +87,18 @@ export function BCMProvider({ children }: { children: React.ReactNode }) {
             schema: 'public', 
             table: 'user_chapters',
             filter: `user_id=eq.${user.id}`
-          }, () => {
-            pullVault(); // Re-sync when library changes on another device
+          }, (payload: any) => {
+            if (payload.new && payload.new.data) {
+              const updatedChapter = payload.new.data;
+              const chapterId = payload.new.chapter_id;
+              setState(prev => ({
+                ...prev,
+                chapters: {
+                  ...prev.chapters,
+                  [chapterId]: updatedChapter
+                }
+              }));
+            }
           })
           .subscribe();
       };
@@ -115,13 +148,18 @@ export function BCMProvider({ children }: { children: React.ReactNode }) {
       // 2. Sync to Personal Vault
       const chapterId = Object.entries(state.chapters).find(([_, ch]) => ch.title === chapterTitle)?.[0];
       if (chapterId) {
-        await supabase.from('user_cards').upsert({
+        const { data: cardData, error: cardError } = await supabase.from('user_cards').upsert({
           user_id: user.id,
           chapter_id: chapterId,
           chunk_id: chunkId,
           data: card,
           updated_at: new Date().toISOString()
-        }, { onConflict: 'user_id,chapter_id,chunk_id' });
+        }, { onConflict: 'user_id,chapter_id,chunk_id' }).select('updated_at').single();
+
+        if (cardData) {
+          // Align local sync time with exact cloud timestamp
+          lastUpdateRef.current[`card_${chunkId}`] = new Date(cardData.updated_at).getTime();
+        }
 
         // Also sync stats
         const stats = state.stats[chapterId];
@@ -179,10 +217,12 @@ export function BCMProvider({ children }: { children: React.ReactNode }) {
           const lastLocal = lastUpdateRef.current[`card_${row.chunk_id}`] || 0;
           const cloudTime = new Date(row.updated_at).getTime();
           
-          // Only merge if cloud data is newer than our last local update (+ small buffer)
-          if (cloudTime > lastLocal + 2000) {
+          // Authoritative Merge: Cloud wins if it's newer than our last action
+          if (cloudTime > lastLocal) {
             if (!newState.cards[row.chapter_id]) newState.cards[row.chapter_id] = {};
             newState.cards[row.chapter_id][row.chunk_id] = row.data;
+            // Align local sync time with cloud
+            lastUpdateRef.current[`card_${row.chunk_id}`] = cloudTime;
           }
         });
 
