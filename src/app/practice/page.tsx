@@ -166,28 +166,30 @@ export default function PracticePage() {
       <div className="flex-1 flex flex-col justify-center py-4">
         {mode === "read" && activeChunk && (
           <div className="animate-in fade-in duration-500">
-            {isFlowMode ? (
-              <FlowReader text={activeChunk.text} />
-            ) : (
-              <div className="space-y-6">
-                <div className="chunk-text-bold text-center leading-relaxed px-4">
-                  {activeChunk.verses.map((v, idx) => (
-                    <div key={idx} className={v.type === "heading" ? "w-full" : "inline"}>
-                      {v.type === "heading" ? (
-                        state.settings.showHeadings && (
-                          <div className="text-zinc-500 text-[11px] font-bold uppercase tracking-[0.2em] mb-4 mt-2">
-                            {v.text}
-                          </div>
-                        )
-                      ) : (
-                        <span>{v.text} </span>
-                      )}
-                    </div>
-                  ))}
-                </div>
-                <p className="text-center text-zinc-500 text-sm italic">Read the text carefully.</p>
-              </div>
-            )}
+            <div className="space-y-6">
+              {isFlowMode ? (
+                <FlowReader text={activeChunk.text} />
+              ) : (
+                <>
+                  <div className="chunk-text-bold text-center leading-relaxed px-4">
+                    {activeChunk.verses.map((v, idx) => (
+                      <div key={idx} className={v.type === "heading" ? "w-full" : "inline"}>
+                        {v.type === "heading" ? (
+                          state.settings.showHeadings && (
+                            <div className="text-zinc-500 text-[11px] font-bold uppercase tracking-[0.2em] mb-4 mt-2">
+                              {v.text}
+                            </div>
+                          )
+                        ) : (
+                          <span>{v.text} </span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                  <p className="text-center text-zinc-500 text-sm italic">Read the text carefully.</p>
+                </>
+              )}
+            </div>
           </div>
         )}
 
