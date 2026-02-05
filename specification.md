@@ -1,4 +1,4 @@
-# Passage - Bible Chapter Memoriser (v2.0.0)
+# Passage - Bible Chapter Memoriser (v2.1.0)
 
 ## 🤖 AI Agent Protocol (Mandatory)
 Before performing any actions in this codebase, all AI agents must:
@@ -11,18 +11,31 @@ Before performing any actions in this codebase, all AI agents must:
 ---
 
 ## 1. Core Goal
-Implement a fast, offline-capable iPhone-first PWA for memorising Bible chapters through chunked practice, recall modes, and shared community progress tracking.
+Implement a fast, offline-capable iPhone-first PWA for memorising Bible chapters through chunked practice, recall modes, and shared community progress tracking with perfect cross-device synchronisation.
 
 ## 2. Technical Stack
 - **Framework**: Next.js (App Router) + TypeScript
 - **Styling**: TailwindCSS with Dynamic Theme Engine (OLED Dark, Sepia, Midnight)
-- **State**: Single `localStorage` key (`bcm_v1_state`) + **Supabase Cloud Sync**
-- **Auth**: Passwordless Magic Link Authentication via Supabase
+- **State**: Single `localStorage` key (`bcm_v1_state`) + **Supabase Personal Vault Sync**
+- **Auth**: Passwordless 8-digit OTP & Magic Link Authentication via Supabase
 - **PWA**: `@ducanh2912/next-pwa` with manifest and service worker
 - **Icons**: Lucide React + Custom Orange Branding
 
-## 3. Data Schema (Cloud Model)
-The app utilizes a hybrid Local/Cloud state.
+## 3. Data Schema & Synchronization
+The app utilizes an authoritative hybrid state where Supabase acts as the permanent source of truth for cross-device mirroring.
+
+### A. Stable Identity System
+- **Deterministic IDs**: All content uses stable "Slugs" rather than random timestamps.
+    - **Chapter ID**: Generated from title (e.g., `romans-8`).
+    - **Chunk ID**: Generated from Chapter + Verse Range (e.g., `romans-8-v1-4`).
+- **Migration Engine**: Automatic background self-healing script ensures legacy data is re-keyed to stable IDs upon app launch.
+
+### B. Personal Vault (Private Sync)
+- **Tables**: `user_chapters` (full text), `user_cards` (SM2 history), `user_stats` (streaks).
+- **Authoritative Mirroring**: Multi-device sync uses `updated_at` timestamps. The cloud version wins only if it is newer than the last local action on a specific chunk, preventing "echo" overwrites.
+- **Atomic Realtime**: Devices subscribe to private Postgres channels to catch and apply specific data packets (individual card updates) instantly without full-page refreshes.
+
+### C. Local State Model
 ```typescript
 interface BCMState {
   chapters: Record<string, Chapter>;
@@ -34,46 +47,37 @@ interface BCMState {
     showHeadings: boolean;
     showMemorised: boolean;
     activeChunkId: Record<string, string | null>;
-    theme: { bg: string; text: string; }; // Persistent custom styling
+    theme: { bg: string; text: string; };
   };
 }
 ```
 
-## 4. Key Features & Learning Modes
+## 4. Key Features & Social Logic
 
-### A. Passage v2.0 Social
-- **OTP & Magic Link Login**: Passwordless email authentication for frictionless iPhone onboarding. Supports both direct Magic Link clicks and 8-digit OTP verification for PWA persistence.
-- **URL Sanitizer**: Automatically wipes access tokens from the browser hash (`#access_token=...`) upon successful login to prevent session conflicts and allow clean navigation.
-- **Study Groups**: Users can create or join groups using a unique Group ID.
-- **Robust Group Lifecycle**: Explicit membership filtering and instant UI refresh logic ensuring group context is preserved and accurately displayed across all screens.
-- **Team Progress Board**: Real-time leaderboard on the home screen showing group members' chunk progress and mastery percentages via Supabase Realtime subscriptions.
-- **Member Management**: Study group members can set custom **Display Names** and view a full directory of the group, including the Admin and member status.
-- **Cloud Sync**: Personal themes, profile settings, and "Memorised" progress are automatically backed up to Supabase.
-- **Error Feedback**: Comprehensive success/error alerts for all cloud operations (Auth, Group Management, Sync).
+### A. Social & Group Management
+- **OTP Login**: 8-digit verification codes sent via email allow users to log in directly within the PWA sandbox without leaving the app.
+- **Admin-Only Controls**:
+    - Only Group Admins can **Add New Chapters** or **Delete Chapters** from the library.
+    - Admins can **Remove Members** from the study group directory.
+- **Team Progress Board**: Positioned prominently on the home screen (above Library). Shows the actual group name and real-time chunk progress (e.g., `1 / 15 Chunks`) for every member.
+- **Zero-Lag UI**: The current user's progress always prioritizes local state to ensure instant visual feedback while cloud sync happens in the background.
 
 ### B. Learning Loop
 - **Practice Mode**:
-    - **Read**: Full text visible.
-    - **Cloze**: Seeded, deterministic word hiding (0%, 20%, 40%, 60%, 80%).
-    - **Mnemonic**: First-letter scaffolding mode (Abc) to bridge the gap between Cloze and full Type recall.
-    - **Type**: Textarea recall with word-level diffing and accuracy percentage.
-- **Recite Mode**:
-    - Tap-to-reveal line pills with a "Master Toggle" eye icon for quick reveal/hide.
-    - Self-grading via SM-2 algorithm.
-
-### C. Appearance & Customization
-- **Theme Engine**: Users can override background and text colors.
-- **Smart Contrast**: UI elements (borders, subtext, inputs) automatically adjust their brightness based on the selected background color.
-- **Branding**: Balanced home screen header with a `52px` `BookOpen` icon aligned to title text.
+    - **Read**: Full text.
+    - **Cloze**: Seeded, deterministic word hiding (0-80%).
+    - **Mnemonic**: First-letter scaffolding (Abc).
+    - **Type**: Recall with accuracy diffing.
+- **Recite Mode**: Tap-to-reveal line pills with self-grading via SM-2.
+- **Chapter Mastery**: Simplified review interface focusing on verse text and memorisation status. All "Due" or "Hard" icons have been removed for a cleaner experience.
 
 ## 5. UI/UX Refinements
 - **iPhone-First**: Optimized for notch, safe areas, and one-thumb navigation.
-- **Smart Continue**: Automatically jumps to the first unmemorised chunk when entering practice.
-- **Persistence**: Wake-lock API used to prevent screen dimming during study sessions.
+- **Layout Priority**: Active Chapter → Team Progress → Library → Navigation.
+- **Persistence**: Wake-lock API prevents screen dimming; 8-digit OTP ensures session persistence in PWA standalone mode.
 
 ## 6. Deployment & DevOps
-- **Git/GitHub**: Hosted at `benresonance-star/Passage.git`. 
-- **CI/CD**: Vercel for automated builds.
-- **Backend**: Supabase handles Auth, Postgres Database, and Realtime progress subscriptions.
-- **Build Safety**: Supabase client initialization is guarded to return `null` during server-side prerendering, preventing "URL required" build errors.
-- **Environment**: Keys (`NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`) must be configured in Vercel.
+- **Backend**: Supabase handles Auth, Postgres Database, and Realtime Vault subscriptions.
+- **Realtime Publication**: `supabase_realtime` includes `shared_progress`, `user_chapters`, `user_cards`, and `user_stats`.
+- **Environment**: Keys (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`) are managed in Vercel.
+- **CI/CD**: Automatic deployments from `main` branch via Vercel (limited by daily build quotas).

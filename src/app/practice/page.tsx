@@ -8,7 +8,8 @@ import { calculateDiff, DiffResult } from "@/lib/diff";
 import { updateCard } from "@/lib/scheduler";
 import { useWakeLock } from "@/hooks/useWakeLock";
 import { useAuth } from "@/context/AuthContext";
-import { ArrowLeft, RefreshCw, CheckCircle2, AlertCircle } from "lucide-react";
+import FlowReader from "@/components/FlowReader";
+import { ArrowLeft, RefreshCw, CheckCircle2, AlertCircle, Zap } from "lucide-react";
 
 type PracticeMode = "read" | "cloze" | "type" | "result";
 
@@ -17,6 +18,7 @@ export default function PracticePage() {
   const { user } = useAuth();
   const router = useRouter();
   const [mode, setMode] = useState<PracticeMode>("read");
+  const [isFlowMode, setIsFlowMode] = useState(false);
   const [typedText, setTypedText] = useState("");
   const [diffResults, setDiffResults] = useState<{ results: DiffResult[]; accuracy: number } | null>(null);
 
@@ -134,6 +136,10 @@ export default function PracticePage() {
   };
 
   const handleBack = () => {
+    if (isFlowMode) {
+      setIsFlowMode(false);
+      return;
+    }
     if (mode === "cloze") setMode("read");
     else if (mode === "type") setMode("cloze");
     else if (mode === "result") setMode("type");
@@ -157,25 +163,31 @@ export default function PracticePage() {
         <div className="w-10" />
       </header>
 
-      <div className="flex-1 flex flex-col justify-center py-8">
+      <div className="flex-1 flex flex-col justify-center py-4">
         {mode === "read" && activeChunk && (
-          <div className="space-y-8 animate-in fade-in duration-500">
-            <div className="chunk-text-bold text-center leading-relaxed">
-              {activeChunk.verses.map((v, idx) => (
-                <div key={idx} className={v.type === "heading" ? "w-full" : "inline"}>
-                  {v.type === "heading" ? (
-                    state.settings.showHeadings && (
-                      <div className="text-zinc-500 text-[11px] font-bold uppercase tracking-[0.2em] mb-4 mt-2">
-                        {v.text}
-                      </div>
-                    )
-                  ) : (
-                    <span>{v.text} </span>
-                  )}
+          <div className="space-y-6 animate-in fade-in duration-500">
+            {isFlowMode ? (
+              <FlowReader text={activeChunk.text} />
+            ) : (
+              <>
+                <div className="chunk-text-bold text-center leading-relaxed px-4">
+                  {activeChunk.verses.map((v, idx) => (
+                    <div key={idx} className={v.type === "heading" ? "w-full" : "inline"}>
+                      {v.type === "heading" ? (
+                        state.settings.showHeadings && (
+                          <div className="text-zinc-500 text-[11px] font-bold uppercase tracking-[0.2em] mb-4 mt-2">
+                            {v.text}
+                          </div>
+                        )
+                      ) : (
+                        <span>{v.text} </span>
+                      )}
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-            <p className="text-center text-zinc-500 text-sm italic">Read the text carefully.</p>
+                <p className="text-center text-zinc-500 text-sm italic">Read the text carefully.</p>
+              </>
+            )}
           </div>
         )}
 
@@ -272,7 +284,17 @@ export default function PracticePage() {
         )}
       </div>
 
-      <div className="py-8">
+      <div className="py-8 space-y-4">
+        {mode === "read" && !isFlowMode && (
+          <button
+            onClick={() => setIsFlowMode(true)}
+            className="w-full py-3 bg-zinc-900 border border-zinc-800 text-zinc-400 font-bold rounded-2xl flex items-center justify-center gap-2 hover:text-orange-500 transition-all uppercase tracking-widest text-xs"
+          >
+            <Zap size={16} className="fill-current" />
+            Start Flow Mode
+          </button>
+        )}
+
         {mode !== "result" && (
           <button
             onClick={handleNextMode}
