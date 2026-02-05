@@ -51,7 +51,7 @@ export default function FlowReader({ text, onComplete }: FlowReaderProps) {
       {/* Word Display Area - Matches Practice Mode Exactly */}
       <div 
         ref={containerRef}
-        className="relative min-h-[200px] p-6 bg-zinc-900/30 rounded-3xl border border-zinc-800/50 overflow-hidden"
+        className="relative min-h-[200px] px-4 overflow-hidden"
       >
         {/* Base Layer: Dimmed Text */}
         <div className="chunk-text-bold text-center leading-relaxed text-zinc-800 select-none">
@@ -71,7 +71,7 @@ export default function FlowReader({ text, onComplete }: FlowReaderProps) {
 
         {/* Highlight Layer: Flowing Gradient Mask */}
         <motion.div 
-          className="absolute inset-0 p-6 chunk-text-bold text-center leading-relaxed pointer-events-none select-none text-orange-500"
+          className="absolute inset-0 px-4 chunk-text-bold text-center leading-relaxed pointer-events-none select-none text-orange-500"
           aria-hidden="true"
           animate={{
             WebkitMaskImage: `linear-gradient(to bottom, 
