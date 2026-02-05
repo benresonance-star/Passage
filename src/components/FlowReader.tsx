@@ -62,16 +62,15 @@ export default function FlowReader({ text, onComplete }: FlowReaderProps) {
               initial={false}
               animate={{
                 opacity: isActive ? 1 : isPast ? 0.4 : 0.2,
-                scale: isActive ? 1.1 : 1,
+                scale: isActive ? 1.05 : 1,
                 color: isActive ? "#f97316" : "#71717a", // orange-500 or zinc-400
-                filter: isActive ? "blur(0px)" : "blur(0.5px)",
               }}
               transition={{
-                duration: 0.3,
-                ease: "easeInOut"
+                duration: 0.2,
+                ease: "easeOut"
               }}
               onClick={() => handleWordClick(index)}
-              className={`text-2xl font-bold cursor-pointer transition-all ${
+              className={`text-2xl font-bold cursor-pointer transition-all will-change-transform will-change-opacity ${
                 isActive ? "z-10" : "z-0"
               }`}
             >
