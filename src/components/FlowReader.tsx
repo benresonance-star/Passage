@@ -51,7 +51,7 @@ export default function FlowReader({ text, onComplete }: FlowReaderProps) {
       {/* Word Display Area - Matches Practice Mode Exactly */}
       <div 
         ref={containerRef}
-        className="relative min-h-[200px] px-4 overflow-hidden"
+        className="relative px-4 overflow-hidden"
       >
         {/* Base Layer: Dimmed Text */}
         <div className="chunk-text-bold text-center leading-relaxed text-zinc-800 select-none">
@@ -88,9 +88,7 @@ export default function FlowReader({ text, onComplete }: FlowReaderProps) {
           }}
           style={{
             WebkitMaskSize: "100% 100%",
-            WebkitMaskRepeat: "no-repeat",
-            paddingTop: "inherit",
-            paddingBottom: "inherit"
+            WebkitMaskRepeat: "no-repeat"
           }}
         >
           {words.map((word, index) => (
@@ -102,7 +100,7 @@ export default function FlowReader({ text, onComplete }: FlowReaderProps) {
       </div>
 
       {/* Controls */}
-      <div className="flex flex-col gap-6 items-center bg-zinc-900/50 p-6 rounded-3xl border border-zinc-800">
+      <div className="flex flex-col gap-6 items-center bg-zinc-900/50 p-6 rounded-3xl border border-zinc-800 shadow-xl">
         <div className="flex items-center gap-8">
           <button
             onClick={() => setCurrentIndex(Math.max(-1, currentIndex - 5))}
