@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { motion } from "framer-motion";
+import { motion, useAnimationControls } from "framer-motion";
 import { Play, Pause, FastForward, Rewind } from "lucide-react";
 
 interface FlowReaderProps {
@@ -43,6 +43,9 @@ export default function FlowReader({ text, onComplete }: FlowReaderProps) {
     setCurrentIndex(-1);
   };
 
+  // Calculate percentage progress for the gradient mask
+  const progress = words.length > 0 ? ((currentIndex + 1) / words.length) * 100 : 0;
+
   return (
     <div className="flex flex-col gap-8 w-full max-w-2xl mx-auto">
       {/* Word Display Area - Matches Practice Mode Exactly */}
@@ -66,28 +69,31 @@ export default function FlowReader({ text, onComplete }: FlowReaderProps) {
           ))}
         </div>
 
-        {/* Highlight Layer: Only the active word is opaque and orange */}
-        <div 
-          className="absolute inset-0 p-6 chunk-text-bold text-center leading-relaxed pointer-events-none select-none"
+        {/* Highlight Layer: Flowing Gradient Mask */}
+        <motion.div 
+          className="absolute inset-0 p-6 chunk-text-bold text-center leading-relaxed pointer-events-none select-none text-orange-500"
           aria-hidden="true"
+          animate={{
+            WebkitMaskImage: `linear-gradient(to bottom, 
+              rgba(0,0,0,1) ${progress - 15}%, 
+              rgba(0,0,0,1) ${progress}%, 
+              rgba(0,0,0,0) ${progress + 5}%)`
+          }}
+          transition={{
+            duration: (60 / wpm),
+            ease: "linear"
+          }}
+          style={{
+            WebkitMaskSize: "100% 100%",
+            WebkitMaskRepeat: "no-repeat"
+          }}
         >
           {words.map((word, index) => (
-            <motion.span
-              key={index}
-              initial={false}
-              animate={{
-                opacity: index === currentIndex ? 1 : 0,
-                color: index === currentIndex ? "#f97316" : "transparent",
-              }}
-              transition={{
-                duration: 0.15,
-                ease: "linear"
-              }}
-            >
+            <span key={index}>
               {word}{" "}
-            </motion.span>
+            </span>
           ))}
-        </div>
+        </motion.div>
       </div>
 
       {/* Controls */}
