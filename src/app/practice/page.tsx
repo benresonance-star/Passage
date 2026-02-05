@@ -167,7 +167,9 @@ export default function PracticePage() {
         {mode === "read" && activeChunk && (
           <div className="animate-in fade-in duration-500">
             {isFlowMode ? (
-              <FlowReader text={activeChunk.text} />
+              <div className="space-y-6">
+                <FlowReader text={activeChunk.text} />
+              </div>
             ) : (
               <div className="space-y-6">
                 <div className="chunk-text-bold text-center leading-relaxed px-4">
