@@ -70,7 +70,7 @@ export default function FlowReader({ text, onComplete }: FlowReaderProps) {
                 ease: "easeOut"
               }}
               onClick={() => handleWordClick(index)}
-              className={`text-2xl font-bold cursor-pointer transition-all will-change-transform will-change-opacity ${
+              className={`text-[20px] font-bold cursor-pointer transition-all will-change-transform will-change-opacity ${
                 isActive ? "z-10" : "z-0"
               }`}
             >
