@@ -242,7 +242,10 @@ export default function PracticePage() {
                       WebkitMaskRepeat: "no-repeat",
                       margin: 0,
                       paddingTop: 0,
-                      paddingBottom: 0
+                      paddingBottom: 0,
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center'
                     }}
                   >
                     {activeChunk.verses.map((v, idx) => (
