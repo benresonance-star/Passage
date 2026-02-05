@@ -262,9 +262,10 @@ export default function PracticePage() {
                 )}
               </div>
               
-              {!isFlowMode && (
-                <p className="text-center text-zinc-500 text-sm italic">Read the text carefully.</p>
-              )}
+              {/* This paragraph is the culprit! We must hide it without removing it from the layout */}
+              <p className={`text-center text-zinc-500 text-sm italic transition-opacity duration-500 ${isFlowMode ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+                Read the text carefully.
+              </p>
             </div>
           </div>
         )}
