@@ -26,7 +26,7 @@ export default function PracticePage() {
   // Flow State
   const [currentIndex, setCurrentIndex] = useState(-1);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [wpm, setWpm] = useState(120);
+  const [wpm, setWpm] = useState(150);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   useWakeLock();
@@ -174,7 +174,7 @@ export default function PracticePage() {
   const progress = words.length > 0 ? ((currentIndex + 1) / words.length) * 100 : 0;
 
   return (
-    <div className="flex flex-col min-h-[calc(100vh-8rem)]">
+    <div className="flex flex-col min-h-[calc(100vh-8rem)] relative">
       <header className="flex items-center justify-between py-4">
         <button onClick={handleBack} className="text-zinc-500 p-2 -ml-2">
           <ArrowLeft size={24} />
@@ -262,7 +262,6 @@ export default function PracticePage() {
                 )}
               </div>
               
-              {/* This paragraph is the culprit! We must hide it without removing it from the layout */}
               <p className={`text-center text-zinc-500 text-sm italic transition-opacity duration-500 ${isFlowMode ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
                 Read the text carefully.
               </p>
@@ -363,23 +362,25 @@ export default function PracticePage() {
         )}
       </div>
 
-      <div className="py-8 space-y-4">
-        {isFlowMode && mode === "read" && (
-          <div className="animate-in slide-in-from-bottom-4 duration-300">
-            <FlowControls 
-              isPlaying={isPlaying}
-              onTogglePlay={() => setIsPlaying(!isPlaying)}
-              wpm={wpm}
-              onWpmChange={setWpm}
-              onSkip={(dir) => setCurrentIndex(prev => dir === 'forward' ? Math.min(words.length - 1, prev + 5) : Math.max(-1, prev - 5))}
-              onReset={() => {
-                setIsPlaying(false);
-                setCurrentIndex(-1);
-              }}
-            />
-          </div>
-        )}
+      {/* Flow Controls - Fixed Position to avoid vertical jump */}
+      {isFlowMode && mode === "read" && (
+        <div className="fixed bottom-32 left-0 right-0 z-50 pointer-events-none">
+          <FlowControls 
+            isPlaying={isPlaying}
+            onTogglePlay={() => setIsPlaying(!isPlaying)}
+            wpm={wpm}
+            onWpmChange={setWpm}
+            onSkip={(dir) => setCurrentIndex(prev => dir === 'forward' ? Math.min(words.length - 1, prev + 5) : Math.max(-1, prev - 5))}
+            onClose={() => {
+              setIsFlowMode(false);
+              setIsPlaying(false);
+              setCurrentIndex(-1);
+            }}
+          />
+        </div>
+      )}
 
+      <div className="py-8 space-y-4">
         {mode === "read" && !isFlowMode && (
           <button
             onClick={() => setIsFlowMode(true)}

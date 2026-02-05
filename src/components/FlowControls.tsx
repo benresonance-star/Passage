@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { Play, Pause, FastForward, Rewind } from "lucide-react";
+import { Play, Pause, FastForward, Rewind, X, Plus, Minus } from "lucide-react";
 
 interface FlowControlsProps {
   isPlaying: boolean;
@@ -9,7 +8,7 @@ interface FlowControlsProps {
   wpm: number;
   onWpmChange: (val: number) => void;
   onSkip: (direction: 'forward' | 'backward') => void;
-  onReset: () => void;
+  onClose: () => void;
 }
 
 export default function FlowControls({ 
@@ -18,69 +17,68 @@ export default function FlowControls({
   wpm, 
   onWpmChange, 
   onSkip, 
-  onReset 
+  onClose 
 }: FlowControlsProps) {
+  const adjustWpm = (delta: number) => {
+    const newWpm = Math.min(200, Math.max(50, wpm + delta));
+    onWpmChange(newWpm);
+  };
+
   return (
-    <div className="flex flex-col gap-6 items-center bg-zinc-900/50 p-6 rounded-3xl border border-zinc-800 shadow-xl w-full max-w-md mx-auto">
-      <div className="flex items-center gap-8">
+    <div className="flex items-center justify-between bg-zinc-900/80 backdrop-blur-xl px-6 py-4 rounded-full border border-white/5 shadow-2xl w-[92%] max-w-md mx-auto pointer-events-auto transition-all animate-in slide-in-from-bottom-4">
+      {/* Exit Button */}
+      <button
+        onClick={onClose}
+        className="p-2 text-zinc-500 hover:text-white transition-colors"
+      >
+        <X size={20} />
+      </button>
+
+      {/* Playback Controls */}
+      <div className="flex items-center gap-4">
         <button
           onClick={() => onSkip('backward')}
-          className="p-3 text-zinc-400 hover:text-white transition-colors"
+          className="p-2 text-zinc-400 hover:text-white transition-colors"
         >
-          <Rewind size={24} />
+          <Rewind size={20} />
         </button>
 
         <button
           onClick={onTogglePlay}
-          className="w-16 h-16 flex items-center justify-center bg-orange-500 text-white rounded-full shadow-lg shadow-orange-500/20 active:scale-95 transition-all"
+          className="w-12 h-12 flex items-center justify-center bg-orange-500 text-white rounded-full shadow-lg shadow-orange-500/20 active:scale-95 transition-all"
         >
-          {isPlaying ? <Pause size={32} fill="currentColor" /> : <Play size={32} fill="currentColor" className="ml-1" />}
+          {isPlaying ? <Pause size={24} fill="currentColor" /> : <Play size={24} fill="currentColor" className="ml-1" />}
         </button>
 
         <button
           onClick={() => onSkip('forward')}
-          className="p-3 text-zinc-400 hover:text-white transition-colors"
+          className="p-2 text-zinc-400 hover:text-white transition-colors"
         >
-          <FastForward size={24} />
+          <FastForward size={20} />
         </button>
       </div>
 
-      <div className="w-full space-y-3">
-        <div className="flex justify-between text-[10px] font-bold uppercase tracking-widest text-zinc-500">
-          <span>Speed</span>
-          <span>{wpm} WPM</span>
+      {/* Speed Controls */}
+      <div className="flex items-center gap-3">
+        <button
+          onClick={() => adjustWpm(-50)}
+          className="p-1.5 text-zinc-500 hover:text-white transition-colors bg-zinc-800 rounded-lg"
+        >
+          <Minus size={14} />
+        </button>
+        
+        <div className="flex flex-col items-center min-w-[40px]">
+          <span className="text-[14px] font-bold text-white tabular-nums">{wpm}</span>
+          <span className="text-[8px] font-bold uppercase tracking-tighter text-zinc-500">WPM</span>
         </div>
-        <input
-          type="range"
-          min="60"
-          max="300"
-          step="10"
-          value={wpm}
-          onChange={(e) => onWpmChange(parseInt(e.target.value))}
-          className="w-full h-1.5 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-orange-500"
-        />
-        <div className="flex justify-between px-1">
-          {[60, 120, 180, 240, 300].map((speed) => (
-            <button
-              key={speed}
-              onClick={() => onWpmChange(speed)}
-              className={`text-[9px] font-bold px-2 py-1 rounded-md transition-colors ${
-                wpm === speed ? "bg-orange-500/20 text-orange-500" : "text-zinc-600 hover:text-zinc-400"
-              }`}
-            >
-              {speed === 60 ? "Slow" : speed === 180 ? "Fast" : speed === 300 ? "Turbo" : speed}
-            </button>
-          ))}
-        </div>
-      </div>
 
-      <button
-        onClick={onReset}
-        className="text-xs font-bold uppercase tracking-widest text-zinc-600 hover:text-zinc-400 transition-colors"
-      >
-        Reset Flow
-      </button>
+        <button
+          onClick={() => adjustWpm(50)}
+          className="p-1.5 text-zinc-500 hover:text-white transition-colors bg-zinc-800 rounded-lg"
+        >
+          <Plus size={14} />
+        </button>
+      </div>
     </div>
   );
 }
-
