@@ -215,7 +215,7 @@ export default function PracticePage() {
                 {/* Flow Highlight Layer (Only visible in Flow Mode) */}
                 {isFlowMode && (
                   <motion.div 
-                    className="absolute inset-0 px-4 chunk-text-bold text-center leading-relaxed pointer-events-none select-none text-orange-500"
+                    className="absolute top-0 left-0 w-full h-full px-4 chunk-text-bold text-center leading-relaxed pointer-events-none select-none text-orange-500"
                     aria-hidden="true"
                     animate={{
                       maskImage: `linear-gradient(to bottom, 
@@ -239,7 +239,10 @@ export default function PracticePage() {
                     }}
                     style={{
                       WebkitMaskSize: "100% 100%",
-                      WebkitMaskRepeat: "no-repeat"
+                      WebkitMaskRepeat: "no-repeat",
+                      margin: 0,
+                      paddingTop: 0,
+                      paddingBottom: 0
                     }}
                   >
                     {activeChunk.verses.map((v, idx) => (
