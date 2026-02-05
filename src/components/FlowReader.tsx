@@ -51,7 +51,7 @@ export default function FlowReader({ text, onComplete }: FlowReaderProps) {
       {/* Word Display Area - Matches Practice Mode Exactly */}
       <div 
         ref={containerRef}
-        className="relative px-4 overflow-hidden bg-transparent border-none shadow-none outline-none"
+        className="relative px-4 overflow-hidden"
       >
         {/* Base Layer: Dimmed Text */}
         <div className="chunk-text-bold text-center leading-relaxed text-zinc-800 select-none">
@@ -71,7 +71,7 @@ export default function FlowReader({ text, onComplete }: FlowReaderProps) {
 
         {/* Highlight Layer: Flowing Gradient Mask */}
         <motion.div 
-          className="absolute inset-0 px-4 chunk-text-bold text-center leading-relaxed pointer-events-none select-none text-orange-500 bg-transparent border-none outline-none shadow-none"
+          className="absolute inset-0 px-4 chunk-text-bold text-center leading-relaxed pointer-events-none select-none text-orange-500"
           aria-hidden="true"
           animate={{
             maskImage: `linear-gradient(to bottom, 
@@ -96,10 +96,7 @@ export default function FlowReader({ text, onComplete }: FlowReaderProps) {
           style={{
             WebkitMaskSize: "100% 100%",
             WebkitMaskRepeat: "no-repeat",
-            backgroundColor: "transparent",
-            border: "none",
-            outline: "none",
-            boxShadow: "none"
+            backgroundColor: "transparent"
           }}
         >
           {words.map((word, index) => (
