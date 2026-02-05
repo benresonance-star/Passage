@@ -74,6 +74,13 @@ export default function FlowReader({ text, onComplete }: FlowReaderProps) {
           className="absolute inset-0 px-4 chunk-text-bold text-center leading-relaxed pointer-events-none select-none text-orange-500 bg-transparent border-none outline-none shadow-none"
           aria-hidden="true"
           animate={{
+            maskImage: `linear-gradient(to bottom, 
+              rgba(0,0,0,0) 0%,
+              rgba(0,0,0,0) ${progress - 20}%, 
+              rgba(0,0,0,1) ${progress - 5}%, 
+              rgba(0,0,0,1) ${progress}%, 
+              rgba(0,0,0,0) ${progress + 5}%,
+              rgba(0,0,0,0) 100%)`,
             WebkitMaskImage: `linear-gradient(to bottom, 
               rgba(0,0,0,0) 0%,
               rgba(0,0,0,0) ${progress - 20}%, 
@@ -81,7 +88,7 @@ export default function FlowReader({ text, onComplete }: FlowReaderProps) {
               rgba(0,0,0,1) ${progress}%, 
               rgba(0,0,0,0) ${progress + 5}%,
               rgba(0,0,0,0) 100%)`
-          }}
+          } as any}
           transition={{
             duration: (60 / wpm),
             ease: "linear"
