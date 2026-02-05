@@ -24,7 +24,7 @@ export default function RecitePage() {
   const activeChunk = chapter?.chunks.find(c => c.id === activeChunkId);
 
   const scriptureText = activeChunk?.verses
-    .filter(v => v.type === "scripture" || state.settings.showHeadings)
+    .filter(v => v.type === "scripture")
     .map(v => v.text)
     .join(" ") || "";
   const lines = scriptureText ? splitIntoLines(scriptureText) : [];
