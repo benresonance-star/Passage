@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { motion, useAnimationControls } from "framer-motion";
+import { motion } from "framer-motion";
 import { Play, Pause, FastForward, Rewind } from "lucide-react";
 
 interface FlowReaderProps {
@@ -51,7 +51,7 @@ export default function FlowReader({ text, onComplete }: FlowReaderProps) {
       {/* Word Display Area - Matches Practice Mode Exactly */}
       <div 
         ref={containerRef}
-        className="relative px-4 overflow-hidden bg-transparent border-none shadow-none"
+        className="relative px-4 overflow-hidden bg-transparent border-none shadow-none outline-none"
       >
         {/* Base Layer: Dimmed Text */}
         <div className="chunk-text-bold text-center leading-relaxed text-zinc-800 select-none">
@@ -71,7 +71,7 @@ export default function FlowReader({ text, onComplete }: FlowReaderProps) {
 
         {/* Highlight Layer: Flowing Gradient Mask */}
         <motion.div 
-          className="absolute inset-0 px-4 chunk-text-bold text-center leading-relaxed pointer-events-none select-none text-orange-500"
+          className="absolute inset-0 px-4 chunk-text-bold text-center leading-relaxed pointer-events-none select-none text-orange-500 bg-transparent border-none outline-none shadow-none"
           aria-hidden="true"
           animate={{
             WebkitMaskImage: `linear-gradient(to bottom, 
