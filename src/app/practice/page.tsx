@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useBCM } from "@/context/BCMContext";
 import { useRouter } from "next/navigation";
 import { hideWords, generateMnemonic } from "@/lib/cloze";
@@ -8,7 +8,8 @@ import { calculateDiff, DiffResult } from "@/lib/diff";
 import { updateCard } from "@/lib/scheduler";
 import { useWakeLock } from "@/hooks/useWakeLock";
 import { useAuth } from "@/context/AuthContext";
-import FlowReader from "@/components/FlowReader";
+import FlowControls from "@/components/FlowControls";
+import { motion } from "framer-motion";
 import { ArrowLeft, RefreshCw, CheckCircle2, AlertCircle, Zap } from "lucide-react";
 
 type PracticeMode = "read" | "cloze" | "type" | "result";
@@ -22,18 +23,28 @@ export default function PracticePage() {
   const [typedText, setTypedText] = useState("");
   const [diffResults, setDiffResults] = useState<{ results: DiffResult[]; accuracy: number } | null>(null);
 
+  // Flow State
+  const [currentIndex, setCurrentIndex] = useState(-1);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [wpm, setWpm] = useState(120);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+
   useWakeLock();
 
   const chapterId = state.selectedChapterId;
   const chapter = chapterId ? state.chapters[chapterId] : null;
   const activeChunkId = chapterId ? state.settings.activeChunkId[chapterId] : null;
   const activeChunk = chapter?.chunks.find(c => c.id === activeChunkId);
+  const words = activeChunk?.text.split(/\s+/).filter(w => w.length > 0) || [];
 
   useEffect(() => {
     const handleReset = () => {
       setMode("read");
+      setIsFlowMode(false);
       setTypedText("");
       setDiffResults(null);
+      setCurrentIndex(-1);
+      setIsPlaying(false);
     };
 
     window.addEventListener("bcm-reset-practice", handleReset);
@@ -48,10 +59,7 @@ export default function PracticePage() {
       }
 
       if (!activeChunkId) {
-        // Smart Continue: Find the first chunk that is NOT memorised
         const firstUnmemorised = chapter.chunks.find(c => !state.cards[chapterId]?.[c.id]?.isMemorised);
-        
-        // If all are memorised, fallback to the first one
         const nextId = firstUnmemorised?.id || chapter.chunks[0]?.id;
 
         if (nextId) {
@@ -71,6 +79,22 @@ export default function PracticePage() {
       }
     }
   }, [isHydrated, chapter, chapterId, activeChunkId, state.cards, router, setState]);
+
+  // Flow Logic
+  useEffect(() => {
+    if (isFlowMode && isPlaying && currentIndex < words.length - 1) {
+      const msPerWord = (60 / wpm) * 1000;
+      timerRef.current = setTimeout(() => {
+        setCurrentIndex(prev => prev + 1);
+      }, msPerWord);
+    } else if (currentIndex >= words.length - 1) {
+      setIsPlaying(false);
+    }
+
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
+  }, [isFlowMode, isPlaying, currentIndex, words.length, wpm]);
 
   if (!isHydrated || !activeChunk || !chapterId) return null;
 
@@ -127,7 +151,6 @@ export default function PracticePage() {
           };
         });
 
-        // Cloud Sync
         if (user && chapter) {
           await syncProgress(chapter.title, activeChunk.id, updatedCard);
         }
@@ -138,6 +161,8 @@ export default function PracticePage() {
   const handleBack = () => {
     if (isFlowMode) {
       setIsFlowMode(false);
+      setIsPlaying(false);
+      setCurrentIndex(-1);
       return;
     }
     if (mode === "cloze") setMode("read");
@@ -145,6 +170,8 @@ export default function PracticePage() {
     else if (mode === "result") setMode("type");
     else router.push("/chapter");
   };
+
+  const progress = words.length > 0 ? ((currentIndex + 1) / words.length) * 100 : 0;
 
   return (
     <div className="flex flex-col min-h-[calc(100vh-8rem)]">
@@ -166,11 +193,10 @@ export default function PracticePage() {
       <div className="flex-1 flex flex-col justify-center">
         {mode === "read" && activeChunk && (
           <div className="animate-in fade-in duration-500">
-            {isFlowMode ? (
-              <FlowReader text={activeChunk.text} />
-            ) : (
-              <div className="space-y-6">
-                <div className="chunk-text-bold text-center leading-relaxed px-4">
+            <div className="space-y-6">
+              <div className="relative">
+                {/* Base Text (Always present, always in the same spot) */}
+                <div className={`chunk-text-bold text-center leading-relaxed px-4 transition-colors duration-500 ${isFlowMode ? 'text-zinc-800' : 'text-white'}`}>
                   {activeChunk.verses.map((v, idx) => (
                     <div key={idx} className={v.type === "heading" ? "w-full" : "inline"}>
                       {v.type === "heading" ? (
@@ -185,9 +211,58 @@ export default function PracticePage() {
                     </div>
                   ))}
                 </div>
-                <p className="text-center text-zinc-500 text-sm italic">Read the text carefully.</p>
+
+                {/* Flow Highlight Layer (Only visible in Flow Mode) */}
+                {isFlowMode && (
+                  <motion.div 
+                    className="absolute inset-0 px-4 chunk-text-bold text-center leading-relaxed pointer-events-none select-none text-orange-500"
+                    aria-hidden="true"
+                    animate={{
+                      maskImage: `linear-gradient(to bottom, 
+                        rgba(0,0,0,0) 0%,
+                        rgba(0,0,0,0) ${progress - 20}%, 
+                        rgba(0,0,0,1) ${progress - 5}%, 
+                        rgba(0,0,0,1) ${progress}%, 
+                        rgba(0,0,0,0) ${progress + 5}%,
+                        rgba(0,0,0,0) 100%)`,
+                      WebkitMaskImage: `linear-gradient(to bottom, 
+                        rgba(0,0,0,0) 0%,
+                        rgba(0,0,0,0) ${progress - 20}%, 
+                        rgba(0,0,0,1) ${progress - 5}%, 
+                        rgba(0,0,0,1) ${progress}%, 
+                        rgba(0,0,0,0) ${progress + 5}%,
+                        rgba(0,0,0,0) 100%)`
+                    } as any}
+                    transition={{
+                      duration: (60 / wpm),
+                      ease: "linear"
+                    }}
+                    style={{
+                      WebkitMaskSize: "100% 100%",
+                      WebkitMaskRepeat: "no-repeat"
+                    }}
+                  >
+                    {activeChunk.verses.map((v, idx) => (
+                      <div key={idx} className={v.type === "heading" ? "w-full" : "inline"}>
+                        {v.type === "heading" ? (
+                          state.settings.showHeadings && (
+                            <div className="text-transparent text-[11px] font-bold uppercase tracking-[0.2em] mb-4 mt-2">
+                              {v.text}
+                            </div>
+                          )
+                        ) : (
+                          <span>{v.text} </span>
+                        )}
+                      </div>
+                    ))}
+                  </motion.div>
+                )}
               </div>
-            )}
+              
+              {!isFlowMode && (
+                <p className="text-center text-zinc-500 text-sm italic">Read the text carefully.</p>
+              )}
+            </div>
           </div>
         )}
 
@@ -285,6 +360,22 @@ export default function PracticePage() {
       </div>
 
       <div className="py-8 space-y-4">
+        {isFlowMode && mode === "read" && (
+          <div className="animate-in slide-in-from-bottom-4 duration-300">
+            <FlowControls 
+              isPlaying={isPlaying}
+              onTogglePlay={() => setIsPlaying(!isPlaying)}
+              wpm={wpm}
+              onWpmChange={setWpm}
+              onSkip={(dir) => setCurrentIndex(prev => dir === 'forward' ? Math.min(words.length - 1, prev + 5) : Math.max(-1, prev - 5))}
+              onReset={() => {
+                setIsPlaying(false);
+                setCurrentIndex(-1);
+              }}
+            />
+          </div>
+        )}
+
         {mode === "read" && !isFlowMode && (
           <button
             onClick={() => setIsFlowMode(true)}
