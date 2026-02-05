@@ -364,7 +364,7 @@ export default function PracticePage() {
 
       {/* Flow Controls - Fixed Position to avoid vertical jump */}
       {isFlowMode && mode === "read" && (
-        <div className="fixed bottom-32 left-0 right-0 z-50 pointer-events-none">
+        <div className="fixed bottom-12 left-0 right-0 z-50 pointer-events-none">
           <FlowControls 
             isPlaying={isPlaying}
             onTogglePlay={() => setIsPlaying(!isPlaying)}

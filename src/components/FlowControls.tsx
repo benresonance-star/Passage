@@ -20,7 +20,7 @@ export default function FlowControls({
   onClose 
 }: FlowControlsProps) {
   const adjustWpm = (delta: number) => {
-    const newWpm = Math.min(200, Math.max(50, wpm + delta));
+    const newWpm = Math.min(500, Math.max(50, wpm + delta));
     onWpmChange(newWpm);
   };
 
@@ -69,7 +69,6 @@ export default function FlowControls({
         
         <div className="flex flex-col items-center min-w-[40px]">
           <span className="text-[14px] font-bold text-white tabular-nums">{wpm}</span>
-          <span className="text-[8px] font-bold uppercase tracking-tighter text-zinc-500">WPM</span>
         </div>
 
         <button
