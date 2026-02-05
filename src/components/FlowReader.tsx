@@ -51,7 +51,7 @@ export default function FlowReader({ text, onComplete }: FlowReaderProps) {
       {/* Word Display Area - Matches Practice Mode Exactly */}
       <div 
         ref={containerRef}
-        className="relative px-4 overflow-hidden"
+        className="relative px-4 overflow-hidden bg-transparent border-none shadow-none"
       >
         {/* Base Layer: Dimmed Text */}
         <div className="chunk-text-bold text-center leading-relaxed text-zinc-800 select-none">
@@ -89,7 +89,10 @@ export default function FlowReader({ text, onComplete }: FlowReaderProps) {
           style={{
             WebkitMaskSize: "100% 100%",
             WebkitMaskRepeat: "no-repeat",
-            backgroundColor: "transparent"
+            backgroundColor: "transparent",
+            border: "none",
+            outline: "none",
+            boxShadow: "none"
           }}
         >
           {words.map((word, index) => (
