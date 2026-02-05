@@ -206,7 +206,7 @@ export default function PracticePage() {
                           </div>
                         )
                       ) : (
-                        <span>{v.text} </span>
+                        <span className="inline-block">{v.text} </span>
                       )}
                     </div>
                   ))}
@@ -255,7 +255,7 @@ export default function PracticePage() {
                             </div>
                           )
                         ) : (
-                          <span>{v.text} </span>
+                          <span className="inline-block">{v.text} </span>
                         )}
                       </div>
                     ))}
