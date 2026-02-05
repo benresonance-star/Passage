@@ -362,34 +362,34 @@ export default function PracticePage() {
         )}
       </div>
 
-      {/* Flow Controls - Fixed Position to avoid vertical jump */}
-      {isFlowMode && mode === "read" && (
-        <div className="fixed bottom-12 left-0 right-0 z-50 pointer-events-none">
-          <FlowControls 
-            isPlaying={isPlaying}
-            onTogglePlay={() => setIsPlaying(!isPlaying)}
-            wpm={wpm}
-            onWpmChange={setWpm}
-            onSkip={(dir) => setCurrentIndex(prev => dir === 'forward' ? Math.min(words.length - 1, prev + 5) : Math.max(-1, prev - 5))}
-            onClose={() => {
-              setIsFlowMode(false);
-              setIsPlaying(false);
-              setCurrentIndex(-1);
-            }}
-          />
-        </div>
-      )}
-
       <div className="py-8 space-y-4">
-        {mode === "read" && !isFlowMode && (
+        <div className="relative">
+          {/* Flow Controls - Positioned above the main buttons */}
+          {isFlowMode && mode === "read" && (
+            <div className="absolute bottom-full mb-4 left-0 right-0 z-50 pointer-events-none">
+              <FlowControls 
+                isPlaying={isPlaying}
+                onTogglePlay={() => setIsPlaying(!isPlaying)}
+                wpm={wpm}
+                onWpmChange={setWpm}
+                onSkip={(dir) => setCurrentIndex(prev => dir === 'forward' ? Math.min(words.length - 1, prev + 5) : Math.max(-1, prev - 5))}
+                onClose={() => {
+                  setIsFlowMode(false);
+                  setIsPlaying(false);
+                  setCurrentIndex(-1);
+                }}
+              />
+            </div>
+          )}
+
           <button
             onClick={() => setIsFlowMode(true)}
-            className="w-full py-3 bg-zinc-900 border border-zinc-800 text-zinc-400 font-bold rounded-2xl flex items-center justify-center gap-2 hover:text-orange-500 transition-all uppercase tracking-widest text-xs"
+            className={`w-full py-3 bg-zinc-900 border border-zinc-800 text-zinc-400 font-bold rounded-2xl flex items-center justify-center gap-2 hover:text-orange-500 transition-all uppercase tracking-widest text-xs ${isFlowMode ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
           >
             <Zap size={16} className="fill-current" />
             Start Flow Mode
           </button>
-        )}
+        </div>
 
         {mode !== "result" && (
           <button
