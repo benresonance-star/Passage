@@ -88,7 +88,9 @@ export default function FlowReader({ text, onComplete }: FlowReaderProps) {
           }}
           style={{
             WebkitMaskSize: "100% 100%",
-            WebkitMaskRepeat: "no-repeat"
+            WebkitMaskRepeat: "no-repeat",
+            paddingTop: "inherit",
+            paddingBottom: "inherit"
           }}
         >
           {words.map((word, index) => (

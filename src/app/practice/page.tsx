@@ -167,9 +167,11 @@ export default function PracticePage() {
         {mode === "read" && activeChunk && (
           <div className="animate-in fade-in duration-500">
             {isFlowMode ? (
-              <FlowReader text={activeChunk.text} />
+              <div className="py-6">
+                <FlowReader text={activeChunk.text} />
+              </div>
             ) : (
-              <div className="space-y-6">
+              <div className="space-y-6 py-6">
                 <div className="chunk-text-bold text-center leading-relaxed px-4">
                   {activeChunk.verses.map((v, idx) => (
                     <div key={idx} className={v.type === "heading" ? "w-full" : "inline"}>
