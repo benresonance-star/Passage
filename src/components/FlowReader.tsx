@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { Play, Pause, FastForward, Rewind } from "lucide-react";
 
 interface FlowReaderProps {
@@ -13,11 +13,11 @@ export default function FlowReader({ text, onComplete }: FlowReaderProps) {
   const [words, setWords] = useState<string[]>([]);
   const [currentIndex, setCurrentIndex] = useState(-1);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [wpm, setWpm] = useState(120); // Words per minute
+  const [wpm, setWpm] = useState(120);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Split text into words, preserving punctuation attached to words
     setWords(text.split(/\s+/).filter(w => w.length > 0));
   }, [text]);
 
@@ -43,41 +43,51 @@ export default function FlowReader({ text, onComplete }: FlowReaderProps) {
     setCurrentIndex(-1);
   };
 
-  const handleWordClick = (index: number) => {
-    setCurrentIndex(index);
-    if (!isPlaying) setIsPlaying(true);
-  };
-
   return (
     <div className="flex flex-col gap-8 w-full max-w-2xl mx-auto">
-      {/* Word Display Area */}
-      <div className="min-h-[200px] flex flex-wrap justify-center items-center gap-x-2 gap-y-4 p-6 bg-zinc-900/30 rounded-3xl border border-zinc-800/50">
-        {words.map((word, index) => {
-          const isActive = index === currentIndex;
-          const isPast = index < currentIndex;
+      {/* Word Display Area - Matches Practice Mode Exactly */}
+      <div 
+        ref={containerRef}
+        className="relative min-h-[200px] p-6 bg-zinc-900/30 rounded-3xl border border-zinc-800/50 overflow-hidden"
+      >
+        {/* Base Layer: Dimmed Text */}
+        <div className="chunk-text-bold text-center leading-relaxed text-zinc-800 select-none">
+          {words.map((word, index) => (
+            <span 
+              key={index} 
+              onClick={() => {
+                setCurrentIndex(index);
+                if (!isPlaying) setIsPlaying(true);
+              }}
+              className="cursor-pointer transition-colors hover:text-zinc-600"
+            >
+              {word}{" "}
+            </span>
+          ))}
+        </div>
 
-          return (
+        {/* Highlight Layer: Only the active word is opaque and orange */}
+        <div 
+          className="absolute inset-0 p-6 chunk-text-bold text-center leading-relaxed pointer-events-none select-none"
+          aria-hidden="true"
+        >
+          {words.map((word, index) => (
             <motion.span
               key={index}
               initial={false}
               animate={{
-                opacity: isActive ? 1 : isPast ? 0.4 : 0.2,
-                scale: isActive ? 1.05 : 1,
-                color: isActive ? "#f97316" : "#71717a", // orange-500 or zinc-400
+                opacity: index === currentIndex ? 1 : 0,
+                color: index === currentIndex ? "#f97316" : "transparent",
               }}
               transition={{
-                duration: 0.2,
-                ease: "easeOut"
+                duration: 0.15,
+                ease: "linear"
               }}
-              onClick={() => handleWordClick(index)}
-              className={`text-[20px] font-bold cursor-pointer transition-all will-change-transform will-change-opacity ${
-                isActive ? "z-10" : "z-0"
-              }`}
             >
-              {word}
+              {word}{" "}
             </motion.span>
-          );
-        })}
+          ))}
+        </div>
       </div>
 
       {/* Controls */}
@@ -144,4 +154,3 @@ export default function FlowReader({ text, onComplete }: FlowReaderProps) {
     </div>
   );
 }
-
