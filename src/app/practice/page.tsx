@@ -165,11 +165,11 @@ export default function PracticePage() {
 
       <div className="flex-1 flex flex-col justify-center py-4">
         {mode === "read" && activeChunk && (
-          <div className="space-y-6 animate-in fade-in duration-500">
+          <div className="animate-in fade-in duration-500">
             {isFlowMode ? (
               <FlowReader text={activeChunk.text} />
             ) : (
-              <>
+              <div className="space-y-6">
                 <div className="chunk-text-bold text-center leading-relaxed px-4">
                   {activeChunk.verses.map((v, idx) => (
                     <div key={idx} className={v.type === "heading" ? "w-full" : "inline"}>
@@ -186,7 +186,7 @@ export default function PracticePage() {
                   ))}
                 </div>
                 <p className="text-center text-zinc-500 text-sm italic">Read the text carefully.</p>
-              </>
+              </div>
             )}
           </div>
         )}
