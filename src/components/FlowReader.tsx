@@ -75,9 +75,12 @@ export default function FlowReader({ text, onComplete }: FlowReaderProps) {
           aria-hidden="true"
           animate={{
             WebkitMaskImage: `linear-gradient(to bottom, 
-              rgba(0,0,0,1) ${progress - 15}%, 
+              rgba(0,0,0,0) 0%,
+              rgba(0,0,0,0) ${progress - 20}%, 
+              rgba(0,0,0,1) ${progress - 5}%, 
               rgba(0,0,0,1) ${progress}%, 
-              rgba(0,0,0,0) ${progress + 5}%)`
+              rgba(0,0,0,0) ${progress + 5}%,
+              rgba(0,0,0,0) 100%)`
           }}
           transition={{
             duration: (60 / wpm),
