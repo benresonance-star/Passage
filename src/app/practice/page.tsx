@@ -198,17 +198,17 @@ export default function PracticePage() {
                 {/* Base Text (Always present, always in the same spot) */}
                 <div className={`chunk-text-bold text-center leading-relaxed px-4 transition-colors duration-500 ${isFlowMode ? 'text-zinc-800' : 'text-white'}`}>
                   {activeChunk.verses.map((v, idx) => (
-                    <div key={idx} className={v.type === "heading" ? "w-full" : "inline"}>
+                    <span key={idx} className={v.type === "heading" ? "block" : "inline"}>
                       {v.type === "heading" ? (
                         state.settings.showHeadings && (
-                          <div className="text-zinc-500 text-[11px] font-bold uppercase tracking-[0.2em] mb-4 mt-2">
+                          <span className="block text-zinc-500 text-[11px] font-bold uppercase tracking-[0.2em] mb-4 mt-2">
                             {v.text}
-                          </div>
+                          </span>
                         )
                       ) : (
-                        <span className="inline-block">{v.text} </span>
+                        <span className="inline">{v.text} </span>
                       )}
-                    </div>
+                    </span>
                   ))}
                 </div>
 
@@ -247,17 +247,17 @@ export default function PracticePage() {
                     }}
                   >
                     {activeChunk.verses.map((v, idx) => (
-                      <div key={idx} className={v.type === "heading" ? "w-full" : "inline"}>
+                      <span key={idx} className={v.type === "heading" ? "block" : "inline"}>
                         {v.type === "heading" ? (
                           state.settings.showHeadings && (
-                            <div className="text-transparent text-[11px] font-bold uppercase tracking-[0.2em] mb-4 mt-2">
+                            <span className="block text-transparent text-[11px] font-bold uppercase tracking-[0.2em] mb-4 mt-2">
                               {v.text}
-                            </div>
+                            </span>
                           )
                         ) : (
-                          <span className="inline-block">{v.text} </span>
+                          <span className="inline">{v.text} </span>
                         )}
-                      </div>
+                      </span>
                     ))}
                   </motion.div>
                 )}
