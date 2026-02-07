@@ -21,7 +21,7 @@ export function BottomNav({ isDawn = false }: { isDawn?: boolean }) {
         ? "bg-black/30 backdrop-blur-md border-t border-white/10" 
         : "bg-[var(--surface)] border-t border-[var(--surface-border)]"
     }`}>
-      <div className="grid grid-cols-5 h-16 max-w-md mx-auto px-4">
+      <div className="grid grid-cols-5 h-16 px-2">
         {NAV_ITEMS.map(({ label, href, icon: Icon }) => {
           const isActive = pathname === href;
           return (
