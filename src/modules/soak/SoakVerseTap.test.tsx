@@ -227,6 +227,46 @@ describe("SoakVerseTap", () => {
     expect(bgBefore).toBe(bgAfter);
   });
 
+  // ── Desktop click-zone navigation ─────────────────────────────
+
+  it("navigates forward on right-zone click (desktop)", () => {
+    render(<SoakVerseTap section={SECTION} />);
+    waitForReady();
+
+    expect(screen.getByTestId("soak-verse").textContent).toContain("therefore");
+
+    fireEvent.click(screen.getByTestId("soak-zone-right"));
+    completeTransitionAndCooldown();
+
+    expect(screen.getByTestId("soak-verse").textContent).toContain("Christ Jesus");
+  });
+
+  it("navigates backward on left-zone click (desktop)", () => {
+    render(<SoakVerseTap section={SECTION} />);
+    waitForReady();
+
+    // Go forward first
+    fireEvent.click(screen.getByTestId("soak-zone-right"));
+    completeTransitionAndCooldown();
+
+    // Go back
+    fireEvent.click(screen.getByTestId("soak-zone-left"));
+    completeTransitionAndCooldown();
+
+    expect(screen.getByTestId("soak-verse").textContent).toContain("therefore");
+  });
+
+  it("center zone click reveals exit icon (desktop)", () => {
+    render(<SoakVerseTap section={SECTION} />);
+    waitForReady();
+
+    const exitButton = screen.getByTestId("soak-exit-button");
+    expect(exitButton.style.opacity).toBe("0.12");
+
+    fireEvent.click(screen.getByTestId("soak-zone-center"));
+    expect(exitButton.style.opacity).toBe("0.7");
+  });
+
   // ── Exit icon ─────────────────────────────────────────────────
 
   it("exit icon appears on tap and calls onExit when clicked", () => {
@@ -239,8 +279,8 @@ describe("SoakVerseTap", () => {
     // Initially nearly invisible (opacity ~0.12)
     expect(exitButton.style.opacity).toBe("0.12");
 
-    // Tap the exit zone to reveal
-    fireEvent.click(screen.getByTestId("soak-exit-zone"));
+    // Tap the center zone to reveal
+    fireEvent.click(screen.getByTestId("soak-zone-center"));
 
     // Now visible
     expect(exitButton.style.opacity).toBe("0.7");
@@ -258,7 +298,7 @@ describe("SoakVerseTap", () => {
     const exitButton = screen.getByTestId("soak-exit-button");
 
     // Reveal
-    fireEvent.click(screen.getByTestId("soak-exit-zone"));
+    fireEvent.click(screen.getByTestId("soak-zone-center"));
     expect(exitButton.style.opacity).toBe("0.7");
 
     // Wait 3 seconds

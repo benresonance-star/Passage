@@ -108,6 +108,8 @@ export function SoakVerseTap({
   /* ── Touch tracking refs ─────────────────────────────────────────── */
   const touchStartX = useRef<number | null>(null);
   const touchStartY = useRef<number | null>(null);
+  /** Timestamp of last touch event — used to ignore synthetic mouse clicks on mobile */
+  const lastTouchTs = useRef(0);
 
   /* ── Exit icon visibility ────────────────────────────────────────── */
   const [exitVisible, setExitVisible] = useState(false);
@@ -156,14 +158,16 @@ export function SoakVerseTap({
     [state.phase, state.lastChangeTs, state.currentIndex, section.verses.length],
   );
 
-  /* ── Swipe handlers ──────────────────────────────────────────────── */
+  /* ── Swipe handlers (mobile) ─────────────────────────────────────── */
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
     touchStartX.current = e.touches[0].clientX;
     touchStartY.current = e.touches[0].clientY;
+    lastTouchTs.current = Date.now();
   }, []);
 
   const handleTouchEnd = useCallback(
     (e: React.TouchEvent) => {
+      lastTouchTs.current = Date.now();
       if (touchStartX.current === null || touchStartY.current === null) return;
 
       const deltaX = e.changedTouches[0].clientX - touchStartX.current;
@@ -184,6 +188,16 @@ export function SoakVerseTap({
         // Swipe right → previous verse
         handleNav(-1);
       }
+    },
+    [handleNav],
+  );
+
+  /* ── Click-zone handler (desktop mouse only) ───────────────────── */
+  const handleZoneClick = useCallback(
+    (direction: 1 | -1) => {
+      // Ignore synthetic clicks fired after a touch event (mobile)
+      if (Date.now() - lastTouchTs.current < 800) return;
+      handleNav(direction);
     },
     [handleNav],
   );
@@ -235,12 +249,24 @@ export function SoakVerseTap({
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
     >
-      {/* Swipe surface — covers the whole screen, below text layer */}
-      <div
-        className="fixed inset-0 z-[51]"
-        data-testid="soak-swipe-surface"
-        onClick={showExitIcon}
-      />
+      {/* Click zones — left/right for desktop mouse nav, center for exit reveal */}
+      <div className="fixed inset-0 z-[51] flex" data-testid="soak-click-zones">
+        <div
+          className="w-[30%] h-full cursor-default"
+          data-testid="soak-zone-left"
+          onClick={() => handleZoneClick(-1)}
+        />
+        <div
+          className="w-[40%] h-full"
+          data-testid="soak-zone-center"
+          onClick={showExitIcon}
+        />
+        <div
+          className="w-[30%] h-full cursor-default"
+          data-testid="soak-zone-right"
+          onClick={() => handleZoneClick(1)}
+        />
+      </div>
 
       {/* Verse text layer */}
       <div
