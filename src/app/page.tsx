@@ -120,19 +120,19 @@ export default function Home() {
           <BookOpen size={52} className="text-orange-500" />
           <div className="space-y-1">
             <h1 className="text-3xl font-bold tracking-[0.05em]">Passage</h1>
-            <p className="text-zinc-500">Bible Chapter Memoriser</p>
+            <p className="text-[var(--theme-ui-subtext)]">Bible Chapter Memoriser</p>
           </div>
         </div>
         <div className="flex gap-2">
           <Link 
             href="/group"
-            className={`p-2 transition-colors rounded-full border border-[var(--surface-border)] ${user ? "text-orange-500 bg-orange-500/10" : "text-zinc-500 bg-[var(--surface)]"}`}
+            className={`p-2 transition-colors rounded-full border border-[var(--surface-border)] ${user ? "text-orange-500 bg-orange-500/10" : "text-[var(--theme-ui-subtext)] bg-[var(--surface)]"}`}
           >
             <Users size={20} />
           </Link>
           <button 
             onClick={() => setShowInfo(true)}
-            className="p-2 text-zinc-500 hover:text-white transition-colors bg-[var(--surface)] rounded-full border border-[var(--surface-border)]"
+            className="p-2 text-[var(--theme-ui-subtext)] hover:text-white transition-colors bg-[var(--surface)] rounded-full border border-[var(--surface-border)]"
           >
             <Info size={20} />
           </button>
@@ -146,7 +146,7 @@ export default function Home() {
           <div className="absolute inset-x-0 bottom-0 max-w-md mx-auto bg-[var(--overlay-surface)] glass border-t border-[var(--surface-border)] rounded-t-[32px] p-6 pb-8 shadow-2xl animate-in slide-in-from-bottom duration-500 max-h-[95vh] overflow-y-auto">
             <div className="flex justify-between items-start mb-6">
               <h2 className="text-lg font-bold pr-8">How to Memorise a Chapter (the right way)</h2>
-              <button onClick={() => setShowInfo(false)} className="p-1 text-zinc-500">
+              <button onClick={() => setShowInfo(false)} className="p-1 text-[var(--theme-ui-subtext)]">
                 <X size={20} />
               </button>
             </div>
@@ -155,7 +155,7 @@ export default function Home() {
               {GUIDE_ITEMS.map((item, i) => (
                 <div key={i} className="space-y-0.5">
                   <h3 className="text-base font-bold text-white leading-tight">{item.title}</h3>
-                  <p className="text-sm text-zinc-400 leading-normal">{item.desc}</p>
+                  <p className="text-sm text-[var(--theme-ui-subtext)] leading-normal">{item.desc}</p>
                 </div>
               ))}
             </div>
@@ -175,7 +175,7 @@ export default function Home() {
           <div className="bg-[var(--surface)] glass border border-[var(--surface-border)] rounded-2xl p-6 space-y-4 shadow-xl relative overflow-hidden">
             <div className="flex justify-between items-start">
               <div className="space-y-1">
-                <h2 className="text-zinc-400 text-sm font-medium uppercase tracking-wider">Active Chapter</h2>
+                <h2 className="text-[var(--theme-ui-subtext)] text-sm font-medium uppercase tracking-wider">Active Chapter</h2>
                 <div className="flex items-center gap-3">
                   <p className="text-xl font-bold">{selectedChapter.title}</p>
                   {isChapterComplete && (
@@ -211,7 +211,7 @@ export default function Home() {
           )}
 
           <div className="space-y-3">
-            <h3 className="text-sm font-medium text-zinc-500 uppercase tracking-wider px-1">Library</h3>
+            <h3 className="text-sm font-medium text-[var(--theme-ui-subtext)] uppercase tracking-wider px-1">Library</h3>
             <div className="grid gap-3">
               {chapters.map((ch) => (
                 <div 
@@ -225,19 +225,19 @@ export default function Home() {
                 >
                   <div className="flex items-center gap-4">
                     <div className={`w-10 h-10 rounded-lg flex items-center justify-center border ${
-                      ch.id === selectedChapter.id ? "bg-orange-500/10 border-orange-500/30 text-orange-500" : "bg-[var(--surface-alt)] border-[var(--surface-border)] text-zinc-500"
+                      ch.id === selectedChapter.id ? "bg-orange-500/10 border-orange-500/30 text-orange-500" : "bg-[var(--surface-alt)] border-[var(--surface-border)] text-[var(--theme-ui-subtext)]"
                     }`}>
                       <BookOpen size={20} />
                     </div>
                     <div>
                       <p className={`font-bold ${ch.id === selectedChapter.id ? "text-orange-500" : "text-white"}`}>{ch.title}</p>
-                      <p className="text-[10px] text-zinc-500 uppercase tracking-widest font-bold">
+                      <p className="text-[10px] text-[var(--theme-ui-subtext)] uppercase tracking-widest font-bold">
                         {Object.values(state.cards[ch.id] || {}).filter(c => c.isMemorised).length} / {ch.chunks.length} Memorised
                       </p>
                     </div>
                   </div>
                   {isAdmin && (
-                    <button onClick={(e) => handleDelete(ch.id, e)} className="p-2 text-zinc-700 hover:text-red-500 transition-colors">
+                    <button onClick={(e) => handleDelete(ch.id, e)} className="p-2 text-[var(--theme-ui-subtext)] hover:text-red-500 transition-colors">
                       <Trash2 size={18} />
                     </button>
                   )}
@@ -246,7 +246,7 @@ export default function Home() {
               {isAdmin && (
                 <Link
                   href="/import"
-                  className="flex items-center justify-center gap-3 p-4 bg-[var(--surface)] border border-dashed border-[var(--surface-border)] rounded-xl text-zinc-500 hover:text-orange-500 hover:border-orange-500/50 transition-all"
+                  className="flex items-center justify-center gap-3 p-4 bg-[var(--surface)] border border-dashed border-[var(--surface-border)] rounded-xl text-[var(--theme-ui-subtext)] hover:text-orange-500 hover:border-orange-500/50 transition-all"
                 >
                   <Upload size={20} />
                   <span className="font-bold">Add New Chapter</span>
@@ -285,11 +285,11 @@ export default function Home() {
       ) : (
         <div className="flex flex-col items-center justify-center py-20 text-center space-y-6">
           <div className="w-20 h-20 bg-[var(--surface)] rounded-3xl flex items-center justify-center border border-[var(--surface-border)] shadow-inner">
-            <BookOpen size={40} className="text-zinc-600" />
+            <BookOpen size={40} className="text-[var(--theme-ui-subtext)]" />
           </div>
           <div className="space-y-2">
             <h2 className="text-xl font-bold">Your Library is Empty</h2>
-            <p className="text-zinc-500 max-w-[240px] mx-auto">
+            <p className="text-[var(--theme-ui-subtext)] max-w-[240px] mx-auto">
               {isAdmin 
                 ? "Import your first Bible chapter to begin." 
                 : "Waiting for group administrator to add chapters."}

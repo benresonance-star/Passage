@@ -67,10 +67,10 @@ export function ThemeContent({ children }: { children: React.ReactNode }) {
       root.style.setProperty("--theme-ui-border", "rgba(255,255,255,0.12)");
       root.style.setProperty("--theme-ui-subtext", "rgba(255,252,240,0.5)");
 
-      // Surface tokens — translucent glass for Dawn
-      root.style.setProperty("--surface", "rgba(0,0,0,0.22)");
-      root.style.setProperty("--surface-alt", "rgba(255,255,255,0.08)");
-      root.style.setProperty("--surface-border", "rgba(255,255,255,0.10)");
+      // Surface tokens — translucent glass for Dawn (raised opacity for clarity)
+      root.style.setProperty("--surface", "rgba(0,0,0,0.35)");
+      root.style.setProperty("--surface-alt", "rgba(255,255,255,0.12)");
+      root.style.setProperty("--surface-border", "rgba(255,255,255,0.20)");
       root.style.setProperty("--overlay", "rgba(0,0,0,0.60)");
       root.style.setProperty("--overlay-surface", "rgba(0,0,0,0.65)");
       root.style.setProperty("--input-bg", "rgba(0,0,0,0.30)");
