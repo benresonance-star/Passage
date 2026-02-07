@@ -82,8 +82,8 @@ export function ThemeContent({ children }: { children: React.ReactNode }) {
 
       // Chunk highlight colors — readable against the Dawn gradient
       root.style.setProperty("--chunk-active", "rgba(255,252,240,0.95)");
-      root.style.setProperty("--chunk-memorised", "#8b5219");       // dark burnt amber
-      root.style.setProperty("--chunk-memorised-sub", "rgba(139,82,25,0.65)");
+      root.style.setProperty("--chunk-memorised", "#3a5f8a");       // muted slate blue
+      root.style.setProperty("--chunk-memorised-sub", "rgba(58,95,138,0.6)");
     } else {
       body.style.backgroundColor = theme.bg;
       body.style.color = theme.text;
