@@ -206,24 +206,30 @@ export default function ChapterPage() {
             >
               <div className="flex justify-between items-center">
                 <span className={`text-[10px] font-bold uppercase tracking-[0.2em] ${
-                  isActive ? "text-orange-500" : showAsMemorised ? "text-amber-500/80" : "text-[var(--theme-ui-subtext)]"
+                  isActive ? "text-[var(--chunk-active)]" : showAsMemorised ? "text-[var(--chunk-memorised)]" : "text-[var(--theme-ui-subtext)]"
                 }`}>
                   Verse {chunk.verseRange}
                 </span>
               </div>
               
-              <div className={`chunk-text ${isActive ? "chunk-text-bold" : showAsMemorised ? "text-amber-500/80 opacity-80" : "opacity-90"}`}>
+              <div className={`chunk-text ${isActive ? "chunk-text-bold" : showAsMemorised ? "opacity-80" : "opacity-90"}`}
+                style={showAsMemorised ? { color: "var(--chunk-memorised)" } : undefined}
+              >
                 {chunk.verses.map((v, idx) => (
                   <div key={idx} className={v.type === "heading" ? "w-full text-center" : "inline"}>
                     {v.type === "heading" ? (
                       state.settings.showHeadings && (
-                        <h3 className={`text-[11px] font-bold uppercase tracking-[0.2em] my-4 block w-full ${showAsMemorised ? "text-amber-500/50" : "text-[var(--theme-ui-subtext)]"}`}>
+                        <h3 className="text-[11px] font-bold uppercase tracking-[0.2em] my-4 block w-full"
+                          style={{ color: showAsMemorised ? "var(--chunk-memorised-sub)" : "var(--theme-ui-subtext)" }}
+                        >
                           {v.text}
                         </h3>
                       )
                     ) : (
                       <span className="inline-block mr-2">
-                        <span className={`text-[12px] align-top opacity-50 mr-1 italic font-normal ${showAsMemorised ? "text-amber-500/50" : ""}`}>
+                        <span className="text-[12px] align-top opacity-50 mr-1 italic font-normal"
+                          style={showAsMemorised ? { color: "var(--chunk-memorised-sub)" } : undefined}
+                        >
                           {v.number}
                         </span>
                         {v.text}

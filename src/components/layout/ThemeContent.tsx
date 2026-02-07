@@ -79,6 +79,11 @@ export function ThemeContent({ children }: { children: React.ReactNode }) {
       root.style.setProperty("--flow-read", "rgba(255,252,240,1)");
       root.style.setProperty("--flow-unread", "rgba(255,252,240,0.22)");
       root.style.setProperty("--flow-glow", "0 0 18px rgba(255,210,150,0.25)");
+
+      // Chunk highlight colors — readable against the Dawn gradient
+      root.style.setProperty("--chunk-active", "rgba(255,252,240,0.95)");
+      root.style.setProperty("--chunk-memorised", "rgba(255,252,240,0.55)");
+      root.style.setProperty("--chunk-memorised-sub", "rgba(255,252,240,0.35)");
     } else {
       body.style.backgroundColor = theme.bg;
       body.style.color = theme.text;
@@ -113,6 +118,11 @@ export function ThemeContent({ children }: { children: React.ReactNode }) {
       root.style.setProperty("--flow-read", "#f97316");       // orange-500
       root.style.setProperty("--flow-unread", isLight ? "rgba(0,0,0,0.15)" : "#27272a");
       root.style.setProperty("--flow-glow", "none");
+
+      // Chunk highlight colors — standard orange/amber
+      root.style.setProperty("--chunk-active", "#f97316");       // orange-500
+      root.style.setProperty("--chunk-memorised", "rgba(245,158,11,0.8)"); // amber-500/80
+      root.style.setProperty("--chunk-memorised-sub", "rgba(245,158,11,0.5)"); // amber-500/50
     }
   }, [theme, isLight, isDawn]);
 
