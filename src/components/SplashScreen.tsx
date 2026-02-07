@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Cormorant_Garamond } from "next/font/google";
 import "@/modules/soak/breathe.css";
 
@@ -19,18 +19,29 @@ const SESSION_KEY = "passage-splash-shown";
 /* ─── Component ──────────────────────────────────────────────────── */
 
 interface SplashScreenProps {
-  /** Called once the splash has fully faded out. */
+  /** Called when the fade-out BEGINS — navigate here while splash still covers screen. */
+  onFadeStart?: () => void;
+  /** Called once the splash has fully faded out — safe to unmount. */
   onComplete: () => void;
 }
 
-export function SplashScreen({ onComplete }: SplashScreenProps) {
+export function SplashScreen({ onFadeStart, onComplete }: SplashScreenProps) {
   const [phase, setPhase] = useState<"hold" | "fade-out" | "done">("hold");
+  const fadeStartFired = useRef(false);
 
   // After HOLD_MS, begin fade-out
   useEffect(() => {
     const holdTimer = setTimeout(() => setPhase("fade-out"), HOLD_MS);
     return () => clearTimeout(holdTimer);
   }, []);
+
+  // Fire onFadeStart exactly once when fade-out begins
+  useEffect(() => {
+    if (phase === "fade-out" && !fadeStartFired.current) {
+      fadeStartFired.current = true;
+      onFadeStart?.();
+    }
+  }, [phase, onFadeStart]);
 
   // After fade-out completes, mark done
   useEffect(() => {

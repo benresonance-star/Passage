@@ -54,10 +54,10 @@ export function ThemeContent({ children }: { children: React.ReactNode }) {
   return (
     <>
       {showSplash && (
-        <SplashScreen onComplete={() => {
-          setShowSplash(false);
-          router.push("/chapter");
-        }} />
+        <SplashScreen
+          onFadeStart={() => router.push("/chapter")}
+          onComplete={() => setShowSplash(false)}
+        />
       )}
       <main className="min-h-screen pb-24 max-w-md mx-auto px-4 pt-safe">
         {children}
