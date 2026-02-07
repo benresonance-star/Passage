@@ -11,7 +11,7 @@ const splashFont = Cormorant_Garamond({
 
 /* ─── Timing ──────────────────────────────────────────────────────── */
 
-const HOLD_MS = 5000;      // Time the splash stays fully visible
+const HOLD_MS = 10000;     // Time the splash stays fully visible
 const FADE_OUT_MS = 900;   // Fade-out duration
 
 const SESSION_KEY = "passage-splash-shown";

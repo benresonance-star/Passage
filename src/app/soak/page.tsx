@@ -48,7 +48,7 @@ export default function SoakPage() {
     <SoakVerseTap
       section={section}
       fontClassName={soakFont.className}
-      onExit={() => router.back()}
+      onExit={() => router.push("/chapter")}
     />
   );
 }

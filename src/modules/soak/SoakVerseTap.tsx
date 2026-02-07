@@ -1,8 +1,9 @@
 "use client";
 
-import { useReducer, useEffect, useCallback, useRef } from "react";
+import { useReducer, useEffect, useCallback, useRef, useState } from "react";
 import { tokenizeVerse } from "./tokenize";
 import type { SoakSection } from "./types";
+import { X } from "lucide-react";
 import "./breathe.css";
 
 /* ─── Timing constants (ms) ──────────────────────────────────────── */
@@ -11,6 +12,14 @@ const FADE_OUT_MS = 400;
 const PAUSE_MS = 400;
 const FADE_IN_MS = 1100;
 const COOLDOWN_MS = 1500;
+
+/* ─── Swipe constants ────────────────────────────────────────────── */
+
+const SWIPE_THRESHOLD_PX = 50;
+
+/* ─── Exit button constants ──────────────────────────────────────── */
+
+const EXIT_VISIBLE_MS = 3000; // How long the exit icon stays visible after tap
 
 /* ─── State machine ──────────────────────────────────────────────── */
 
@@ -37,7 +46,6 @@ type SoakAction =
 function soakReducer(state: SoakState, action: SoakAction): SoakState {
   switch (action.type) {
     case "NAVIGATE": {
-      // Safety: only from visible phase (caller also checks, belt-and-suspenders)
       if (state.phase !== "visible") return state;
       return {
         ...state,
@@ -50,17 +58,14 @@ function soakReducer(state: SoakState, action: SoakAction): SoakState {
     case "PHASE_COMPLETE": {
       switch (state.phase) {
         case "fade-out":
-          // Old verse has faded; swap content while invisible
           return {
             ...state,
             phase: "pause",
             displayedIndex: state.currentIndex,
           };
         case "pause":
-          // Content swapped; begin fade-in
           return { ...state, phase: "fade-in" };
         case "fade-in":
-          // Verse fully visible; start cooldown clock
           return {
             ...state,
             phase: "visible",
@@ -89,7 +94,7 @@ export interface SoakVerseTapProps {
   section: SoakSection;
   /** Optional class to apply a custom font (e.g. from next/font). */
   fontClassName?: string;
-  /** Called when the user navigates past the first/last verse. */
+  /** Called when the user taps the exit icon. */
   onExit?: () => void;
 }
 
@@ -100,6 +105,14 @@ export function SoakVerseTap({
 }: SoakVerseTapProps) {
   const bgRef = useRef<HTMLDivElement>(null);
 
+  /* ── Touch tracking refs ─────────────────────────────────────────── */
+  const touchStartX = useRef<number | null>(null);
+  const touchStartY = useRef<number | null>(null);
+
+  /* ── Exit icon visibility ────────────────────────────────────────── */
+  const [exitVisible, setExitVisible] = useState(false);
+  const exitTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   // Initial phase is "pause" so the first verse fades in on mount
   const [state, dispatch] = useReducer(soakReducer, {
     currentIndex: 0,
@@ -109,7 +122,7 @@ export function SoakVerseTap({
     lastChangeTs: 0,
   });
 
-  /* ── Transition timer: advances through fade-out → pause → fade-in → visible ── */
+  /* ── Transition timer ────────────────────────────────────────────── */
   useEffect(() => {
     if (state.phase === "visible") return;
 
@@ -130,23 +143,64 @@ export function SoakVerseTap({
   /* ── Navigation handler ──────────────────────────────────────────── */
   const handleNav = useCallback(
     (direction: 1 | -1) => {
-      // Guard: transition running
       if (state.phase !== "visible") return;
-      // Guard: cooldown
       if (Date.now() - state.lastChangeTs < COOLDOWN_MS) return;
 
       const newIndex = state.currentIndex + direction;
 
-      // Past-the-edge: exit soak mode
-      if (newIndex < 0 || newIndex >= section.verses.length) {
-        onExit?.();
-        return;
-      }
+      // Past-the-edge: do nothing (exit is via the exit icon now)
+      if (newIndex < 0 || newIndex >= section.verses.length) return;
 
       dispatch({ type: "NAVIGATE", direction });
     },
-    [state.phase, state.lastChangeTs, state.currentIndex, section.verses.length, onExit],
+    [state.phase, state.lastChangeTs, state.currentIndex, section.verses.length],
   );
+
+  /* ── Swipe handlers ──────────────────────────────────────────────── */
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+  }, []);
+
+  const handleTouchEnd = useCallback(
+    (e: React.TouchEvent) => {
+      if (touchStartX.current === null || touchStartY.current === null) return;
+
+      const deltaX = e.changedTouches[0].clientX - touchStartX.current;
+      const deltaY = e.changedTouches[0].clientY - touchStartY.current;
+
+      // Reset
+      touchStartX.current = null;
+      touchStartY.current = null;
+
+      // Only count horizontal swipes (ignore vertical scrolls)
+      if (Math.abs(deltaX) < SWIPE_THRESHOLD_PX) return;
+      if (Math.abs(deltaY) > Math.abs(deltaX)) return;
+
+      if (deltaX < 0) {
+        // Swipe left → next verse
+        handleNav(1);
+      } else {
+        // Swipe right → previous verse
+        handleNav(-1);
+      }
+    },
+    [handleNav],
+  );
+
+  /* ── Exit icon: show on tap in bottom area, auto-hide after delay ── */
+  const showExitIcon = useCallback(() => {
+    setExitVisible(true);
+    if (exitTimerRef.current) clearTimeout(exitTimerRef.current);
+    exitTimerRef.current = setTimeout(() => setExitVisible(false), EXIT_VISIBLE_MS);
+  }, []);
+
+  // Cleanup timer on unmount
+  useEffect(() => {
+    return () => {
+      if (exitTimerRef.current) clearTimeout(exitTimerRef.current);
+    };
+  }, []);
 
   /* ── Word click handler ──────────────────────────────────────────── */
   const handleWordClick = useCallback(
@@ -169,32 +223,26 @@ export function SoakVerseTap({
       ? `${FADE_IN_MS}ms`
       : "0ms";
 
+  /* ── Verse indicator (e.g. 1 / 5) ───────────────────────────────── */
+  const verseIndicator = `${state.displayedIndex + 1} / ${section.verses.length}`;
+
   /* ── Render ──────────────────────────────────────────────────────── */
   return (
     <div
       ref={bgRef}
       data-testid="soak-breathe"
       className="soak-breathe"
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
     >
-      {/* Tap zones — below the text layer so word clicks take priority */}
-      <div className="fixed inset-0 z-[51] flex" data-testid="soak-zones">
-        <div
-          className="w-[30%] h-full"
-          data-testid="soak-zone-left"
-          onClick={() => handleNav(-1)}
-        />
-        <div
-          className="w-[40%] h-full"
-          data-testid="soak-zone-center"
-        />
-        <div
-          className="w-[30%] h-full"
-          data-testid="soak-zone-right"
-          onClick={() => handleNav(1)}
-        />
-      </div>
+      {/* Swipe surface — covers the whole screen, below text layer */}
+      <div
+        className="fixed inset-0 z-[51]"
+        data-testid="soak-swipe-surface"
+        onClick={showExitIcon}
+      />
 
-      {/* Verse text layer — pointer-events-none lets non-word taps fall to zones */}
+      {/* Verse text layer */}
       <div
         className={`fixed inset-0 z-[52] flex items-center justify-center px-8 pointer-events-none ${fontClassName}`}
       >
@@ -222,7 +270,63 @@ export function SoakVerseTap({
           ))}
         </p>
       </div>
+
+      {/* Verse indicator — subtle, always visible */}
+      <div
+        className="fixed top-0 left-0 right-0 z-[53] flex justify-center pt-safe"
+        style={{ paddingTop: "max(env(safe-area-inset-top), 16px)" }}
+      >
+        <span
+          className="text-[11px] tracking-[0.2em] uppercase font-light"
+          style={{
+            color: "rgba(255, 252, 240, 0.3)",
+            opacity,
+            transition: `opacity ${transitionDuration} ease-in-out`,
+          }}
+        >
+          {verseIndicator}
+        </span>
+      </div>
+
+      {/* Bottom exit zone — tap to reveal, tap icon to exit */}
+      <div
+        className="fixed bottom-0 left-0 right-0 z-[53] flex justify-center pb-safe"
+        style={{ paddingBottom: "max(env(safe-area-inset-bottom), 24px)" }}
+        onClick={(e) => {
+          e.stopPropagation();
+          if (!exitVisible) {
+            showExitIcon();
+          }
+        }}
+        data-testid="soak-exit-zone"
+      >
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            if (exitVisible) {
+              onExit?.();
+            } else {
+              showExitIcon();
+            }
+          }}
+          className="p-3 rounded-full transition-all duration-500"
+          style={{
+            opacity: exitVisible ? 0.7 : 0.12,
+            backgroundColor: exitVisible
+              ? "rgba(255, 252, 240, 0.12)"
+              : "transparent",
+            transform: exitVisible ? "scale(1)" : "scale(0.85)",
+            transition: "opacity 500ms ease, background-color 500ms ease, transform 300ms ease",
+          }}
+          data-testid="soak-exit-button"
+          aria-label="Exit Soak mode"
+        >
+          <X
+            size={22}
+            style={{ color: "rgba(255, 252, 240, 0.85)" }}
+          />
+        </button>
+      </div>
     </div>
   );
 }
-

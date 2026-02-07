@@ -45,6 +45,24 @@ function completeTransitionAndCooldown() {
   });
 }
 
+/* ─── Swipe simulation helpers ────────────────────────────────────── */
+
+/**
+ * Simulate a horizontal swipe on the soak-breathe element.
+ * Negative deltaX = swipe left (next), positive = swipe right (prev).
+ */
+function simulateSwipe(element: HTMLElement, deltaX: number) {
+  const startX = 200;
+  const startY = 300;
+
+  fireEvent.touchStart(element, {
+    touches: [{ clientX: startX, clientY: startY }],
+  });
+  fireEvent.touchEnd(element, {
+    changedTouches: [{ clientX: startX + deltaX, clientY: startY }],
+  });
+}
+
 /* ─── Test suite ──────────────────────────────────────────────────── */
 
 describe("SoakVerseTap", () => {
@@ -56,73 +74,81 @@ describe("SoakVerseTap", () => {
     jest.useRealTimers();
   });
 
-  // ── Navigation ─────────────────────────────────────────────────
+  // ── Swipe Navigation ──────────────────────────────────────────
 
-  it("navigates forward on right-zone tap", () => {
+  it("navigates forward on swipe left", () => {
     render(<SoakVerseTap section={SECTION} />);
     waitForReady();
 
-    // Should start on verse 1
-    expect(screen.getByTestId("soak-verse").textContent).toContain(
-      "therefore",
-    );
+    expect(screen.getByTestId("soak-verse").textContent).toContain("therefore");
 
-    fireEvent.click(screen.getByTestId("soak-zone-right"));
+    // Swipe left (negative delta) → next verse
+    simulateSwipe(screen.getByTestId("soak-breathe"), -80);
     completeTransitionAndCooldown();
 
-    // Should now show verse 2
-    expect(screen.getByTestId("soak-verse").textContent).toContain(
-      "Christ Jesus",
-    );
-    expect(screen.getByTestId("soak-verse").textContent).not.toContain(
-      "therefore",
-    );
+    expect(screen.getByTestId("soak-verse").textContent).toContain("Christ Jesus");
+    expect(screen.getByTestId("soak-verse").textContent).not.toContain("therefore");
   });
 
-  it("navigates backward on left-zone tap", () => {
+  it("navigates backward on swipe right", () => {
     render(<SoakVerseTap section={SECTION} />);
     waitForReady();
 
     // Go forward first
-    fireEvent.click(screen.getByTestId("soak-zone-right"));
+    simulateSwipe(screen.getByTestId("soak-breathe"), -80);
     completeTransitionAndCooldown();
 
-    // Now go back
-    fireEvent.click(screen.getByTestId("soak-zone-left"));
+    // Swipe right → previous verse
+    simulateSwipe(screen.getByTestId("soak-breathe"), 80);
     completeTransitionAndCooldown();
 
-    // Should be back on verse 1
-    expect(screen.getByTestId("soak-verse").textContent).toContain(
-      "therefore",
-    );
+    expect(screen.getByTestId("soak-verse").textContent).toContain("therefore");
   });
 
-  it("center zone does nothing", () => {
+  it("ignores swipes below threshold", () => {
     render(<SoakVerseTap section={SECTION} />);
     waitForReady();
 
     const textBefore = screen.getByTestId("soak-verse").textContent;
-    fireEvent.click(screen.getByTestId("soak-zone-center"));
 
-    // Advance time generously — nothing should change
+    // Swipe too short (below 50px threshold)
+    simulateSwipe(screen.getByTestId("soak-breathe"), -30);
     act(() => jest.advanceTimersByTime(5000));
 
     expect(screen.getByTestId("soak-verse").textContent).toBe(textBefore);
   });
 
-  // ── Tap gating ────────────────────────────────────────────────
-
-  it("blocks navigation while a transition is running", () => {
+  it("ignores vertical swipes", () => {
     render(<SoakVerseTap section={SECTION} />);
     waitForReady();
 
-    // Start a navigation (verse 1 → 2)
-    fireEvent.click(screen.getByTestId("soak-zone-right"));
+    const textBefore = screen.getByTestId("soak-verse").textContent;
+    const element = screen.getByTestId("soak-breathe");
 
-    // Immediately try to navigate again (verse 2 → 3) — should be blocked
-    fireEvent.click(screen.getByTestId("soak-zone-right"));
+    // Vertical swipe (large Y delta, small X delta)
+    fireEvent.touchStart(element, {
+      touches: [{ clientX: 200, clientY: 200 }],
+    });
+    fireEvent.touchEnd(element, {
+      changedTouches: [{ clientX: 220, clientY: 400 }],
+    });
 
-    // Complete the transition
+    act(() => jest.advanceTimersByTime(5000));
+    expect(screen.getByTestId("soak-verse").textContent).toBe(textBefore);
+  });
+
+  // ── Swipe gating ──────────────────────────────────────────────
+
+  it("blocks swipe while a transition is running", () => {
+    render(<SoakVerseTap section={SECTION} />);
+    waitForReady();
+
+    // Start navigation
+    simulateSwipe(screen.getByTestId("soak-breathe"), -80);
+
+    // Immediately try again — should be blocked
+    simulateSwipe(screen.getByTestId("soak-breathe"), -80);
+
     completeTransitionAndCooldown();
 
     // Should be on verse 2, NOT verse 3
@@ -131,33 +157,26 @@ describe("SoakVerseTap", () => {
     expect(text).not.toContain("because");
   });
 
-  it("blocks navigation for 1500ms after a verse appears", () => {
+  it("blocks swipe for 1500ms after a verse appears", () => {
     render(<SoakVerseTap section={SECTION} />);
     waitForReady();
 
-    // Navigate to verse 2
-    fireEvent.click(screen.getByTestId("soak-zone-right"));
+    simulateSwipe(screen.getByTestId("soak-breathe"), -80);
 
-    // Complete the transition only (no cooldown)
+    // Complete transition only (no cooldown)
     act(() => jest.advanceTimersByTime(TRANSITION_MS));
 
-    // Try to navigate — should be blocked (cooldown not expired)
-    fireEvent.click(screen.getByTestId("soak-zone-right"));
+    // Try to navigate — should be blocked
+    simulateSwipe(screen.getByTestId("soak-breathe"), -80);
     act(() => jest.advanceTimersByTime(0));
 
-    // Still on verse 2
-    expect(screen.getByTestId("soak-verse").textContent).toContain(
-      "Christ Jesus",
-    );
-    expect(screen.getByTestId("soak-verse").textContent).not.toContain(
-      "because",
-    );
+    expect(screen.getByTestId("soak-verse").textContent).toContain("Christ Jesus");
+    expect(screen.getByTestId("soak-verse").textContent).not.toContain("because");
 
     // Now wait for cooldown
     act(() => jest.advanceTimersByTime(COOLDOWN_MS));
 
-    // Navigate should now work
-    fireEvent.click(screen.getByTestId("soak-zone-right"));
+    simulateSwipe(screen.getByTestId("soak-breathe"), -80);
     completeTransitionAndCooldown();
 
     expect(screen.getByTestId("soak-verse").textContent).toContain("because");
@@ -171,51 +190,26 @@ describe("SoakVerseTap", () => {
 
     const word = screen.getByTestId("soak-word-0");
 
-    // Initially not highlighted
     expect(word.className).not.toContain("soak-word-highlighted");
 
-    // Click to highlight
     fireEvent.click(word);
     expect(word.className).toContain("soak-word-highlighted");
 
-    // Click again to un-highlight
     fireEvent.click(word);
     expect(word.className).not.toContain("soak-word-highlighted");
-  });
-
-  it("word click does not trigger navigation", () => {
-    render(<SoakVerseTap section={SECTION} />);
-    waitForReady();
-
-    const textBefore = screen.getByTestId("soak-verse").textContent;
-
-    // Click several words
-    fireEvent.click(screen.getByTestId("soak-word-0"));
-    fireEvent.click(screen.getByTestId("soak-word-1"));
-
-    // No transition should have started — text unchanged
-    act(() => jest.advanceTimersByTime(5000));
-    expect(screen.getByTestId("soak-verse").textContent).toBe(textBefore);
   });
 
   it("highlights reset when verse changes", () => {
     render(<SoakVerseTap section={SECTION} />);
     waitForReady();
 
-    // Highlight a word on verse 1
     fireEvent.click(screen.getByTestId("soak-word-0"));
-    expect(screen.getByTestId("soak-word-0").className).toContain(
-      "soak-word-highlighted",
-    );
+    expect(screen.getByTestId("soak-word-0").className).toContain("soak-word-highlighted");
 
-    // Navigate to verse 2
-    fireEvent.click(screen.getByTestId("soak-zone-right"));
+    simulateSwipe(screen.getByTestId("soak-breathe"), -80);
     completeTransitionAndCooldown();
 
-    // Verse 2's first word should NOT be highlighted
-    expect(screen.getByTestId("soak-word-0").className).not.toContain(
-      "soak-word-highlighted",
-    );
+    expect(screen.getByTestId("soak-word-0").className).not.toContain("soak-word-highlighted");
   });
 
   // ── DOM stability ─────────────────────────────────────────────
@@ -226,46 +220,65 @@ describe("SoakVerseTap", () => {
 
     const bgBefore = screen.getByTestId("soak-breathe");
 
-    // Navigate forward
-    fireEvent.click(screen.getByTestId("soak-zone-right"));
+    simulateSwipe(screen.getByTestId("soak-breathe"), -80);
     completeTransitionAndCooldown();
 
     const bgAfter = screen.getByTestId("soak-breathe");
-
-    // Strict reference equality — same DOM node, not a remount
     expect(bgBefore).toBe(bgAfter);
   });
 
-  // ── Exit ──────────────────────────────────────────────────────
+  // ── Exit icon ─────────────────────────────────────────────────
 
-  it("calls onExit when navigating past the last verse", () => {
+  it("exit icon appears on tap and calls onExit when clicked", () => {
     const onExit = jest.fn();
     render(<SoakVerseTap section={SECTION} onExit={onExit} />);
     waitForReady();
 
-    // Go to verse 2
-    fireEvent.click(screen.getByTestId("soak-zone-right"));
-    completeTransitionAndCooldown();
+    const exitButton = screen.getByTestId("soak-exit-button");
 
-    // Go to verse 3
-    fireEvent.click(screen.getByTestId("soak-zone-right"));
-    completeTransitionAndCooldown();
+    // Initially nearly invisible (opacity ~0.12)
+    expect(exitButton.style.opacity).toBe("0.12");
 
-    // Try to go past the end
-    fireEvent.click(screen.getByTestId("soak-zone-right"));
+    // Tap the exit zone to reveal
+    fireEvent.click(screen.getByTestId("soak-exit-zone"));
+
+    // Now visible
+    expect(exitButton.style.opacity).toBe("0.7");
+
+    // Tap the exit button itself
+    fireEvent.click(exitButton);
 
     expect(onExit).toHaveBeenCalledTimes(1);
   });
 
-  it("calls onExit when navigating before the first verse", () => {
-    const onExit = jest.fn();
-    render(<SoakVerseTap section={SECTION} onExit={onExit} />);
+  it("exit icon auto-hides after 3 seconds", () => {
+    render(<SoakVerseTap section={SECTION} />);
     waitForReady();
 
-    // Try to go before the start
-    fireEvent.click(screen.getByTestId("soak-zone-left"));
+    const exitButton = screen.getByTestId("soak-exit-button");
 
-    expect(onExit).toHaveBeenCalledTimes(1);
+    // Reveal
+    fireEvent.click(screen.getByTestId("soak-exit-zone"));
+    expect(exitButton.style.opacity).toBe("0.7");
+
+    // Wait 3 seconds
+    act(() => jest.advanceTimersByTime(3000));
+
+    expect(exitButton.style.opacity).toBe("0.12");
+  });
+
+  // ── Past-the-edge does not exit (exit is via icon only) ───────
+
+  it("does not navigate past the edges", () => {
+    render(<SoakVerseTap section={SECTION} />);
+    waitForReady();
+
+    const textBefore = screen.getByTestId("soak-verse").textContent;
+
+    // Try swiping right at the start — should do nothing
+    simulateSwipe(screen.getByTestId("soak-breathe"), 80);
+    act(() => jest.advanceTimersByTime(5000));
+
+    expect(screen.getByTestId("soak-verse").textContent).toBe(textBefore);
   });
 });
-
