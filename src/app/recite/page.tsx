@@ -8,7 +8,7 @@ import { splitIntoLines } from "@/lib/parser";
 import { updateCard } from "@/lib/scheduler";
 import { calculateUpdatedStreak } from "@/lib/streak";
 import { useWakeLock } from "@/hooks/useWakeLock";
-import { ArrowLeft, Eye, EyeOff, Check, AlertCircle, XCircle } from "lucide-react";
+import { ArrowLeft, Eye, EyeOff } from "lucide-react";
 
 export default function RecitePage() {
   const { state, setState, isHydrated, syncProgress } = useBCM();
@@ -172,24 +172,18 @@ export default function RecitePage() {
         </div>
       </div>
 
-      <div className="py-8 space-y-4">
-        {!isGraded ? (
-          <div className="grid grid-cols-3 gap-3">
-            <button onClick={() => handleGrade(0.3)} className="flex flex-col items-center gap-1 p-4 bg-[var(--surface)] border border-[var(--surface-border)] rounded-2xl text-red-500 active:scale-95 transition-transform">
-              <XCircle size={24} /><span className="text-[10px] font-bold uppercase">Missed</span>
-            </button>
-            <button onClick={() => handleGrade(0.75)} className="flex flex-col items-center gap-1 p-4 bg-[var(--surface)] border border-[var(--surface-border)] rounded-2xl text-orange-500 active:scale-95 transition-transform">
-              <AlertCircle size={24} /><span className="text-[10px] font-bold uppercase">Shaky</span>
-            </button>
-            <button onClick={() => handleGrade(1.0)} className="flex flex-col items-center gap-1 p-4 bg-[var(--surface)] border border-[var(--surface-border)] rounded-2xl text-green-500 active:scale-95 transition-transform">
-              <Check size={24} /><span className="text-[10px] font-bold uppercase">Nailed it</span>
-            </button>
-          </div>
-        ) : (
-          <button onClick={() => router.push("/chapter")} className="w-full py-4 bg-orange-500 text-white font-bold rounded-2xl shadow-lg shadow-orange-500/20">
-            Continue
-          </button>
-        )}
+      <div className="py-8">
+        <button
+          onClick={async () => {
+            if (!isGraded) {
+              await handleGrade(0.75);
+            }
+            router.push("/chapter");
+          }}
+          className="w-full py-4 bg-orange-500 text-white font-bold rounded-2xl shadow-lg shadow-orange-500/20 active:scale-95 transition-transform"
+        >
+          Done
+        </button>
       </div>
     </div>
   );
