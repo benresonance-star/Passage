@@ -1,8 +1,9 @@
 "use client";
 
-import { useLayoutEffect } from "react";
+import { useLayoutEffect, useState, useEffect } from "react";
 import { useBCM } from "@/context/BCMContext";
 import { BottomNav } from "@/components/BottomNav";
+import { SplashScreen, wasSplashShown } from "@/components/SplashScreen";
 
 // Helper to calculate brightness of a hex color
 function getBrightness(hex: string) {
@@ -14,6 +15,16 @@ function getBrightness(hex: string) {
 
 export function ThemeContent({ children }: { children: React.ReactNode }) {
   const { state, isHydrated } = useBCM();
+
+  // Splash: shown once per browser session
+  const [showSplash, setShowSplash] = useState(false);
+
+  useEffect(() => {
+    // Only check sessionStorage after hydration (client-side)
+    if (isHydrated && !wasSplashShown()) {
+      setShowSplash(true);
+    }
+  }, [isHydrated]);
 
   const theme = isHydrated && state.settings.theme
     ? state.settings.theme
@@ -40,6 +51,9 @@ export function ThemeContent({ children }: { children: React.ReactNode }) {
 
   return (
     <>
+      {showSplash && (
+        <SplashScreen onComplete={() => setShowSplash(false)} />
+      )}
       <main className="min-h-screen pb-24 max-w-md mx-auto px-4 pt-safe">
         {children}
       </main>
