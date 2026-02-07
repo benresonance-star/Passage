@@ -229,10 +229,10 @@ export function SoakVerseTap({
   const verse = section.verses[state.displayedIndex];
   const tokens = verse ? tokenizeVerse(verse.text) : [];
 
-  const isFading = state.phase === "fade-out" || state.phase === "pause";
-  const opacity = isFading ? 0 : 1;
-  // Use the longer of the two durations so fade-out and fade-in both animate smoothly
-  const transitionDuration = `${Math.max(FADE_OUT_MS, FADE_IN_MS)}ms`;
+  /* Inline opacity — iOS Safari requires this instead of class toggles
+     for smooth CSS transitions.  0 during fade-out & pause, 1 otherwise. */
+  const verseOpacity =
+    state.phase === "fade-out" || state.phase === "pause" ? 0 : 1;
 
   /* ── Verse indicator (e.g. 1 / 5) ───────────────────────────────── */
   const verseIndicator = `${state.displayedIndex + 1} / ${section.verses.length}`;
@@ -271,7 +271,7 @@ export function SoakVerseTap({
       >
         <p
           className="soak-verse soak-text max-w-lg"
-          style={{ opacity, transitionDuration }}
+          style={{ opacity: verseOpacity }}
           data-testid="soak-verse"
           aria-live="polite"
         >
@@ -300,12 +300,8 @@ export function SoakVerseTap({
         style={{ paddingTop: "max(env(safe-area-inset-top), 16px)" }}
       >
         <span
-          className="text-[11px] tracking-[0.2em] uppercase font-light"
-          style={{
-            color: "rgba(255, 252, 240, 0.3)",
-            opacity,
-            transition: `opacity ${transitionDuration} ease-in-out`,
-          }}
+          className="text-[11px] tracking-[0.2em] uppercase font-light soak-verse"
+          style={{ color: "rgba(255, 252, 240, 0.3)", opacity: verseOpacity }}
         >
           {verseIndicator}
         </span>

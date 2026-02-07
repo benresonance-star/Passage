@@ -97,8 +97,14 @@
 /* ─── Verse Text ──────────────────────────────────────────────────── */
 
 .soak-verse {
-  transition-property: opacity;
-  transition-timing-function: ease-in-out;
+  /* Inline opacity is set by JS — never use class-based opacity toggles
+     because iOS Safari ignores CSS transitions on class-swapped !important. */
+  transition: opacity 800ms ease-in-out;
+
+  /* Force GPU layer so iOS doesn't jank the fade */
+  will-change: opacity;
+  -webkit-transform: translate3d(0, 0, 0);
+  transform: translate3d(0, 0, 0);
 }
 
 .soak-text {
