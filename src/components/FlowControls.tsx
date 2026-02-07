@@ -62,9 +62,9 @@ export default function FlowControls({
       <div className="flex items-center gap-3">
         <button
           onClick={() => adjustWpm(-50)}
-          className="p-1.5 text-zinc-500 hover:text-white transition-colors bg-[var(--surface-alt)] rounded-lg"
+          className="p-2 text-white/80 hover:text-white transition-colors bg-[var(--surface-alt)] rounded-lg border border-[var(--surface-border)]"
         >
-          <Minus size={14} />
+          <Minus size={16} />
         </button>
         
         <div className="flex flex-col items-center min-w-[40px]">
@@ -73,9 +73,9 @@ export default function FlowControls({
 
         <button
           onClick={() => adjustWpm(50)}
-          className="p-1.5 text-zinc-500 hover:text-white transition-colors bg-[var(--surface-alt)] rounded-lg"
+          className="p-2 text-white/80 hover:text-white transition-colors bg-[var(--surface-alt)] rounded-lg border border-[var(--surface-border)]"
         >
-          <Plus size={14} />
+          <Plus size={16} />
         </button>
       </div>
     </div>

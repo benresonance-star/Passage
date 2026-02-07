@@ -78,6 +78,7 @@ export function ThemeContent({ children }: { children: React.ReactNode }) {
       // Flow mode — soft warm glow instead of orange
       root.style.setProperty("--flow-read", "rgba(255,252,240,1)");
       root.style.setProperty("--flow-unread", "rgba(255,252,240,0.22)");
+      root.style.setProperty("--flow-glow", "0 0 18px rgba(255,210,150,0.25)");
     } else {
       body.style.backgroundColor = theme.bg;
       body.style.color = theme.text;
@@ -111,6 +112,7 @@ export function ThemeContent({ children }: { children: React.ReactNode }) {
       // Flow mode — standard colours for non-Dawn themes
       root.style.setProperty("--flow-read", "#f97316");       // orange-500
       root.style.setProperty("--flow-unread", isLight ? "rgba(0,0,0,0.15)" : "#27272a");
+      root.style.setProperty("--flow-glow", "none");
     }
   }, [theme, isLight, isDawn]);
 
