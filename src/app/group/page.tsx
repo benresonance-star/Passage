@@ -261,14 +261,14 @@ export default function GroupPage() {
       <PromptDialog />
       <ToastContainer />
       <header className="flex items-center gap-4">
-        <Link href="/" className="p-2 text-zinc-500 bg-zinc-900 rounded-full border border-white/5">
+        <Link href="/" className="p-2 text-zinc-500 bg-[var(--surface)] rounded-full border border-[var(--surface-border)]">
           <ArrowLeft size={20} />
         </Link>
         <h1 className="text-2xl font-bold">Study Group</h1>
       </header>
 
       {!user ? (
-        <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-8 space-y-8 shadow-2xl">
+        <div className="bg-[var(--surface)] glass border border-[var(--surface-border)] rounded-3xl p-8 space-y-8 shadow-2xl">
           <div className="flex flex-col items-center text-center space-y-4">
             <div className="w-16 h-16 bg-orange-500/10 rounded-2xl flex items-center justify-center border border-orange-500/20 text-orange-500">
               <Users size={32} />
@@ -292,7 +292,7 @@ export default function GroupPage() {
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full bg-black border border-zinc-800 rounded-2xl py-4 pl-12 pr-4 text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50 transition-all"
+                    className="w-full bg-[var(--input-bg)] border border-[var(--surface-border)] rounded-2xl py-4 pl-12 pr-4 text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50 transition-all"
                     placeholder="name@email.com"
                   />
                 </div>
@@ -328,7 +328,7 @@ export default function GroupPage() {
                     maxLength={8}
                     value={otp}
                     onChange={(e) => setOtp(e.target.value)}
-                    className="w-full bg-black border border-zinc-800 rounded-2xl py-4 text-center text-2xl font-bold tracking-[0.3em] text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50 transition-all"
+                    className="w-full bg-[var(--input-bg)] border border-[var(--surface-border)] rounded-2xl py-4 text-center text-2xl font-bold tracking-[0.3em] text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50 transition-all"
                     placeholder="00000000"
                   />
                 </div>
@@ -353,7 +353,7 @@ export default function GroupPage() {
       ) : (
         <div className="space-y-8 animate-in fade-in duration-500">
           {/* User Profile Card */}
-          <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-6 space-y-6 shadow-xl relative overflow-hidden">
+          <div className="bg-[var(--surface)] glass border border-[var(--surface-border)] rounded-3xl p-6 space-y-6 shadow-xl relative overflow-hidden">
             <div className="flex justify-between items-start">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 bg-orange-500 rounded-2xl flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-orange-500/20">
@@ -365,7 +365,7 @@ export default function GroupPage() {
                       autoFocus
                       value={newName}
                       onChange={(e) => setNewName(e.target.value)}
-                      className="bg-black border border-zinc-700 rounded-lg px-3 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-orange-500 w-32"
+                      className="bg-[var(--input-bg)] border border-[var(--surface-border)] rounded-lg px-3 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-orange-500 w-32"
                     />
                     <button onClick={handleUpdateName} className="p-1 text-green-500">
                       <Check size={18} />
@@ -388,7 +388,7 @@ export default function GroupPage() {
               </div>
               <button 
                 onClick={() => signOut()}
-                className="p-2 text-zinc-500 bg-black/40 rounded-xl border border-white/5"
+                className="p-2 text-zinc-500 bg-[var(--surface-alt)] rounded-xl border border-[var(--surface-border)]"
               >
                 <LogOut size={18} />
               </button>
@@ -401,7 +401,7 @@ export default function GroupPage() {
             
             {group ? (
               <div className="space-y-4">
-                <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-6 space-y-6 shadow-xl">
+                <div className="bg-[var(--surface)] glass border border-[var(--surface-border)] rounded-3xl p-6 space-y-6 shadow-xl">
                   <div className="flex justify-between items-center">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 bg-orange-500/10 rounded-xl flex items-center justify-center text-orange-500 border border-orange-500/20">
@@ -416,15 +416,15 @@ export default function GroupPage() {
                     </div>
                   </div>
 
-                  <div className="pt-4 border-t border-zinc-800 space-y-3">
+                  <div className="pt-4 border-t border-[var(--surface-border)] space-y-3">
                     <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest ml-1">Invite Friends (Group ID)</p>
                     <div className="flex gap-2">
-                      <div className="flex-1 bg-black border border-zinc-800 rounded-xl px-4 py-3 text-zinc-400 font-mono text-xs overflow-hidden text-ellipsis whitespace-nowrap">
+                      <div className="flex-1 bg-[var(--input-bg)] border border-[var(--surface-border)] rounded-xl px-4 py-3 text-zinc-400 font-mono text-xs overflow-hidden text-ellipsis whitespace-nowrap">
                         {group.id}
                       </div>
                       <button 
                         onClick={copyGroupId}
-                        className={`p-3 rounded-xl border transition-all ${copied ? "bg-green-500/10 border-green-500/20 text-green-500" : "bg-zinc-800 border-white/5 text-zinc-400"}`}
+                        className={`p-3 rounded-xl border transition-all ${copied ? "bg-green-500/10 border-green-500/20 text-green-500" : "bg-[var(--surface-alt)] border-[var(--surface-border)] text-zinc-400"}`}
                       >
                         {copied ? <Check size={18} /> : <Copy size={18} />}
                       </button>
@@ -433,15 +433,15 @@ export default function GroupPage() {
                 </div>
 
                 {/* Member List */}
-                <div className="bg-zinc-900 border border-zinc-800 rounded-3xl overflow-hidden shadow-xl">
-                  <div className="p-4 border-b border-zinc-800 bg-black/20">
+                <div className="bg-[var(--surface)] glass border border-[var(--surface-border)] rounded-3xl overflow-hidden shadow-xl">
+                  <div className="p-4 border-b border-[var(--surface-border)] bg-[var(--surface-alt)]">
                     <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Group Members ({members.length})</p>
                   </div>
-                  <div className="divide-y divide-zinc-800">
+                  <div className="divide-y divide-[var(--surface-border)]">
                     {members.map((m: any) => (
                       <div key={m.user_id} className="p-4 flex justify-between items-center">
                         <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-lg bg-zinc-800 border border-white/5 flex items-center justify-center text-xs font-bold text-zinc-500">
+                          <div className="w-8 h-8 rounded-lg bg-[var(--surface-alt)] border border-[var(--surface-border)] flex items-center justify-center text-xs font-bold text-zinc-500">
                             {m.profiles.display_name?.charAt(0).toUpperCase() || "S"}
                           </div>
                           <div>
@@ -467,14 +467,14 @@ export default function GroupPage() {
                         </div>
                         <div className="flex items-center gap-2">
                           {m.role === 'admin' ? (
-                            <span className="text-[9px] font-bold uppercase tracking-tighter px-2 py-0.5 bg-zinc-800 text-zinc-400 rounded-full border border-white/5">
+                            <span className="text-[9px] font-bold uppercase tracking-tighter px-2 py-0.5 bg-[var(--surface-alt)] text-zinc-400 rounded-full border border-[var(--surface-border)]">
                               Admin
                             </span>
                           ) : (
                             group.admin_id === user.id && (
                               <button 
                                 onClick={() => handleRemoveMember(m.user_id, m.profiles.display_name)}
-                                className="p-2 text-zinc-600 hover:text-red-500 transition-colors bg-zinc-800/50 rounded-lg border border-white/5"
+                                className="p-2 text-zinc-600 hover:text-red-500 transition-colors bg-[var(--surface-alt)] rounded-lg border border-[var(--surface-border)]"
                               >
                                 <X size={14} />
                               </button>
@@ -488,7 +488,7 @@ export default function GroupPage() {
               </div>
             ) : (
               <div className="space-y-4">
-                <div className="bg-zinc-900/50 border border-dashed border-zinc-800 rounded-3xl p-10 text-center space-y-6">
+                <div className="bg-[var(--surface)] border border-dashed border-[var(--surface-border)] rounded-3xl p-10 text-center space-y-6">
                   <div className="flex justify-center">
                     <Users size={32} className="text-zinc-700" />
                   </div>
@@ -499,14 +499,14 @@ export default function GroupPage() {
                   <button 
                     onClick={handleCreateGroup}
                     disabled={loading}
-                    className="w-full py-4 bg-zinc-800 text-white font-bold rounded-2xl border border-white/5 active:scale-95 transition-transform flex items-center justify-center gap-2"
+                    className="w-full py-4 bg-[var(--surface-alt)] text-white font-bold rounded-2xl border border-[var(--surface-border)] active:scale-95 transition-transform flex items-center justify-center gap-2"
                   >
                     <Plus size={18} />
                     Create New Group
                   </button>
                 </div>
 
-                <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-6">
+                <div className="bg-[var(--surface)] glass border border-[var(--surface-border)] rounded-3xl p-6">
                   <form onSubmit={handleJoinGroup} className="space-y-4">
                     <div className="space-y-2">
                       <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest ml-1">Join with Group ID</label>
@@ -514,7 +514,7 @@ export default function GroupPage() {
                         required
                         value={joinGroupId}
                         onChange={(e) => setJoinGroupId(e.target.value)}
-                        className="w-full bg-black border border-zinc-800 rounded-2xl py-4 px-6 text-white text-sm font-mono focus:outline-none focus:ring-2 focus:ring-orange-500/50 transition-all"
+                        className="w-full bg-[var(--input-bg)] border border-[var(--surface-border)] rounded-2xl py-4 px-6 text-white text-sm font-mono focus:outline-none focus:ring-2 focus:ring-orange-500/50 transition-all"
                         placeholder="Paste ID here..."
                       />
                     </div>

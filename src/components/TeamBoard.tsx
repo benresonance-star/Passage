@@ -124,13 +124,13 @@ export function TeamBoard({ groupId, groupName, chapterTitle, totalChunks }: { g
           {groupName}
         </h3>
       </div>
-      <div className="bg-zinc-900 border border-zinc-800 rounded-3xl overflow-hidden shadow-xl">
-        <div className="divide-y divide-zinc-800">
+      <div className="bg-[var(--surface)] glass border border-[var(--surface-border)] rounded-3xl overflow-hidden shadow-xl">
+        <div className="divide-y divide-[var(--surface-border)]">
           {members.map((member) => (
             <div key={member.user_id} className="p-4 space-y-3">
               <div className="flex justify-between items-center">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-zinc-800 rounded-lg flex items-center justify-center text-xs font-bold text-zinc-400 border border-white/5">
+                  <div className="w-8 h-8 bg-[var(--surface-alt)] rounded-lg flex items-center justify-center text-xs font-bold text-zinc-400 border border-[var(--surface-border)]">
                     {member.display_name.charAt(0)}
                   </div>
                   <div>
@@ -146,7 +146,7 @@ export function TeamBoard({ groupId, groupName, chapterTitle, totalChunks }: { g
                   </span>
                 )}
               </div>
-              <div className="h-1.5 bg-black rounded-full overflow-hidden border border-white/5">
+              <div className="h-1.5 bg-[var(--input-bg)] rounded-full overflow-hidden border border-[var(--surface-border)]">
                 <div 
                   className="h-full bg-orange-500 transition-all duration-1000" 
                   style={{ width: `${member.progress}%` }}

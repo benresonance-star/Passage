@@ -175,13 +175,13 @@ export default function RecitePage() {
       <div className="py-8 space-y-4">
         {!isGraded ? (
           <div className="grid grid-cols-3 gap-3">
-            <button onClick={() => handleGrade(0.3)} className="flex flex-col items-center gap-1 p-4 bg-zinc-900 border border-zinc-800 rounded-2xl text-red-500 active:scale-95 transition-transform">
+            <button onClick={() => handleGrade(0.3)} className="flex flex-col items-center gap-1 p-4 bg-[var(--surface)] border border-[var(--surface-border)] rounded-2xl text-red-500 active:scale-95 transition-transform">
               <XCircle size={24} /><span className="text-[10px] font-bold uppercase">Missed</span>
             </button>
-            <button onClick={() => handleGrade(0.75)} className="flex flex-col items-center gap-1 p-4 bg-zinc-900 border border-zinc-800 rounded-2xl text-orange-500 active:scale-95 transition-transform">
+            <button onClick={() => handleGrade(0.75)} className="flex flex-col items-center gap-1 p-4 bg-[var(--surface)] border border-[var(--surface-border)] rounded-2xl text-orange-500 active:scale-95 transition-transform">
               <AlertCircle size={24} /><span className="text-[10px] font-bold uppercase">Shaky</span>
             </button>
-            <button onClick={() => handleGrade(1.0)} className="flex flex-col items-center gap-1 p-4 bg-zinc-900 border border-zinc-800 rounded-2xl text-green-500 active:scale-95 transition-transform">
+            <button onClick={() => handleGrade(1.0)} className="flex flex-col items-center gap-1 p-4 bg-[var(--surface)] border border-[var(--surface-border)] rounded-2xl text-green-500 active:scale-95 transition-transform">
               <Check size={24} /><span className="text-[10px] font-bold uppercase">Nailed it</span>
             </button>
           </div>

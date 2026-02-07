@@ -71,7 +71,7 @@ export default function ReviewPage() {
       <header className="py-4">
         <h1 className="text-2xl font-bold">Chapter Mastery</h1>
         <div className="flex items-center gap-2 mt-1">
-          <div className="flex-1 h-1.5 bg-zinc-900 rounded-full overflow-hidden border border-white/5">
+          <div className="flex-1 h-1.5 bg-[var(--surface)] rounded-full overflow-hidden border border-[var(--surface-border)]">
             <div 
               className="h-full bg-amber-500 transition-all duration-500" 
               style={{ width: `${(memorisedCount / totalChunks) * 100}%` }}
@@ -127,14 +127,14 @@ export default function ReviewPage() {
               <div className="grid grid-cols-2 gap-3">
                 <button
                   onClick={() => setActiveAndNavigate(chunk.id, "/practice")}
-                  className="flex items-center justify-center gap-2 py-3 bg-zinc-800 text-white text-sm font-bold rounded-xl active:scale-95 transition-transform border border-white/5"
+                  className="flex items-center justify-center gap-2 py-3 bg-[var(--surface-alt)] text-white text-sm font-bold rounded-xl active:scale-95 transition-transform border border-[var(--surface-border)]"
                 >
                   <Play size={16} fill="currentColor" />
                   Practice
                 </button>
                 <button
                   onClick={() => setActiveAndNavigate(chunk.id, "/recite")}
-                  className="flex items-center justify-center gap-2 py-3 bg-zinc-800 text-white text-sm font-bold rounded-xl active:scale-95 transition-transform border border-white/5"
+                  className="flex items-center justify-center gap-2 py-3 bg-[var(--surface-alt)] text-white text-sm font-bold rounded-xl active:scale-95 transition-transform border border-[var(--surface-border)]"
                 >
                   <Mic size={16} />
                   Recite
@@ -147,7 +147,7 @@ export default function ReviewPage() {
                   className={`col-span-2 flex items-center justify-center gap-2 py-3 text-sm font-bold rounded-xl border transition-all active:scale-95 ${
                     isMemorised 
                       ? "bg-amber-500 text-zinc-950 border-amber-400" 
-                      : "bg-zinc-800 text-zinc-400 border-zinc-700"
+                      : "bg-[var(--surface-alt)] text-zinc-400 border-[var(--surface-border)]"
                   }`}
                 >
                   <Award size={16} fill={isMemorised ? "currentColor" : "none"} />

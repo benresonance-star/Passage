@@ -241,7 +241,7 @@ export default function PracticePage() {
                   className={`px-3 py-1 rounded-full text-xs font-bold transition-colors ${
                     state.settings.clozeLevel === level 
                       ? "bg-orange-500 text-white" 
-                      : "bg-zinc-900 text-zinc-500 border border-zinc-800"
+                      : "bg-[var(--surface)] text-[var(--theme-ui-subtext)] border border-[var(--surface-border)]"
                   }`}
                 >
                   {level}%
@@ -252,7 +252,7 @@ export default function PracticePage() {
                 className={`px-3 py-1 rounded-full text-xs font-bold transition-colors uppercase tracking-widest ${
                   state.settings.clozeLevel === "mnemonic" 
                     ? "bg-amber-500 text-black" 
-                    : "bg-zinc-900 text-zinc-500 border border-zinc-800"
+                    : "bg-[var(--surface)] text-[var(--theme-ui-subtext)] border border-[var(--surface-border)]"
                 }`}
               >
                 Abc
@@ -341,7 +341,7 @@ export default function PracticePage() {
 
           <button
             onClick={() => setIsFlowMode(true)}
-            className={`w-full py-3 bg-zinc-900 border border-zinc-800 text-zinc-400 font-bold rounded-2xl flex items-center justify-center gap-2 hover:text-orange-500 transition-all uppercase tracking-widest text-xs ${isFlowMode ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
+            className={`w-full py-3 bg-[var(--surface)] border border-[var(--surface-border)] text-[var(--theme-ui-subtext)] font-bold rounded-2xl flex items-center justify-center gap-2 hover:text-orange-500 transition-all uppercase tracking-widest text-xs ${isFlowMode ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
           >
             <Zap size={16} className="fill-current" />
             Start Flow Mode

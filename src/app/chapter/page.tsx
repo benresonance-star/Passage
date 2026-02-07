@@ -112,8 +112,8 @@ export default function ChapterPage() {
       {/* Theme Modal */}
       {showThemeModal && (
         <div className="fixed inset-0 z-50 animate-in fade-in duration-300">
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowThemeModal(false)} />
-          <div className={`absolute inset-x-0 bottom-0 max-w-md mx-auto border-t rounded-t-[32px] p-8 pb-12 shadow-2xl animate-in slide-in-from-bottom duration-500 ${isDawn ? "bg-black/80 backdrop-blur-xl border-white/10" : "bg-zinc-900 border-zinc-800"}`}>
+          <div className="absolute inset-0 bg-[var(--overlay)] backdrop-blur-sm" onClick={() => setShowThemeModal(false)} />
+          <div className="absolute inset-x-0 bottom-0 max-w-md mx-auto bg-[var(--overlay-surface)] glass border-t border-[var(--surface-border)] rounded-t-[32px] p-8 pb-12 shadow-2xl animate-in slide-in-from-bottom duration-500">
             <div className="flex justify-between items-center mb-8">
               <h2 className="text-xl font-bold text-white text-center w-full ml-8">Appearance</h2>
               <button onClick={() => setShowThemeModal(false)} className="p-2 text-zinc-500">
@@ -132,7 +132,7 @@ export default function ChapterPage() {
                       key={p.name}
                       onClick={() => setTheme(p.bg, p.text, p.id)}
                       className={`flex items-center gap-3 p-4 rounded-2xl border transition-all ${
-                        isSelected ? "border-orange-500 bg-orange-500/5" : "border-zinc-800 bg-black/20"
+                        isSelected ? "border-orange-500 bg-orange-500/5" : "border-[var(--surface-border)] bg-[var(--surface)]"
                       }`}
                     >
                       <div 
@@ -149,7 +149,7 @@ export default function ChapterPage() {
                 })}
               </div>
 
-              <div className="space-y-4 pt-4 border-t border-zinc-800">
+              <div className="space-y-4 pt-4 border-t border-[var(--surface-border)]">
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-bold text-zinc-400">Background</span>
                   <input 
@@ -173,7 +173,7 @@ export default function ChapterPage() {
 
             <button 
               onClick={() => setShowThemeModal(false)}
-              className="w-full mt-12 py-4 bg-zinc-800 text-white font-bold rounded-2xl border border-white/5 active:scale-95 transition-transform"
+              className="w-full mt-12 py-4 bg-[var(--surface-alt)] text-white font-bold rounded-2xl border border-[var(--surface-border)] active:scale-95 transition-transform"
             >
               Done
             </button>

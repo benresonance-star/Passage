@@ -17,8 +17,8 @@ export function Modal({ open, onClose, title, children }: ModalProps) {
 
   return (
     <div className="fixed inset-0 z-50 animate-in fade-in duration-200">
-      <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={onClose} />
-      <div className="absolute inset-x-0 bottom-0 max-w-md mx-auto bg-zinc-900 border-t border-zinc-800 rounded-t-[32px] p-6 pb-8 shadow-2xl animate-in slide-in-from-bottom duration-300">
+      <div className="absolute inset-0 bg-[var(--overlay)] backdrop-blur-sm" onClick={onClose} />
+      <div className="absolute inset-x-0 bottom-0 max-w-md mx-auto bg-[var(--overlay-surface)] glass border-t border-[var(--surface-border)] rounded-t-[32px] p-6 pb-8 shadow-2xl animate-in slide-in-from-bottom duration-300">
         {title && (
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-lg font-bold text-white">{title}</h2>
@@ -118,7 +118,7 @@ export function useConfirm() {
         <div className="grid grid-cols-2 gap-3">
           <button
             onClick={() => handleClose(false)}
-            className="py-3.5 bg-zinc-800 text-white font-bold rounded-2xl border border-white/5 active:scale-95 transition-transform"
+            className="py-3.5 bg-[var(--surface-alt)] text-white font-bold rounded-2xl border border-[var(--surface-border)] active:scale-95 transition-transform"
           >
             Cancel
           </button>
@@ -191,7 +191,7 @@ export function usePrompt() {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder={state.placeholder}
-          className="w-full bg-black border border-zinc-800 rounded-2xl py-4 px-5 text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50 transition-all mb-6"
+          className="w-full bg-[var(--input-bg)] border border-[var(--surface-border)] rounded-2xl py-4 px-5 text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50 transition-all mb-6"
           onKeyDown={(e) => {
             if (e.key === "Enter" && input.trim()) handleClose(input.trim());
           }}
@@ -199,7 +199,7 @@ export function usePrompt() {
         <div className="grid grid-cols-2 gap-3">
           <button
             onClick={() => handleClose(null)}
-            className="py-3.5 bg-zinc-800 text-white font-bold rounded-2xl border border-white/5 active:scale-95 transition-transform"
+            className="py-3.5 bg-[var(--surface-alt)] text-white font-bold rounded-2xl border border-[var(--surface-border)] active:scale-95 transition-transform"
           >
             Cancel
           </button>

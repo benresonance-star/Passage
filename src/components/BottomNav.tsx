@@ -20,7 +20,7 @@ export function BottomNav({ isDawn = false }: { isDawn?: boolean }) {
     <nav className={`fixed bottom-0 left-0 right-0 z-[2] pb-safe pt-2 ${
       isDawn 
         ? "bg-black/30 backdrop-blur-md border-t border-white/10" 
-        : "bg-zinc-900 border-t border-zinc-800"
+        : "bg-[var(--surface)] border-t border-[var(--surface-border)]"
     }`}>
       <div className="flex justify-around items-center h-16 max-w-md mx-auto px-4">
         {NAV_ITEMS.map(({ label, href, icon: Icon }) => {

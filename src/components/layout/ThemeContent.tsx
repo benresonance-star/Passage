@@ -46,6 +46,13 @@ export function ThemeContent({ children }: { children: React.ReactNode }) {
     const body = document.body;
     const root = document.documentElement;
 
+    // Dawn data-attribute for CSS-only rules (e.g. glass blur)
+    if (isDawn) {
+      root.setAttribute("data-dawn", "");
+    } else {
+      root.removeAttribute("data-dawn");
+    }
+
     if (isDawn) {
       // Dawn: transparent body so the gradient div shows through
       body.style.backgroundColor = "transparent";
@@ -59,6 +66,14 @@ export function ThemeContent({ children }: { children: React.ReactNode }) {
       root.style.setProperty("--theme-ui-bg", "rgba(255,255,255,0.08)");
       root.style.setProperty("--theme-ui-border", "rgba(255,255,255,0.12)");
       root.style.setProperty("--theme-ui-subtext", "rgba(255,252,240,0.5)");
+
+      // Surface tokens — translucent glass for Dawn
+      root.style.setProperty("--surface", "rgba(0,0,0,0.22)");
+      root.style.setProperty("--surface-alt", "rgba(255,255,255,0.08)");
+      root.style.setProperty("--surface-border", "rgba(255,255,255,0.10)");
+      root.style.setProperty("--overlay", "rgba(0,0,0,0.60)");
+      root.style.setProperty("--overlay-surface", "rgba(0,0,0,0.65)");
+      root.style.setProperty("--input-bg", "rgba(0,0,0,0.30)");
     } else {
       body.style.backgroundColor = theme.bg;
       body.style.color = theme.text;
@@ -71,6 +86,23 @@ export function ThemeContent({ children }: { children: React.ReactNode }) {
       root.style.setProperty("--theme-ui-bg", isLight ? "rgba(0,0,0,0.05)" : "rgba(255,255,255,0.05)");
       root.style.setProperty("--theme-ui-border", isLight ? "rgba(0,0,0,0.1)" : "rgba(255,255,255,0.1)");
       root.style.setProperty("--theme-ui-subtext", isLight ? "rgba(0,0,0,0.5)" : "rgba(255,255,255,0.5)");
+
+      // Surface tokens — opaque for standard themes
+      if (isLight) {
+        root.style.setProperty("--surface", "rgba(0,0,0,0.04)");
+        root.style.setProperty("--surface-alt", "rgba(0,0,0,0.07)");
+        root.style.setProperty("--surface-border", "rgba(0,0,0,0.10)");
+        root.style.setProperty("--overlay", "rgba(0,0,0,0.50)");
+        root.style.setProperty("--overlay-surface", theme.bg);
+        root.style.setProperty("--input-bg", "rgba(0,0,0,0.04)");
+      } else {
+        root.style.setProperty("--surface", "#18181b");
+        root.style.setProperty("--surface-alt", "#27272a");
+        root.style.setProperty("--surface-border", "#27272a");
+        root.style.setProperty("--overlay", "rgba(0,0,0,0.90)");
+        root.style.setProperty("--overlay-surface", "#18181b");
+        root.style.setProperty("--input-bg", "#000000");
+      }
     }
   }, [theme, isLight, isDawn]);
 

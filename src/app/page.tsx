@@ -126,13 +126,13 @@ export default function Home() {
         <div className="flex gap-2">
           <Link 
             href="/group"
-            className={`p-2 transition-colors rounded-full border border-white/5 ${user ? "text-orange-500 bg-orange-500/10" : "text-zinc-500 bg-zinc-900"}`}
+            className={`p-2 transition-colors rounded-full border border-[var(--surface-border)] ${user ? "text-orange-500 bg-orange-500/10" : "text-zinc-500 bg-[var(--surface)]"}`}
           >
             <Users size={20} />
           </Link>
           <button 
             onClick={() => setShowInfo(true)}
-            className="p-2 text-zinc-500 hover:text-white transition-colors bg-zinc-900 rounded-full border border-white/5"
+            className="p-2 text-zinc-500 hover:text-white transition-colors bg-[var(--surface)] rounded-full border border-[var(--surface-border)]"
           >
             <Info size={20} />
           </button>
@@ -142,8 +142,8 @@ export default function Home() {
       {/* Info Modal */}
       {showInfo && (
         <div className="fixed inset-0 z-50 animate-in fade-in duration-300">
-          <div className="absolute inset-0 bg-black/90 backdrop-blur-sm" onClick={() => setShowInfo(false)} />
-          <div className="absolute inset-x-0 bottom-0 max-w-md mx-auto bg-zinc-900 border-t border-zinc-800 rounded-t-[32px] p-6 pb-8 shadow-2xl animate-in slide-in-from-bottom duration-500 max-h-[95vh] overflow-y-auto">
+          <div className="absolute inset-0 bg-[var(--overlay)] backdrop-blur-sm" onClick={() => setShowInfo(false)} />
+          <div className="absolute inset-x-0 bottom-0 max-w-md mx-auto bg-[var(--overlay-surface)] glass border-t border-[var(--surface-border)] rounded-t-[32px] p-6 pb-8 shadow-2xl animate-in slide-in-from-bottom duration-500 max-h-[95vh] overflow-y-auto">
             <div className="flex justify-between items-start mb-6">
               <h2 className="text-lg font-bold pr-8">How to Memorise a Chapter (the right way)</h2>
               <button onClick={() => setShowInfo(false)} className="p-1 text-zinc-500">
@@ -162,7 +162,7 @@ export default function Home() {
 
             <button 
               onClick={() => setShowInfo(false)}
-              className="w-full mt-8 py-3.5 bg-zinc-800 text-white font-bold rounded-2xl border border-white/5 active:scale-95 transition-transform"
+              className="w-full mt-8 py-3.5 bg-[var(--surface-alt)] text-white font-bold rounded-2xl border border-[var(--surface-border)] active:scale-95 transition-transform"
             >
               Got it
             </button>
@@ -172,7 +172,7 @@ export default function Home() {
 
       {selectedChapter ? (
         <div className="space-y-8">
-          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 space-y-4 shadow-xl relative overflow-hidden">
+          <div className="bg-[var(--surface)] glass border border-[var(--surface-border)] rounded-2xl p-6 space-y-4 shadow-xl relative overflow-hidden">
             <div className="flex justify-between items-start">
               <div className="space-y-1">
                 <h2 className="text-zinc-400 text-sm font-medium uppercase tracking-wider">Active Chapter</h2>
@@ -195,7 +195,7 @@ export default function Home() {
               <Link href="/practice" className="flex items-center justify-center gap-2 py-4 bg-orange-500 text-white font-bold rounded-xl active:scale-95 transition-transform">
                 <Play size={20} fill="currentColor" />Practice
               </Link>
-              <Link href="/chapter" className="flex items-center justify-center gap-2 py-4 bg-zinc-800 text-white font-bold rounded-xl active:scale-95 transition-transform">
+              <Link href="/chapter" className="flex items-center justify-center gap-2 py-4 bg-[var(--surface-alt)] text-white font-bold rounded-xl active:scale-95 transition-transform">
                 <BookOpen size={20} />Full Text
               </Link>
             </div>
@@ -220,12 +220,12 @@ export default function Home() {
                   className={`flex items-center justify-between p-4 rounded-xl border transition-all active:scale-[0.98] ${
                     ch.id === selectedChapter.id 
                       ? "bg-orange-500/5 border-orange-500/20" 
-                      : "bg-zinc-900 border-zinc-800 active:bg-zinc-800"
+                      : "bg-[var(--surface)] border-[var(--surface-border)] active:bg-[var(--surface-alt)]"
                   }`}
                 >
                   <div className="flex items-center gap-4">
                     <div className={`w-10 h-10 rounded-lg flex items-center justify-center border ${
-                      ch.id === selectedChapter.id ? "bg-orange-500/10 border-orange-500/30 text-orange-500" : "bg-zinc-800 border-zinc-700 text-zinc-500"
+                      ch.id === selectedChapter.id ? "bg-orange-500/10 border-orange-500/30 text-orange-500" : "bg-[var(--surface-alt)] border-[var(--surface-border)] text-zinc-500"
                     }`}>
                       <BookOpen size={20} />
                     </div>
@@ -246,7 +246,7 @@ export default function Home() {
               {isAdmin && (
                 <Link
                   href="/import"
-                  className="flex items-center justify-center gap-3 p-4 bg-zinc-900/50 border border-dashed border-zinc-800 rounded-xl text-zinc-500 hover:text-orange-500 hover:border-orange-500/50 transition-all"
+                  className="flex items-center justify-center gap-3 p-4 bg-[var(--surface)] border border-dashed border-[var(--surface-border)] rounded-xl text-zinc-500 hover:text-orange-500 hover:border-orange-500/50 transition-all"
                 >
                   <Upload size={20} />
                   <span className="font-bold">Add New Chapter</span>
@@ -284,7 +284,7 @@ export default function Home() {
         </div>
       ) : (
         <div className="flex flex-col items-center justify-center py-20 text-center space-y-6">
-          <div className="w-20 h-20 bg-zinc-900 rounded-3xl flex items-center justify-center border border-zinc-800 shadow-inner">
+          <div className="w-20 h-20 bg-[var(--surface)] rounded-3xl flex items-center justify-center border border-[var(--surface-border)] shadow-inner">
             <BookOpen size={40} className="text-zinc-600" />
           </div>
           <div className="space-y-2">

@@ -25,7 +25,7 @@ export default function FlowControls({
   };
 
   return (
-    <div className="flex items-center justify-between bg-zinc-900/80 backdrop-blur-xl px-6 py-4 rounded-full border border-white/5 shadow-2xl w-[92%] max-w-md mx-auto pointer-events-auto transition-all animate-in slide-in-from-bottom-4">
+    <div className="flex items-center justify-between bg-[var(--surface)] backdrop-blur-xl px-6 py-4 rounded-full border border-[var(--surface-border)] shadow-2xl w-[92%] max-w-md mx-auto pointer-events-auto transition-all animate-in slide-in-from-bottom-4">
       {/* Exit Button */}
       <button
         onClick={onClose}
@@ -62,7 +62,7 @@ export default function FlowControls({
       <div className="flex items-center gap-3">
         <button
           onClick={() => adjustWpm(-50)}
-          className="p-1.5 text-zinc-500 hover:text-white transition-colors bg-zinc-800 rounded-lg"
+          className="p-1.5 text-zinc-500 hover:text-white transition-colors bg-[var(--surface-alt)] rounded-lg"
         >
           <Minus size={14} />
         </button>
@@ -73,7 +73,7 @@ export default function FlowControls({
 
         <button
           onClick={() => adjustWpm(50)}
-          className="p-1.5 text-zinc-500 hover:text-white transition-colors bg-zinc-800 rounded-lg"
+          className="p-1.5 text-zinc-500 hover:text-white transition-colors bg-[var(--surface-alt)] rounded-lg"
         >
           <Plus size={14} />
         </button>

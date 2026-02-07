@@ -90,9 +90,9 @@ export default function ImportPage() {
       </header>
 
       <div className="space-y-4">
-        <div className="bg-zinc-900 rounded-xl p-4 border border-zinc-800">
+        <div className="bg-[var(--surface)] rounded-xl p-4 border border-[var(--surface-border)]">
           <p className="text-sm text-zinc-400 mb-2">Example format:</p>
-          <pre className="text-xs text-orange-500/80 bg-black/40 p-2 rounded border border-orange-500/20 leading-relaxed">
+          <pre className="text-xs text-orange-500/80 bg-[var(--input-bg)] p-2 rounded border border-orange-500/20 leading-relaxed">
             {"<1> Therefore, there is now no...\n<2> because through Christ..."}
           </pre>
         </div>
@@ -102,17 +102,17 @@ export default function ImportPage() {
           <textarea
             value={text}
             onChange={(e) => setText(e.target.value)}
-            className="w-full h-80 bg-zinc-900 border border-zinc-800 rounded-xl p-4 text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50 resize-none"
+            className="w-full h-80 bg-[var(--surface)] border border-[var(--surface-border)] rounded-xl p-4 text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50 resize-none"
             placeholder="Paste your chapter here..."
           />
         </div>
 
         <div 
           onClick={() => setStripRefs(!stripRefs)}
-          className="flex items-center gap-3 p-4 bg-zinc-900 border border-zinc-800 rounded-xl cursor-pointer active:bg-zinc-800 transition-colors"
+          className="flex items-center gap-3 p-4 bg-[var(--surface)] border border-[var(--surface-border)] rounded-xl cursor-pointer active:bg-[var(--surface-alt)] transition-colors"
         >
           <div className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${
-            stripRefs ? "bg-orange-500 border-orange-500" : "border-zinc-700"
+            stripRefs ? "bg-orange-500 border-orange-500" : "border-[var(--surface-border)]"
           }`}>
             {stripRefs && <Check size={14} className="text-white" />}
           </div>

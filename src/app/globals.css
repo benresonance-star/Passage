@@ -124,3 +124,10 @@
     opacity: 0.6;
   }
 }
+
+/* ─── Dawn Glass — backdrop blur for translucent surfaces ────────── */
+
+html[data-dawn] .glass {
+  -webkit-backdrop-filter: blur(16px) saturate(1.2);
+  backdrop-filter: blur(16px) saturate(1.2);
+}
