@@ -21,7 +21,7 @@ export function BottomNav({ isDawn = false }: { isDawn?: boolean }) {
         ? "bg-black/30 backdrop-blur-md border-t border-white/10" 
         : "bg-[var(--surface)] border-t border-[var(--surface-border)]"
     }`}>
-      <div className="flex justify-around items-center h-16 max-w-md mx-auto px-4">
+      <div className="flex items-center h-16 max-w-md mx-auto px-4">
         {NAV_ITEMS.map(({ label, href, icon: Icon }) => {
           const isActive = pathname === href;
           return (
@@ -30,7 +30,6 @@ export function BottomNav({ isDawn = false }: { isDawn?: boolean }) {
               href={href}
               onClick={(e) => {
                 if (pathname === href) {
-                  // If we are already on this page, dispatch a reset event
                   if (href === "/practice") {
                     window.dispatchEvent(new CustomEvent("bcm-reset-practice"));
                   }
@@ -39,7 +38,7 @@ export function BottomNav({ isDawn = false }: { isDawn?: boolean }) {
                   }
                 }
               }}
-              className={`flex flex-col items-center justify-center gap-1 transition-colors ${
+              className={`flex-1 flex flex-col items-center justify-center gap-1 transition-colors ${
                 isActive 
                   ? "text-orange-500" 
                   : isDawn ? "text-white/50" : "text-zinc-500"
