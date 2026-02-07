@@ -10,7 +10,6 @@ import { calculateUpdatedStreak } from "@/lib/streak";
 import { useWakeLock } from "@/hooks/useWakeLock";
 import { useAuth } from "@/context/AuthContext";
 import FlowControls from "@/components/FlowControls";
-import { motion } from "framer-motion";
 import { ArrowLeft, RefreshCw, CheckCircle2, AlertCircle, Zap } from "lucide-react";
 
 type PracticeMode = "read" | "cloze" | "type" | "result";
@@ -156,7 +155,6 @@ export default function PracticePage() {
     else router.push("/chapter");
   };
 
-  const progress = words.length > 0 ? ((currentIndex + 1) / words.length) * 100 : 0;
 
   return (
     <div className="flex flex-col min-h-[calc(100vh-8rem)] relative">
@@ -179,10 +177,13 @@ export default function PracticePage() {
         {mode === "read" && activeChunk && (
           <div className="animate-in fade-in duration-500">
             <div className="space-y-6">
-              <div className="relative">
-                {/* Base Text (Always present, always in the same spot) */}
-                <div className={`chunk-text-bold text-center leading-relaxed px-4 transition-colors duration-500 ${isFlowMode ? 'text-zinc-800' : 'text-white'}`}>
-                  {activeChunk.verses.map((v, idx) => (
+              <div className="chunk-text-bold text-center leading-relaxed px-4">
+                {(() => {
+                  // Single-layer rendering: each word is individually colored
+                  // based on flow progress — no overlay, no alignment drift.
+                  let globalWordIdx = 0;
+
+                  return activeChunk.verses.map((v, idx) => (
                     <span key={idx} className={v.type === "heading" ? "block" : "inline"}>
                       {v.type === "heading" ? (
                         state.settings.showHeadings && (
@@ -191,61 +192,31 @@ export default function PracticePage() {
                           </span>
                         )
                       ) : (
-                        <span className="inline">{v.text} </span>
+                        <>
+                          {v.text.split(/\s+/).filter(w => w.length > 0).map((word) => {
+                            const wi = globalWordIdx++;
+                            const isRead = isFlowMode && wi <= currentIndex;
+                            const isUnread = isFlowMode && wi > currentIndex;
+                            return (
+                              <span
+                                key={wi}
+                                className={`inline transition-colors duration-200 ${
+                                  isRead
+                                    ? "text-orange-500"
+                                    : isUnread
+                                    ? "text-zinc-800"
+                                    : ""
+                                }`}
+                              >
+                                {word}{" "}
+                              </span>
+                            );
+                          })}
+                        </>
                       )}
                     </span>
-                  ))}
-                </div>
-
-                {/* Flow Highlight Layer (Only visible in Flow Mode) */}
-                {isFlowMode && (
-                  <motion.div 
-                    className="absolute top-0 left-0 w-full h-full px-4 chunk-text-bold text-center leading-relaxed pointer-events-none select-none text-orange-500"
-                    aria-hidden="true"
-                    animate={{
-                      maskImage: `linear-gradient(to bottom, 
-                        rgba(0,0,0,0) 0%,
-                        rgba(0,0,0,0) ${progress - 20}%, 
-                        rgba(0,0,0,1) ${progress - 5}%, 
-                        rgba(0,0,0,1) ${progress}%, 
-                        rgba(0,0,0,0) ${progress + 5}%,
-                        rgba(0,0,0,0) 100%)`,
-                      WebkitMaskImage: `linear-gradient(to bottom, 
-                        rgba(0,0,0,0) 0%,
-                        rgba(0,0,0,0) ${progress - 20}%, 
-                        rgba(0,0,0,1) ${progress - 5}%, 
-                        rgba(0,0,0,1) ${progress}%, 
-                        rgba(0,0,0,0) ${progress + 5}%,
-                        rgba(0,0,0,0) 100%)`
-                    } as any}
-                    transition={{
-                      duration: (60 / wpm),
-                      ease: "linear"
-                    }}
-                    style={{
-                      WebkitMaskSize: "100% 100%",
-                      WebkitMaskRepeat: "no-repeat",
-                      margin: 0,
-                      paddingTop: 0,
-                      paddingBottom: 0,
-                      zIndex: 10
-                    }}
-                  >
-                    {activeChunk.verses.map((v, idx) => (
-                      <span key={idx} className={v.type === "heading" ? "block" : "inline"}>
-                        {v.type === "heading" ? (
-                          state.settings.showHeadings && (
-                            <span className="block text-transparent text-[11px] font-bold uppercase tracking-[0.2em] mb-4 mt-2">
-                              {v.text}
-                            </span>
-                          )
-                        ) : (
-                          <span className="inline">{v.text} </span>
-                        )}
-                      </span>
-                    ))}
-                  </motion.div>
-                )}
+                  ));
+                })()}
               </div>
               
               <p className={`text-center text-zinc-500 text-sm italic transition-opacity duration-500 ${isFlowMode ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
