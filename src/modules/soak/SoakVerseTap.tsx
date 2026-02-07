@@ -10,16 +10,22 @@ import "./breathe.css";
 
 /** Duration of the crossfade (both directions simultaneous). */
 const CROSSFADE_MS = 800;
+/** Pause after new content is rendered at opacity 0, before crossfade starts.
+ *  Gives the browser (especially iOS Safari) time to paint the new DOM. */
+const PREPARE_MS = 60;
 /** Minimum dwell time on a verse before navigation is allowed. */
-const COOLDOWN_MS = 1200;
+const COOLDOWN_MS = 800;
 
 /* ─── Swipe constants ────────────────────────────────────────────── */
 
-const SWIPE_THRESHOLD_PX = 50;
+const SWIPE_THRESHOLD_PX = 30;
 
 /* ─── Exit button constants ──────────────────────────────────────── */
 
 const EXIT_VISIBLE_MS = 3000;
+
+/* ─── Inline transition style (highest CSS specificity) ──────────── */
+const FADE_TRANSITION = "opacity 800ms ease-in-out";
 
 /* ─── State machine ──────────────────────────────────────────────── */
 /*
@@ -29,14 +35,14 @@ const EXIT_VISIBLE_MS = 3000;
  *  Only one is visible at a time (`activeSlot`).
  *
  *  On NAVIGATE the inactive slot receives the new verse index, then:
- *    preparing  → browser paints the new content at opacity 0  (2× rAF)
- *    crossfading → active slot fades out, inactive fades in    (CROSSFADE_MS)
+ *    preparing   → browser paints the new content at opacity 0  (PREPARE_MS)
+ *    crossfading → active slot fades out, inactive fades in     (CROSSFADE_MS)
  *    idle        → activeSlot flips to the slot that just faded in
  *
  *  Because the incoming verse is already rendered (at opacity 0)
  *  before the crossfade begins, NO DOM mutation ever happens during
  *  a visible transition — the compositor just interpolates opacity
- *  on two pre-rendered layers. This is silky-smooth on iOS Safari.
+ *  on two pre-rendered layers.
  */
 
 type Phase = "idle" | "preparing" | "crossfading";
@@ -126,6 +132,7 @@ export function SoakVerseTap({
   /* ── Touch tracking refs ─────────────────────────────────────────── */
   const touchStartX = useRef<number | null>(null);
   const touchStartY = useRef<number | null>(null);
+  /** Timestamp of last touch event — used to ignore synthetic mouse clicks */
   const lastTouchTs = useRef(0);
 
   /* ── Exit icon visibility ────────────────────────────────────────── */
@@ -135,8 +142,6 @@ export function SoakVerseTap({
   /* ── One-time mount fade-in ──────────────────────────────────────── */
   const [mounted, setMounted] = useState(false);
   useEffect(() => {
-    // Schedule on next animation frame so the browser paints opacity 0 first,
-    // then we flip to 1 and the CSS transition produces a smooth fade-in.
     requestAnimationFrame(() => setMounted(true));
   }, []);
 
@@ -155,26 +160,14 @@ export function SoakVerseTap({
   useEffect(() => {
     if (state.phase === "idle") return;
 
-    if (state.phase === "preparing") {
-      // The inactive slot just got new content at opacity 0.
-      // Wait for the browser to paint it, then start the crossfade.
-      let cancelled = false;
-      requestAnimationFrame(() => {
-        if (cancelled) return;
-        requestAnimationFrame(() => {
-          if (cancelled) return;
-          dispatch({ type: "PHASE_COMPLETE" });
-        });
-      });
-      return () => {
-        cancelled = true;
-      };
-    }
+    // Both phases use setTimeout for reliable cross-browser timing.
+    // "preparing" waits PREPARE_MS so the browser fully paints the new
+    // verse content at opacity 0 before the crossfade begins.
+    const ms = state.phase === "preparing" ? PREPARE_MS : CROSSFADE_MS;
 
-    // crossfading → wait for the CSS transition to finish, then complete
     const timer = setTimeout(
       () => dispatch({ type: "PHASE_COMPLETE" }),
-      CROSSFADE_MS,
+      ms,
     );
     return () => clearTimeout(timer);
   }, [state.phase]);
@@ -211,8 +204,10 @@ export function SoakVerseTap({
       touchStartX.current = null;
       touchStartY.current = null;
 
+      // Must exceed horizontal threshold
       if (Math.abs(deltaX) < SWIPE_THRESHOLD_PX) return;
-      if (Math.abs(deltaY) > Math.abs(deltaX)) return;
+      // Allow diagonal swipes — only reject if vertical is more than 2× horizontal
+      if (Math.abs(deltaY) > Math.abs(deltaX) * 2) return;
 
       handleNav(deltaX < 0 ? 1 : -1);
     },
@@ -314,7 +309,12 @@ export function SoakVerseTap({
     >
       <p
         className="soak-verse soak-text max-w-lg"
-        style={{ opacity }}
+        style={{
+          opacity,
+          transition: FADE_TRANSITION,
+          WebkitTransition: FADE_TRANSITION,
+          WebkitTransform: "translate3d(0,0,0)",
+        }}
         data-testid={isTarget ? "soak-verse" : undefined}
         aria-live={isTarget ? "polite" : "off"}
       >
@@ -350,13 +350,14 @@ export function SoakVerseTap({
       ref={bgRef}
       data-testid="soak-breathe"
       className="soak-breathe"
-      onTouchStart={handleTouchStart}
-      onTouchEnd={handleTouchEnd}
     >
-      {/* Click zones — left/right for desktop, center for exit reveal */}
+      {/* Click & swipe zones — topmost interactive layer (z-51).
+          Touch handlers live HERE so iOS Safari reliably captures swipes. */}
       <div
         className="fixed inset-0 z-[51] flex"
         data-testid="soak-click-zones"
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
       >
         <div
           className="w-[30%] h-full cursor-default"

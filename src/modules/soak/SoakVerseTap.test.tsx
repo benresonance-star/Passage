@@ -25,11 +25,11 @@ const SECTION: SoakSection = {
 
 /* ─── Timing helpers ──────────────────────────────────────────────── */
 
-// Initial mount sequence: pause(100) + fade-in(800) + cooldown(1200) = 2100ms
-const MOUNT_TO_READY_MS = 2100;
-// Full verse transition: fade-out(800) + pause(100) + fade-in(800) = 1700ms
-const TRANSITION_MS = 1700;
-const COOLDOWN_MS = 1200;
+// Mount: rAF (~16ms) sets mounted=true, then cooldown (800ms) before nav
+const MOUNT_TO_READY_MS = 1000;
+// Full verse transition: preparing(60) + crossfade(800) = 860ms
+const TRANSITION_MS = 900;
+const COOLDOWN_MS = 800;
 
 /** Advance fake timers past the initial mount sequence so navigation is possible. */
 function waitForReady() {
@@ -48,17 +48,19 @@ function completeTransitionAndCooldown() {
 /* ─── Swipe simulation helpers ────────────────────────────────────── */
 
 /**
- * Simulate a horizontal swipe on the soak-breathe element.
+ * Simulate a horizontal swipe on the click-zones element (topmost touch layer).
  * Negative deltaX = swipe left (next), positive = swipe right (prev).
  */
 function simulateSwipe(element: HTMLElement, deltaX: number) {
   const startX = 200;
   const startY = 300;
+  // Touch handlers are on the click-zones container
+  const touchTarget = element.querySelector('[data-testid="soak-click-zones"]') || element;
 
-  fireEvent.touchStart(element, {
+  fireEvent.touchStart(touchTarget, {
     touches: [{ clientX: startX, clientY: startY }],
   });
-  fireEvent.touchEnd(element, {
+  fireEvent.touchEnd(touchTarget, {
     changedTouches: [{ clientX: startX + deltaX, clientY: startY }],
   });
 }
@@ -123,13 +125,13 @@ describe("SoakVerseTap", () => {
     waitForReady();
 
     const textBefore = screen.getByTestId("soak-verse").textContent;
-    const element = screen.getByTestId("soak-breathe");
+    const touchTarget = screen.getByTestId("soak-click-zones");
 
     // Vertical swipe (large Y delta, small X delta)
-    fireEvent.touchStart(element, {
+    fireEvent.touchStart(touchTarget, {
       touches: [{ clientX: 200, clientY: 200 }],
     });
-    fireEvent.touchEnd(element, {
+    fireEvent.touchEnd(touchTarget, {
       changedTouches: [{ clientX: 220, clientY: 400 }],
     });
 
