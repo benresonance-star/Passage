@@ -8,10 +8,10 @@ import "./breathe.css";
 
 /* ─── Timing constants (ms) ──────────────────────────────────────── */
 
-const FADE_OUT_MS = 400;
-const PAUSE_MS = 400;
-const FADE_IN_MS = 1100;
-const COOLDOWN_MS = 1500;
+const FADE_OUT_MS = 800;
+const PAUSE_MS = 100;
+const FADE_IN_MS = 800;
+const COOLDOWN_MS = 1200;
 
 /* ─── Swipe constants ────────────────────────────────────────────── */
 

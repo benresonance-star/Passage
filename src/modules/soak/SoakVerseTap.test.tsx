@@ -25,11 +25,11 @@ const SECTION: SoakSection = {
 
 /* ─── Timing helpers ──────────────────────────────────────────────── */
 
-// Initial mount sequence: pause(400) + fade-in(1100) + cooldown(1500) = 3000ms
-const MOUNT_TO_READY_MS = 3000;
-// Full verse transition: fade-out(400) + pause(400) + fade-in(1100) = 1900ms
-const TRANSITION_MS = 1900;
-const COOLDOWN_MS = 1500;
+// Initial mount sequence: pause(100) + fade-in(800) + cooldown(1200) = 2100ms
+const MOUNT_TO_READY_MS = 2100;
+// Full verse transition: fade-out(800) + pause(100) + fade-in(800) = 1700ms
+const TRANSITION_MS = 1700;
+const COOLDOWN_MS = 1200;
 
 /** Advance fake timers past the initial mount sequence so navigation is possible. */
 function waitForReady() {
