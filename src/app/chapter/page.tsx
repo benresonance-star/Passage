@@ -10,6 +10,7 @@ const THEME_PRESETS = [
   { name: "Midnight", bg: "#0f172a", text: "#e2e8f0" },
   { name: "Sepia", bg: "#fdf6e3", text: "#433422" },
   { name: "Classic", bg: "#18181b", text: "#d4d4d8" },
+  { name: "Dawn", bg: "#3d3566", text: "#fffcf0", id: "dawn" },
 ];
 
 export default function ChapterPage() {
@@ -60,22 +61,23 @@ export default function ChapterPage() {
     }));
   };
 
-  const setTheme = (bg: string, text: string) => {
+  const setTheme = (bg: string, text: string, id?: string) => {
     setState(prev => ({
       ...prev,
       settings: {
         ...prev.settings,
-        theme: { bg, text }
+        theme: { bg, text, id }
       }
     }));
   };
 
   const activeChunkId = state.settings.activeChunkId[chapterId];
   const currentTheme = state.settings.theme || { bg: "#000000", text: "#f4f4f5" };
+  const isDawn = currentTheme.id === "dawn";
 
   return (
     <div className="space-y-6 pb-32">
-      <header className="sticky top-0 bg-inherit backdrop-blur-md pt-4 pb-2 z-10 border-b border-white/10">
+      <header className={`sticky top-0 backdrop-blur-md pt-4 pb-2 z-10 border-b border-white/10 ${isDawn ? "bg-black/20" : "bg-inherit"}`}>
         <div className="flex justify-between items-start">
           <div>
             <h1 className="text-2xl font-bold">{chapter.title}</h1>
@@ -111,7 +113,7 @@ export default function ChapterPage() {
       {showThemeModal && (
         <div className="fixed inset-0 z-50 animate-in fade-in duration-300">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowThemeModal(false)} />
-          <div className="absolute inset-x-0 bottom-0 max-w-md mx-auto bg-zinc-900 border-t border-zinc-800 rounded-t-[32px] p-8 pb-12 shadow-2xl animate-in slide-in-from-bottom duration-500">
+          <div className={`absolute inset-x-0 bottom-0 max-w-md mx-auto border-t rounded-t-[32px] p-8 pb-12 shadow-2xl animate-in slide-in-from-bottom duration-500 ${isDawn ? "bg-black/80 backdrop-blur-xl border-white/10" : "bg-zinc-900 border-zinc-800"}`}>
             <div className="flex justify-between items-center mb-8">
               <h2 className="text-xl font-bold text-white text-center w-full ml-8">Appearance</h2>
               <button onClick={() => setShowThemeModal(false)} className="p-2 text-zinc-500">
@@ -121,18 +123,30 @@ export default function ChapterPage() {
             
             <div className="space-y-8">
               <div className="grid grid-cols-2 gap-3">
-                {THEME_PRESETS.map((p) => (
-                  <button
-                    key={p.name}
-                    onClick={() => setTheme(p.bg, p.text)}
-                    className={`flex items-center gap-3 p-4 rounded-2xl border transition-all ${
-                      currentTheme.bg === p.bg ? "border-orange-500 bg-orange-500/5" : "border-zinc-800 bg-black/20"
-                    }`}
-                  >
-                    <div className="w-6 h-6 rounded-full border border-white/10 shadow-inner" style={{ backgroundColor: p.bg }} />
-                    <span className="font-bold text-sm text-white">{p.name}</span>
-                  </button>
-                ))}
+                {THEME_PRESETS.map((p) => {
+                  const isSelected = p.id 
+                    ? currentTheme.id === p.id 
+                    : currentTheme.bg === p.bg && !currentTheme.id;
+                  return (
+                    <button
+                      key={p.name}
+                      onClick={() => setTheme(p.bg, p.text, p.id)}
+                      className={`flex items-center gap-3 p-4 rounded-2xl border transition-all ${
+                        isSelected ? "border-orange-500 bg-orange-500/5" : "border-zinc-800 bg-black/20"
+                      }`}
+                    >
+                      <div 
+                        className="w-6 h-6 rounded-full border border-white/10 shadow-inner flex-shrink-0"
+                        style={p.id === "dawn" ? {
+                          background: "linear-gradient(180deg, #3d3566 0%, #dabb8e 50%, #5a8090 100%)"
+                        } : {
+                          backgroundColor: p.bg
+                        }}
+                      />
+                      <span className="font-bold text-sm text-white">{p.name}</span>
+                    </button>
+                  );
+                })}
               </div>
 
               <div className="space-y-4 pt-4 border-t border-zinc-800">

@@ -48,6 +48,7 @@ export interface BCMState {
     theme?: {
       bg: string;
       text: string;
+      id?: string; // "dawn" for the breathing gradient theme
     };
   };
 }

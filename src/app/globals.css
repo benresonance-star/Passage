@@ -51,3 +51,76 @@
     font-weight: 700;
   }
 }
+
+/* ─── Dawn Theme — Breathing Gradient Background ─────────────────── */
+
+.dawn-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(
+      180deg,
+      #1e1b3a 0%,
+      #3d3566 12%,
+      #7b6b96 24%,
+      #b09aaf 36%,
+      #c9ac9a 46%,
+      #dabb8e 54%,
+      #c9a87a 62%,
+      #8eaab0 76%,
+      #5a8090 88%,
+      #3a5f6d 100%
+    );
+  background-size: 100% 220%;
+  animation: dawn-sky 25s ease-in-out infinite;
+}
+
+.dawn-bg::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse 70% 45% at 50% 56%,
+    rgba(255, 210, 150, 0.22) 0%,
+    rgba(240, 180, 120, 0.08) 40%,
+    transparent 68%
+  );
+  animation: dawn-glow 10s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.dawn-bg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse 80% 80% at 50% 50%,
+    transparent 50%,
+    rgba(15, 12, 30, 0.35) 100%
+  );
+  pointer-events: none;
+}
+
+@keyframes dawn-sky {
+  0%, 100% { background-position: 50% 0%; }
+  50% { background-position: 50% 35%; }
+}
+
+@keyframes dawn-glow {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50% { opacity: 0.85; transform: scale(1.12); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dawn-bg {
+    animation: none;
+    background-size: 100% 160%;
+    background-position: 50% 18%;
+  }
+  .dawn-bg::before {
+    animation: none;
+    opacity: 0.6;
+  }
+}

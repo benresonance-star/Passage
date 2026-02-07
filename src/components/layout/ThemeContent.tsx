@@ -5,6 +5,12 @@ import { useRouter } from "next/navigation";
 import { useBCM } from "@/context/BCMContext";
 import { BottomNav } from "@/components/BottomNav";
 import { SplashScreen, wasSplashShown } from "@/components/SplashScreen";
+import { Cormorant_Garamond } from "next/font/google";
+
+const dawnFont = Cormorant_Garamond({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+});
 
 // Helper to calculate brightness of a hex color
 function getBrightness(hex: string) {
@@ -32,37 +38,57 @@ export function ThemeContent({ children }: { children: React.ReactNode }) {
     ? state.settings.theme
     : { bg: "#000000", text: "#f4f4f5" };
 
-  const isLight = getBrightness(theme.bg) > 128;
+  const isDawn = theme.id === "dawn";
+  const isLight = !isDawn && getBrightness(theme.bg) > 128;
 
   // Apply dynamic theme to <body> and CSS custom properties to :root
   useLayoutEffect(() => {
     const body = document.body;
-    body.style.backgroundColor = theme.bg;
-    body.style.color = theme.text;
-
-    body.classList.remove("theme-light", "theme-dark");
-    body.classList.add(isLight ? "theme-light" : "theme-dark");
-
     const root = document.documentElement;
-    root.style.setProperty("--theme-bg", theme.bg);
-    root.style.setProperty("--theme-text", theme.text);
-    root.style.setProperty("--theme-ui-bg", isLight ? "rgba(0,0,0,0.05)" : "rgba(255,255,255,0.05)");
-    root.style.setProperty("--theme-ui-border", isLight ? "rgba(0,0,0,0.1)" : "rgba(255,255,255,0.1)");
-    root.style.setProperty("--theme-ui-subtext", isLight ? "rgba(0,0,0,0.5)" : "rgba(255,255,255,0.5)");
-  }, [theme, isLight]);
+
+    if (isDawn) {
+      // Dawn: transparent body so the gradient div shows through
+      body.style.backgroundColor = "transparent";
+      body.style.color = theme.text;
+
+      body.classList.remove("theme-light", "theme-dark");
+      body.classList.add("theme-dark");
+
+      root.style.setProperty("--theme-bg", "transparent");
+      root.style.setProperty("--theme-text", theme.text);
+      root.style.setProperty("--theme-ui-bg", "rgba(255,255,255,0.08)");
+      root.style.setProperty("--theme-ui-border", "rgba(255,255,255,0.12)");
+      root.style.setProperty("--theme-ui-subtext", "rgba(255,252,240,0.5)");
+    } else {
+      body.style.backgroundColor = theme.bg;
+      body.style.color = theme.text;
+
+      body.classList.remove("theme-light", "theme-dark");
+      body.classList.add(isLight ? "theme-light" : "theme-dark");
+
+      root.style.setProperty("--theme-bg", theme.bg);
+      root.style.setProperty("--theme-text", theme.text);
+      root.style.setProperty("--theme-ui-bg", isLight ? "rgba(0,0,0,0.05)" : "rgba(255,255,255,0.05)");
+      root.style.setProperty("--theme-ui-border", isLight ? "rgba(0,0,0,0.1)" : "rgba(255,255,255,0.1)");
+      root.style.setProperty("--theme-ui-subtext", isLight ? "rgba(0,0,0,0.5)" : "rgba(255,255,255,0.5)");
+    }
+  }, [theme, isLight, isDawn]);
 
   return (
     <>
+      {/* Dawn breathing gradient — persistent, behind everything */}
+      {isDawn && <div className="dawn-bg" />}
+
       {showSplash && (
         <SplashScreen
           onFadeStart={() => router.push("/chapter")}
           onComplete={() => setShowSplash(false)}
         />
       )}
-      <main className="min-h-screen pb-24 max-w-md mx-auto px-4 pt-safe">
+      <main className={`relative z-[1] min-h-screen pb-24 max-w-md mx-auto px-4 pt-safe ${isDawn ? dawnFont.className : ""}`}>
         {children}
       </main>
-      <BottomNav />
+      <BottomNav isDawn={isDawn} />
     </>
   );
 }
