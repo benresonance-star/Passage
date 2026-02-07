@@ -3,6 +3,9 @@ import "./globals.css";
 import { BCMProvider } from "@/context/BCMContext";
 import { AuthProvider } from "@/context/AuthContext";
 import { ThemeContent } from "@/components/layout/ThemeContent";
+import { Inter } from "next/font/google";
+
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Passage - Bible Chapter Memoriser",
@@ -31,11 +34,16 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark">
-      <AuthProvider>
-        <BCMProvider>
-          <ThemeContent>{children}</ThemeContent>
-        </BCMProvider>
-      </AuthProvider>
+      <body
+        className={`${inter.className} antialiased selection:bg-orange-500/30 transition-colors duration-500 theme-dark`}
+        style={{ backgroundColor: "#000000", color: "#f4f4f5", minHeight: "100vh" }}
+      >
+        <AuthProvider>
+          <BCMProvider>
+            <ThemeContent>{children}</ThemeContent>
+          </BCMProvider>
+        </AuthProvider>
+      </body>
     </html>
   );
 }

@@ -8,6 +8,7 @@ import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/lib/supabase";
 import { useEffect } from "react";
 import { TeamBoard } from "@/components/TeamBoard";
+import { useConfirm } from "@/components/AppModal";
 
 const GUIDE_ITEMS = [
   {
@@ -41,18 +42,20 @@ const GUIDE_ITEMS = [
 ];
 
 export default function Home() {
-  const { state, setState, isHydrated } = useBCM();
+  const { state, setState, isHydrated, deleteChapter } = useBCM();
   const { user } = useAuth();
+  const { confirm, ConfirmDialog } = useConfirm();
   const [showInfo, setShowInfo] = useState(false);
   const [groupId, setGroupId] = useState<string | null>(null);
   const [groupName, setGroupName] = useState<string | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
-    if (user) {
+    if (user && supabase) {
+      const client = supabase;
       const fetchGroup = async () => {
         try {
-          const { data, error } = await supabase
+          const { data, error } = await client
             .from('group_members')
             .select('group_id, role, groups(name, admin_id)')
             .eq('user_id', user.id)
@@ -62,8 +65,9 @@ export default function Home() {
           if (error) throw error;
           if (data) {
             setGroupId(data.group_id);
-            setGroupName((data.groups as any)?.name || null);
-            setIsAdmin(data.role === 'admin' || (data.groups as any)?.admin_id === user.id);
+            const groups = data.groups as { name?: string; admin_id?: string } | null;
+            setGroupName(groups?.name || null);
+            setIsAdmin(data.role === 'admin' || groups?.admin_id === user.id);
           }
         } catch (err) {
           console.error("Home group fetch error:", err);
@@ -96,32 +100,21 @@ export default function Home() {
     setState(prev => ({ ...prev, selectedChapterId: id }));
   };
 
-  const handleDelete = (id: string, e: React.MouseEvent) => {
+  const handleDelete = async (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    if (!confirm("⚠️ CAUTION: Do you really want to delete this chapter and all its progress? This action cannot be undone.")) return;
-    
-    setState(prev => {
-      const { [id]: _, ...remainingChapters } = prev.chapters;
-      const { [id]: __, ...remainingCards } = prev.cards;
-      const { [id]: ___, ...remainingStats } = prev.stats;
-      const { [id]: ____, ...remainingActiveChunks } = prev.settings.activeChunkId;
-      
-      return {
-        ...prev,
-        chapters: remainingChapters,
-        selectedChapterId: prev.selectedChapterId === id ? (Object.keys(remainingChapters)[0] || null) : prev.selectedChapterId,
-        cards: remainingCards,
-        stats: remainingStats,
-        settings: {
-          ...prev.settings,
-          activeChunkId: remainingActiveChunks
-        }
-      };
+    const confirmed = await confirm({
+      title: "Delete Chapter",
+      message: "Do you really want to delete this chapter and all its progress? This action cannot be undone.",
+      confirmLabel: "Delete",
+      destructive: true,
     });
+    if (!confirmed) return;
+    deleteChapter(id);
   };
 
   return (
     <div className="space-y-8 py-6">
+      <ConfirmDialog />
       <header className="flex justify-between items-start">
         <div className="flex items-center gap-4">
           <BookOpen size={52} className="text-orange-500" />

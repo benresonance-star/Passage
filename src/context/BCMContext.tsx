@@ -6,6 +6,7 @@ import { INITIAL_STATE, loadState, saveState } from "@/lib/storage";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "./AuthContext";
 import { getChapterSlug } from "@/lib/parser";
+import { shouldResetStreak } from "@/lib/streak";
 
 interface BCMContextType {
   state: BCMState;
@@ -16,6 +17,7 @@ interface BCMContextType {
   syncAllMemorised: () => Promise<void>;
   pushChapter: (chapter: any) => Promise<void>;
   pullVault: () => Promise<void>;
+  deleteChapter: (chapterId: string) => Promise<void>;
 }
 
 const BCMContext = createContext<BCMContextType | undefined>(undefined);
@@ -33,9 +35,10 @@ export function BCMProvider({ children }: { children: React.ReactNode }) {
     let chapterSubscription: any = null;
 
     if (user && supabase) {
+      const client = supabase; // Narrow for closures
       const initCloud = async () => {
         // 1. Fetch Group ID
-        const { data } = await supabase
+        const { data } = await client
           .from('group_members')
           .select('group_id')
           .eq('user_id', user.id)
@@ -46,7 +49,7 @@ export function BCMProvider({ children }: { children: React.ReactNode }) {
         await pullVault();
 
         // 3. Subscribe to Realtime Vault Changes
-        cardSubscription = supabase
+        cardSubscription = client
           .channel(`vault_cards_${user.id}`)
           .on('postgres_changes', { 
             event: '*', 
@@ -81,7 +84,7 @@ export function BCMProvider({ children }: { children: React.ReactNode }) {
           })
           .subscribe();
 
-        chapterSubscription = supabase
+        chapterSubscription = client
           .channel(`vault_chapters_${user.id}`)
           .on('postgres_changes', { 
             event: '*', 
@@ -116,6 +119,7 @@ export function BCMProvider({ children }: { children: React.ReactNode }) {
 
   const syncProgress = async (chapterTitle: string, chunkId: string, card: any) => {
     if (!user || !supabase) return;
+    const client = supabase;
 
     const chapterId = getChapterSlug(chapterTitle);
     
@@ -126,7 +130,7 @@ export function BCMProvider({ children }: { children: React.ReactNode }) {
       // 1. Sync to Public Team Board
       let gid = userGroupId;
       if (!gid) {
-        const { data } = await supabase
+        const { data } = await client
           .from('group_members')
           .select('group_id')
           .eq('user_id', user.id)
@@ -138,7 +142,7 @@ export function BCMProvider({ children }: { children: React.ReactNode }) {
       }
 
       if (gid) {
-        await supabase.from('shared_progress').upsert({
+        await client.from('shared_progress').upsert({
           group_id: gid,
           user_id: user.id,
           chapter_title: chapterTitle,
@@ -149,7 +153,7 @@ export function BCMProvider({ children }: { children: React.ReactNode }) {
       }
 
       // 2. Sync to Personal Vault
-      const { data: cardData } = await supabase.from('user_cards').upsert({
+      const { data: cardData } = await client.from('user_cards').upsert({
         user_id: user.id,
         chapter_id: chapterId,
         chunk_id: chunkId,
@@ -164,7 +168,7 @@ export function BCMProvider({ children }: { children: React.ReactNode }) {
       // Also sync stats
       const stats = state.stats[chapterId];
       if (stats) {
-        await supabase.from('user_stats').upsert({
+        await client.from('user_stats').upsert({
           user_id: user.id,
           chapter_id: chapterId,
           data: stats,
@@ -178,8 +182,9 @@ export function BCMProvider({ children }: { children: React.ReactNode }) {
 
   const pushChapter = async (chapter: any) => {
     if (!user || !supabase) return;
+    const client = supabase;
     try {
-      await supabase.from('user_chapters').upsert({
+      await client.from('user_chapters').upsert({
         user_id: user.id,
         chapter_id: chapter.id,
         data: chapter,
@@ -192,13 +197,14 @@ export function BCMProvider({ children }: { children: React.ReactNode }) {
 
   const pullVault = async () => {
     if (!user || !supabase) return;
+    const client = supabase;
 
     try {
       console.log("Pulling personal vault...");
       
-      const { data: chapters } = await supabase.from('user_chapters').select('*').eq('user_id', user.id);
-      const { data: cards } = await supabase.from('user_cards').select('*').eq('user_id', user.id);
-      const { data: stats } = await supabase.from('user_stats').select('*').eq('user_id', user.id);
+      const { data: chapters } = await client.from('user_chapters').select('*').eq('user_id', user.id);
+      const { data: cards } = await client.from('user_cards').select('*').eq('user_id', user.id);
+      const { data: stats } = await client.from('user_stats').select('*').eq('user_id', user.id);
 
       if (!chapters && !cards && !stats) return;
 
@@ -241,24 +247,25 @@ export function BCMProvider({ children }: { children: React.ReactNode }) {
 
   const syncAllMemorised = async () => {
     if (!user || !supabase) return;
+    const client = supabase;
 
     try {
-      const { data: memberData } = await supabase
+      const { data: memberData } = await client
         .from('group_members')
         .select('group_id')
         .eq('user_id', user.id);
 
       if (!memberData || memberData.length === 0) return;
 
-      const allSyncs: any[] = [];
+      const allSyncs: PromiseLike<unknown>[] = [];
       
       Object.entries(state.chapters).forEach(([chapterId, chapter]) => {
         const chapterCards = state.cards[chapterId] || {};
         Object.entries(chapterCards).forEach(([chunkId, card]) => {
           if (card.isMemorised) {
-            memberData.forEach((member: any) => {
+            memberData.forEach((member) => {
               allSyncs.push(
-                supabase.from('shared_progress').upsert({
+                client.from('shared_progress').upsert({
                   group_id: member.group_id,
                   user_id: user.id,
                   chapter_title: chapter.title,
@@ -277,6 +284,56 @@ export function BCMProvider({ children }: { children: React.ReactNode }) {
       }
     } catch (err) {
       console.error("Bulk sync error:", err);
+    }
+  };
+
+  const deleteChapter = async (chapterId: string) => {
+    // 1. Remove from local state
+    setState(prev => {
+      const { [chapterId]: _, ...remainingChapters } = prev.chapters;
+      const { [chapterId]: __, ...remainingCards } = prev.cards;
+      const { [chapterId]: ___, ...remainingStats } = prev.stats;
+      const { [chapterId]: ____, ...remainingActiveChunks } = prev.settings.activeChunkId;
+
+      return {
+        ...prev,
+        chapters: remainingChapters,
+        selectedChapterId: prev.selectedChapterId === chapterId
+          ? (Object.keys(remainingChapters)[0] || null)
+          : prev.selectedChapterId,
+        cards: remainingCards,
+        stats: remainingStats,
+        settings: {
+          ...prev.settings,
+          activeChunkId: remainingActiveChunks,
+        },
+      };
+    });
+
+    // 2. Remove from Supabase if logged in
+    if (user && supabase) {
+      const client = supabase;
+      try {
+        await Promise.all([
+          client.from('user_chapters').delete().eq('user_id', user.id).eq('chapter_id', chapterId),
+          client.from('user_cards').delete().eq('user_id', user.id).eq('chapter_id', chapterId),
+          client.from('user_stats').delete().eq('user_id', user.id).eq('chapter_id', chapterId),
+        ]);
+
+        // Also clean shared_progress if in a group
+        const gid = userGroupId;
+        if (gid) {
+          const chapter = state.chapters[chapterId];
+          if (chapter) {
+            await client.from('shared_progress').delete()
+              .eq('group_id', gid)
+              .eq('user_id', user.id)
+              .eq('chapter_title', chapter.title);
+          }
+        }
+      } catch (err) {
+        console.error("Delete chapter sync error:", err);
+      }
     }
   };
 
@@ -353,16 +410,8 @@ export function BCMProvider({ children }: { children: React.ReactNode }) {
     // Check for streak reset on load
     Object.keys(migratedState.stats).forEach(chapterId => {
       const stats = migratedState.stats[chapterId];
-      if (stats.lastActivity) {
-        const now = new Date();
-        const lastActivity = new Date(stats.lastActivity);
-        const nowDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-        const lastDate = new Date(lastActivity.getFullYear(), lastActivity.getMonth(), lastActivity.getDate());
-        const diffInDays = Math.floor((nowDate.getTime() - lastDate.getTime()) / (1000 * 60 * 60 * 24));
-        
-        if (diffInDays > 1) {
-          stats.streak = 0;
-        }
+      if (shouldResetStreak(stats.lastActivity)) {
+        stats.streak = 0;
       }
     });
     
@@ -377,10 +426,11 @@ export function BCMProvider({ children }: { children: React.ReactNode }) {
 
       // Sync to Supabase if logged in
       if (user && supabase) {
+        const client = supabase;
         // De-bounce theme sync to prevent excessive calls
         const syncTheme = setTimeout(() => {
           if (state.settings.theme) {
-            supabase.from('profiles').update({ 
+            client.from('profiles').update({ 
               theme: state.settings.theme,
               last_active: new Date().toISOString()
             }).eq('id', user.id).then();
@@ -393,7 +443,7 @@ export function BCMProvider({ children }: { children: React.ReactNode }) {
   }, [state, isHydrated, user]);
 
   return (
-    <BCMContext.Provider value={{ state, setState, isHydrated, userGroupId, syncProgress, syncAllMemorised, pushChapter, pullVault }}>
+    <BCMContext.Provider value={{ state, setState, isHydrated, userGroupId, syncProgress, syncAllMemorised, pushChapter, pullVault, deleteChapter }}>
       {children}
     </BCMContext.Provider>
   );

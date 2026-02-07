@@ -12,7 +12,7 @@ interface MemberProgress {
   display_name: string;
   progress: number; // percentage
   memorisedCount: number;
-  last_active: string;
+  last_active?: string;
 }
 
 export function TeamBoard({ groupId, groupName, chapterTitle, totalChunks }: { groupId: string, groupName: string, chapterTitle: string, totalChunks: number }) {
@@ -28,10 +28,12 @@ export function TeamBoard({ groupId, groupName, chapterTitle, totalChunks }: { g
       return;
     }
 
+    const client = supabase; // Narrow for closures
+
     const fetchProgress = async () => {
       try {
         // 1. Get all members of the group
-        const { data: membersData, error: mError } = await supabase
+        const { data: membersData, error: mError } = await client
           .from('group_members')
           .select(`
             user_id,
@@ -46,7 +48,7 @@ export function TeamBoard({ groupId, groupName, chapterTitle, totalChunks }: { g
         }
 
         // 2. Get progress for the current chapter for these users
-        const { data: progressData, error: pError } = await supabase
+        const { data: progressData, error: pError } = await client
           .from('shared_progress')
           .select('user_id, is_memorised')
           .eq('group_id', groupId)
@@ -55,8 +57,10 @@ export function TeamBoard({ groupId, groupName, chapterTitle, totalChunks }: { g
 
         if (pError) throw pError;
 
+        const progressList = progressData ?? [];
         const memberList: MemberProgress[] = membersData.map((m: any) => {
-          let userProgress = (progressData as any[])?.filter((p: any) => p.user_id === m.user_id).length || 0;
+          const profiles = m.profiles as { display_name?: string; last_active?: string } | null;
+          let userProgress = progressList.filter((p) => p.user_id === m.user_id).length;
           
           // Override with local state for current user to avoid sync lag
           if (user && m.user_id === user.id && state.selectedChapterId) {
@@ -66,10 +70,10 @@ export function TeamBoard({ groupId, groupName, chapterTitle, totalChunks }: { g
 
           return {
             user_id: m.user_id,
-            display_name: (m.profiles as any)?.display_name || "Student",
+            display_name: profiles?.display_name || "Student",
             progress: totalChunks > 0 ? (userProgress / totalChunks) * 100 : 0,
             memorisedCount: userProgress,
-            last_active: (m.profiles as any)?.last_active
+            last_active: profiles?.last_active
           };
         });
 

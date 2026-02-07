@@ -6,6 +6,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import { splitIntoLines } from "@/lib/parser";
 import { updateCard } from "@/lib/scheduler";
+import { calculateUpdatedStreak } from "@/lib/streak";
 import { useWakeLock } from "@/hooks/useWakeLock";
 import { ArrowLeft, Eye, EyeOff, Check, AlertCircle, XCircle } from "lucide-react";
 
@@ -99,24 +100,8 @@ export default function RecitePage() {
       const updatedCard = updateCard(currentCard, score);
       
       setState(prev => {
-        const now = new Date();
         const stats = prev.stats[chapterId] || { streak: 0, lastActivity: null };
-        const lastActivity = stats.lastActivity ? new Date(stats.lastActivity) : null;
-        let newStreak = stats.streak;
-
-        if (!lastActivity) {
-          newStreak = 1;
-        } else {
-          const nowDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-          const lastDate = new Date(lastActivity.getFullYear(), lastActivity.getMonth(), lastActivity.getDate());
-          const diffInDays = Math.floor((nowDate.getTime() - lastDate.getTime()) / (1000 * 60 * 60 * 24));
-          
-          if (diffInDays === 1) {
-            newStreak += 1;
-          } else if (diffInDays > 1) {
-            newStreak = 1;
-          }
-        }
+        const newStreak = calculateUpdatedStreak(stats.streak, stats.lastActivity);
 
         return {
           ...prev,
@@ -131,7 +116,7 @@ export default function RecitePage() {
             ...prev.stats,
             [chapterId]: {
               streak: newStreak,
-              lastActivity: now.toISOString()
+              lastActivity: new Date().toISOString()
             }
           }
         };

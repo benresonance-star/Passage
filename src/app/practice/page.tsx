@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { hideWords, generateMnemonic } from "@/lib/cloze";
 import { calculateDiff, DiffResult } from "@/lib/diff";
 import { updateCard } from "@/lib/scheduler";
+import { calculateUpdatedStreak } from "@/lib/streak";
 import { useWakeLock } from "@/hooks/useWakeLock";
 import { useAuth } from "@/context/AuthContext";
 import FlowControls from "@/components/FlowControls";
@@ -113,24 +114,8 @@ export default function PracticePage() {
         const updatedCard = updateCard(currentCard, score);
         
         setState(prev => {
-          const now = new Date();
           const stats = prev.stats[chapterId] || { streak: 0, lastActivity: null };
-          const lastActivity = stats.lastActivity ? new Date(stats.lastActivity) : null;
-          let newStreak = stats.streak;
-
-          if (!lastActivity) {
-            newStreak = 1;
-          } else {
-            const nowDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-            const lastDate = new Date(lastActivity.getFullYear(), lastActivity.getMonth(), lastActivity.getDate());
-            const diffInDays = Math.floor((nowDate.getTime() - lastDate.getTime()) / (1000 * 60 * 60 * 24));
-            
-            if (diffInDays === 1) {
-              newStreak += 1;
-            } else if (diffInDays > 1) {
-              newStreak = 1;
-            }
-          }
+          const newStreak = calculateUpdatedStreak(stats.streak, stats.lastActivity);
 
           return {
             ...prev,
@@ -145,7 +130,7 @@ export default function PracticePage() {
               ...prev.stats,
               [chapterId]: {
                 streak: newStreak,
-                lastActivity: now.toISOString()
+                lastActivity: new Date().toISOString()
               }
             }
           };
@@ -278,10 +263,10 @@ export default function PracticePage() {
                 : hideWords(activeChunk.text, state.settings.clozeLevel as number, activeChunk.id)}
             </p>
             <div className="flex justify-center gap-2 flex-wrap px-4">
-              {[0, 20, 40, 60, 80].map((level) => (
+              {([0, 20, 40, 60, 80] as const).map((level) => (
                 <button
                   key={level}
-                  onClick={() => setState(p => ({ ...p, settings: { ...p.settings, clozeLevel: level as any } }))}
+                  onClick={() => setState(p => ({ ...p, settings: { ...p.settings, clozeLevel: level } }))}
                   className={`px-3 py-1 rounded-full text-xs font-bold transition-colors ${
                     state.settings.clozeLevel === level 
                       ? "bg-orange-500 text-white" 

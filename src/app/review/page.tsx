@@ -4,7 +4,6 @@ import { useBCM } from "@/context/BCMContext";
 import { useRouter } from "next/navigation";
 import { Play, Mic, Award } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
-import { supabase } from "@/lib/supabase";
 
 export default function ReviewPage() {
   const { state, setState, isHydrated, syncProgress } = useBCM();
@@ -39,7 +38,8 @@ export default function ReviewPage() {
   };
 
   const handleToggleMemorised = async (chunkId: string) => {
-    const currentCard = state.cards[chapterId][chunkId];
+    const currentCard = state.cards[chapterId]?.[chunkId];
+    if (!currentCard) return;
     const nextIsMemorised = !currentCard.isMemorised;
     const updatedCard = { ...currentCard, isMemorised: nextIsMemorised };
     

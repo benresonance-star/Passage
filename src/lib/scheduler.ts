@@ -1,5 +1,11 @@
 import { SM2Card } from "@/types";
 
+/**
+ * Auto-promotion threshold: once a card has been successfully recalled
+ * this many times in a row with high scores, it is marked as memorised.
+ */
+const MEMORISED_REP_THRESHOLD = 3;
+
 export function updateCard(card: SM2Card, score: number): SM2Card {
   const newCard = { ...card };
   newCard.lastScore = score;
@@ -16,6 +22,11 @@ export function updateCard(card: SM2Card, score: number): SM2Card {
     newCard.reps += 1;
     newCard.ease = Math.max(1.3, newCard.ease + (0.1 - (1 - score) * (0.1 + (1 - score) * 0.1)));
     newCard.hardUntilAt = null;
+
+    // Auto-promote to memorised after sustained high performance
+    if (newCard.reps >= MEMORISED_REP_THRESHOLD && !newCard.isMemorised) {
+      newCard.isMemorised = true;
+    }
   } else if (score >= 0.75) {
     // Shaky or decent accuracy
     newCard.intervalDays = Math.max(1, Math.round(newCard.intervalDays * 0.5));
@@ -27,6 +38,11 @@ export function updateCard(card: SM2Card, score: number): SM2Card {
     newCard.intervalDays = 0;
     newCard.lapses += 1;
     newCard.ease = Math.max(1.3, newCard.ease - 0.5);
+
+    // Demote if the user fails a previously memorised chunk
+    if (newCard.isMemorised) {
+      newCard.isMemorised = false;
+    }
     
     // Mark as hard for 24 hours
     const tomorrow = new Date();

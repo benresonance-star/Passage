@@ -24,9 +24,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return;
     }
 
+    const client = supabase; // Narrow for closures
+
     // Check active sessions and sets the user
     const getSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
+      const { data: { session } } = await client.auth.getSession();
       setUser(session?.user ?? null);
       setLoading(false);
     };
@@ -34,7 +36,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     getSession();
 
     // Listen for changes on auth state (logged in, signed out, etc.)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event: string, session: any) => {
+    const { data: { subscription } } = client.auth.onAuthStateChange((event: string, session: any) => {
       setUser(session?.user ?? null);
       setLoading(false);
 

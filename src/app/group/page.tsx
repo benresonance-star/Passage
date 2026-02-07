@@ -6,6 +6,7 @@ import { useBCM } from "@/context/BCMContext";
 import { Users, Mail, ArrowLeft, LogOut, CheckCircle2, Loader2, Trophy, Plus, Copy, Check, X } from "lucide-react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
+import { useConfirm, usePrompt, useToast } from "@/components/AppModal";
 
 export default function GroupPage() {
   const { user, signIn, verifyOtp, signOut, loading: authLoading } = useAuth();
@@ -23,6 +24,9 @@ export default function GroupPage() {
   const [joinGroupId, setJoinGroupId] = useState("");
   const [isEditingName, setIsEditingName] = useState(false);
   const [newName, setNewName] = useState("");
+  const { confirm, ConfirmDialog } = useConfirm();
+  const { prompt, PromptDialog } = usePrompt();
+  const { toast, ToastContainer } = useToast();
 
   useEffect(() => {
     if (user && state.selectedChapterId) {
@@ -31,8 +35,11 @@ export default function GroupPage() {
   }, [user, state.selectedChapterId]);
 
   const fetchProfileAndGroup = async () => {
+    if (!supabase) return;
+    const client = supabase;
+
     // Fetch Profile
-    const { data: profileData } = await supabase
+    const { data: profileData } = await client
       .from('profiles')
       .select('*')
       .eq('id', user?.id)
@@ -41,7 +48,7 @@ export default function GroupPage() {
     if (profileData?.display_name) setNewName(profileData.display_name);
 
     // Fetch Group (User as member)
-    const { data: memberData } = await supabase
+    const { data: memberData } = await client
       .from('group_members')
       .select('group_id, groups(*)')
       .eq('user_id', user?.id)
@@ -50,7 +57,7 @@ export default function GroupPage() {
     if (memberData) {
       setGroup(memberData.groups);
       // Fetch all members of this group
-      const { data: groupMembers } = await supabase
+      const { data: groupMembers } = await client
         .from('group_members')
         .select(`
           user_id,
@@ -65,19 +72,21 @@ export default function GroupPage() {
         // Fetch progress for all members if a chapter is selected
         if (state.selectedChapterId) {
           const chapter = state.chapters[state.selectedChapterId];
-          const { data: progress } = await supabase
-            .from('shared_progress')
-            .select('user_id, is_memorised')
-            .eq('group_id', memberData.group_id)
-            .eq('chapter_title', chapter.title)
-            .eq('is_memorised', true);
-          
-          if (progress) {
-            const counts: Record<string, number> = {};
-            progress.forEach((p: any) => {
-              counts[p.user_id] = (counts[p.user_id] || 0) + 1;
-            });
-            setMemberProgress(counts);
+          if (chapter) {
+            const { data: progress } = await client
+              .from('shared_progress')
+              .select('user_id, is_memorised')
+              .eq('group_id', memberData.group_id)
+              .eq('chapter_title', chapter.title)
+              .eq('is_memorised', true);
+            
+            if (progress) {
+              const counts: Record<string, number> = {};
+              progress.forEach((p: any) => {
+                counts[p.user_id] = (counts[p.user_id] || 0) + 1;
+              });
+              setMemberProgress(counts);
+            }
           }
         }
       }
@@ -85,9 +94,10 @@ export default function GroupPage() {
   };
 
   const handleUpdateName = async () => {
-    if (!user || !newName.trim()) return;
+    if (!user || !newName.trim() || !supabase) return;
+    const client = supabase;
     setLoading(true);
-    const { error } = await supabase
+    const { error } = await client
       .from('profiles')
       .update({ display_name: newName.trim() })
       .eq('id', user.id);
@@ -125,14 +135,19 @@ export default function GroupPage() {
   };
 
   const handleCreateGroup = async () => {
-    if (!user) return;
-    const groupName = prompt("Enter a name for your Study Group:");
+    if (!user || !supabase) return;
+    const client = supabase;
+    const groupName = await prompt({
+      title: "Create Study Group",
+      placeholder: "Enter a name for your group...",
+      submitLabel: "Create",
+    });
     if (!groupName) return;
 
     setLoading(true);
     try {
       // 1. Create the group
-      const { data: newGroup, error: groupError } = await supabase
+      const { data: newGroup, error: groupError } = await client
         .from('groups')
         .insert({ name: groupName, admin_id: user.id })
         .select()
@@ -142,7 +157,7 @@ export default function GroupPage() {
 
       if (newGroup) {
         // 2. Add creator as admin member
-        const { error: memberError } = await supabase
+        const { error: memberError } = await client
           .from('group_members')
           .insert({
             group_id: newGroup.id,
@@ -155,11 +170,11 @@ export default function GroupPage() {
         // 3. Refresh UI
         await fetchProfileAndGroup();
         await syncAllMemorised();
-        alert("Group created successfully!");
+        toast("Group created successfully!");
       }
     } catch (err: any) {
       console.error("Group creation error:", err);
-      alert(`Failed to create group: ${err.message || "Unknown error"}`);
+      toast(err.message || "Failed to create group", "error");
     } finally {
       setLoading(false);
     }
@@ -167,11 +182,12 @@ export default function GroupPage() {
 
   const handleJoinGroup = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user || !joinGroupId.trim()) return;
+    if (!user || !joinGroupId.trim() || !supabase) return;
+    const client = supabase;
     
     setLoading(true);
     try {
-      const { error: joinError } = await supabase
+      const { error: joinError } = await client
         .from('group_members')
         .insert({
           group_id: joinGroupId.trim(),
@@ -184,24 +200,31 @@ export default function GroupPage() {
       await fetchProfileAndGroup();
       await syncAllMemorised();
       setJoinGroupId("");
-      alert("Joined group successfully!");
+      toast("Joined group successfully!");
     } catch (err: any) {
       console.error("Join group error:", err);
-      alert(`Failed to join group: ${err.message || "Invalid Group ID"}`);
+      toast(err.message || "Invalid Group ID", "error");
     } finally {
       setLoading(false);
     }
   };
 
   const handleRemoveMember = async (targetUserId: string, targetName: string) => {
-    if (!user || !group) return;
+    if (!user || !group || !supabase) return;
+    const client = supabase;
     if (targetUserId === user.id) return; // Can't remove self from here
     
-    if (!confirm(`Are you sure you want to remove ${targetName || 'this student'} from the group?`)) return;
+    const confirmed = await confirm({
+      title: "Remove Member",
+      message: `Are you sure you want to remove ${targetName || 'this student'} from the group?`,
+      confirmLabel: "Remove",
+      destructive: true,
+    });
+    if (!confirmed) return;
 
     setLoading(true);
     try {
-      const { error } = await supabase
+      const { error } = await client
         .from('group_members')
         .delete()
         .eq('group_id', group.id)
@@ -210,10 +233,10 @@ export default function GroupPage() {
       if (error) throw error;
 
       await fetchProfileAndGroup();
-      alert("Member removed successfully.");
+      toast("Member removed successfully.");
     } catch (err: any) {
       console.error("Remove member error:", err);
-      alert(`Failed to remove member: ${err.message}`);
+      toast(err.message || "Failed to remove member", "error");
     } finally {
       setLoading(false);
     }
@@ -234,6 +257,9 @@ export default function GroupPage() {
 
   return (
     <div className="space-y-8 py-6">
+      <ConfirmDialog />
+      <PromptDialog />
+      <ToastContainer />
       <header className="flex items-center gap-4">
         <Link href="/" className="p-2 text-zinc-500 bg-zinc-900 rounded-full border border-white/5">
           <ArrowLeft size={20} />
@@ -432,7 +458,7 @@ export default function GroupPage() {
                                     {(user && m.user_id === user.id) 
                                       ? Object.values(state.cards[state.selectedChapterId] || {}).filter(c => c.isMemorised).length 
                                       : (memberProgress[m.user_id] || 0)
-                                    } / {state.chapters[state.selectedChapterId].chunks.length} Chunks
+                                    } / {state.chapters[state.selectedChapterId]?.chunks.length ?? 0} Chunks
                                   </p>
                                 </>
                               )}
