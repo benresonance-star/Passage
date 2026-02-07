@@ -94,18 +94,32 @@
   }
 }
 
-/* ─── Verse Text ──────────────────────────────────────────────────── */
+/* ─── Verse Fade Layer ─────────────────────────────────────────────
+ * Opacity is driven by inline style from JS.
+ * MUST NOT carry any CSS animation — iOS Safari can't hardware-accelerate
+ * a CSS transition and a CSS animation on the same composited layer.
+ * ──────────────────────────────────────────────────────────────────── */
 
 .soak-verse {
-  /* Inline opacity is set by JS — never use class-based opacity toggles
-     because iOS Safari ignores CSS transitions on class-swapped !important. */
   transition: opacity 800ms ease-in-out;
-
-  /* Force GPU layer so iOS doesn't jank the fade */
-  will-change: opacity;
   -webkit-transform: translate3d(0, 0, 0);
   transform: translate3d(0, 0, 0);
 }
+
+/* ─── Breathing Wrapper ────────────────────────────────────────────
+ * Lives on a PARENT element that wraps .soak-verse.
+ * Keeps the filter animation on a separate composited layer so it
+ * never fights the opacity transition on the child.
+ * ──────────────────────────────────────────────────────────────────── */
+
+.soak-breathe-text {
+  /* 11 cycles/min = 60/11 ≈ 5.45s per cycle, brightness 100% → 80% */
+  animation: soak-text-breathe 5.45s ease-in-out infinite;
+  -webkit-transform: translate3d(0, 0, 0);
+  transform: translate3d(0, 0, 0);
+}
+
+/* ─── Text Style (no animation — purely visual) ───────────────────── */
 
 .soak-text {
   font-size: 28px;
@@ -114,8 +128,6 @@
   color: rgba(255, 252, 240, 0.92);
   text-align: center;
   letter-spacing: 0.01em;
-  /* 11 cycles/min = 60/11 ≈ 5.45s per cycle, brightness 100% → 80% */
-  animation: soak-text-breathe 5.45s ease-in-out infinite;
 }
 
 /* ─── Word Tokens ─────────────────────────────────────────────────── */

@@ -128,12 +128,23 @@ export function SoakVerseTap({
   useEffect(() => {
     if (state.phase === "visible") return;
 
-    const duration =
-      state.phase === "fade-out"
-        ? FADE_OUT_MS
-        : state.phase === "pause"
-        ? PAUSE_MS
-        : FADE_IN_MS;
+    // During the "pause" phase the verse content swaps at opacity 0.
+    // We use a double-requestAnimationFrame instead of a fixed timeout
+    // so the browser (especially iOS Safari) fully paints the new DOM
+    // at opacity 0 before we kick off the fade-in.
+    if (state.phase === "pause") {
+      let cancelled = false;
+      requestAnimationFrame(() => {
+        if (cancelled) return;
+        requestAnimationFrame(() => {
+          if (cancelled) return;
+          dispatch({ type: "PHASE_COMPLETE" });
+        });
+      });
+      return () => { cancelled = true; };
+    }
+
+    const duration = state.phase === "fade-out" ? FADE_OUT_MS : FADE_IN_MS;
 
     const timer = setTimeout(
       () => dispatch({ type: "PHASE_COMPLETE" }),
@@ -265,9 +276,10 @@ export function SoakVerseTap({
         />
       </div>
 
-      {/* Verse text layer */}
+      {/* Verse text layer — breathing wrapper is a SEPARATE composited layer
+           from the opacity-transitioning <p> so iOS Safari can GPU-accelerate both. */}
       <div
-        className={`fixed inset-0 z-[52] flex items-center justify-center px-8 pointer-events-none ${fontClassName}`}
+        className={`fixed inset-0 z-[52] flex items-center justify-center px-8 pointer-events-none soak-breathe-text ${fontClassName}`}
       >
         <p
           className="soak-verse soak-text max-w-lg"
