@@ -8,9 +8,9 @@ import "./breathe.css";
 
 /* ─── Timing constants (ms) ──────────────────────────────────────── */
 
-const FADE_OUT_MS = 800;
-const PAUSE_MS = 100;
-const FADE_IN_MS = 800;
+/** Duration of the crossfade (both directions simultaneous). */
+const CROSSFADE_MS = 800;
+/** Minimum dwell time on a verse before navigation is allowed. */
 const COOLDOWN_MS = 1200;
 
 /* ─── Swipe constants ────────────────────────────────────────────── */
@@ -19,61 +19,79 @@ const SWIPE_THRESHOLD_PX = 50;
 
 /* ─── Exit button constants ──────────────────────────────────────── */
 
-const EXIT_VISIBLE_MS = 3000; // How long the exit icon stays visible after tap
+const EXIT_VISIBLE_MS = 3000;
 
 /* ─── State machine ──────────────────────────────────────────────── */
+/*
+ *  Double-buffer crossfade:
+ *
+ *  Two verse "slots" (A & B) are always in the DOM, overlapping.
+ *  Only one is visible at a time (`activeSlot`).
+ *
+ *  On NAVIGATE the inactive slot receives the new verse index, then:
+ *    preparing  → browser paints the new content at opacity 0  (2× rAF)
+ *    crossfading → active slot fades out, inactive fades in    (CROSSFADE_MS)
+ *    idle        → activeSlot flips to the slot that just faded in
+ *
+ *  Because the incoming verse is already rendered (at opacity 0)
+ *  before the crossfade begins, NO DOM mutation ever happens during
+ *  a visible transition — the compositor just interpolates opacity
+ *  on two pre-rendered layers. This is silky-smooth on iOS Safari.
+ */
 
-type Phase = "visible" | "fade-out" | "pause" | "fade-in";
+type Phase = "idle" | "preparing" | "crossfading";
 
 interface SoakState {
-  /** Target verse index (jumps immediately on NAVIGATE). */
+  /** The latest verse index the user navigated to. */
   currentIndex: number;
-  /** Verse index currently rendered in the DOM (swaps during pause). */
-  displayedIndex: number;
+  /** Which slot is currently the "on-screen" one. */
+  activeSlot: "a" | "b";
+  /** Verse index loaded in slot A. */
+  slotA: number;
+  /** Verse index loaded in slot B. */
+  slotB: number;
   /** Transition phase. */
   phase: Phase;
-  /** Set of highlighted word keys for the current verse. */
+  /** Set of highlighted word keys (active slot only). */
   highlightedWords: Set<number>;
-  /** Timestamp when the last verse became fully visible. */
+  /** Timestamp when the current verse became fully visible. */
   lastChangeTs: number;
 }
 
 type SoakAction =
-  | { type: "NAVIGATE"; direction: 1 | -1 }
+  | { type: "NAVIGATE"; newIndex: number }
   | { type: "PHASE_COMPLETE" }
   | { type: "TOGGLE_WORD"; key: number };
 
 function soakReducer(state: SoakState, action: SoakAction): SoakState {
   switch (action.type) {
     case "NAVIGATE": {
-      if (state.phase !== "visible") return state;
+      if (state.phase !== "idle") return state;
+      const inactive = state.activeSlot === "a" ? "b" : "a";
       return {
         ...state,
-        currentIndex: state.currentIndex + action.direction,
-        phase: "fade-out",
+        currentIndex: action.newIndex,
+        ...(inactive === "a"
+          ? { slotA: action.newIndex }
+          : { slotB: action.newIndex }),
+        phase: "preparing",
         highlightedWords: new Set(),
       };
     }
 
     case "PHASE_COMPLETE": {
-      switch (state.phase) {
-        case "fade-out":
-          return {
-            ...state,
-            phase: "pause",
-            displayedIndex: state.currentIndex,
-          };
-        case "pause":
-          return { ...state, phase: "fade-in" };
-        case "fade-in":
-          return {
-            ...state,
-            phase: "visible",
-            lastChangeTs: Date.now(),
-          };
-        default:
-          return state;
+      if (state.phase === "preparing") {
+        return { ...state, phase: "crossfading" };
       }
+      if (state.phase === "crossfading") {
+        return {
+          ...state,
+          activeSlot: state.activeSlot === "a" ? "b" : "a",
+          phase: "idle",
+          lastChangeTs: Date.now(),
+        };
+      }
+      return state;
     }
 
     case "TOGGLE_WORD": {
@@ -108,31 +126,38 @@ export function SoakVerseTap({
   /* ── Touch tracking refs ─────────────────────────────────────────── */
   const touchStartX = useRef<number | null>(null);
   const touchStartY = useRef<number | null>(null);
-  /** Timestamp of last touch event — used to ignore synthetic mouse clicks on mobile */
   const lastTouchTs = useRef(0);
 
   /* ── Exit icon visibility ────────────────────────────────────────── */
   const [exitVisible, setExitVisible] = useState(false);
   const exitTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Initial phase is "pause" so the first verse fades in on mount
+  /* ── One-time mount fade-in ──────────────────────────────────────── */
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    // Schedule on next animation frame so the browser paints opacity 0 first,
+    // then we flip to 1 and the CSS transition produces a smooth fade-in.
+    requestAnimationFrame(() => setMounted(true));
+  }, []);
+
+  /* ── Reducer ─────────────────────────────────────────────────────── */
   const [state, dispatch] = useReducer(soakReducer, {
     currentIndex: 0,
-    displayedIndex: 0,
-    phase: "pause" as Phase,
+    activeSlot: "a" as const,
+    slotA: 0,
+    slotB: 0,
+    phase: "idle" as Phase,
     highlightedWords: new Set<number>(),
-    lastChangeTs: 0,
+    lastChangeTs: Date.now(),
   });
 
-  /* ── Transition timer ────────────────────────────────────────────── */
+  /* ── Phase transition effects ────────────────────────────────────── */
   useEffect(() => {
-    if (state.phase === "visible") return;
+    if (state.phase === "idle") return;
 
-    // During the "pause" phase the verse content swaps at opacity 0.
-    // We use a double-requestAnimationFrame instead of a fixed timeout
-    // so the browser (especially iOS Safari) fully paints the new DOM
-    // at opacity 0 before we kick off the fade-in.
-    if (state.phase === "pause") {
+    if (state.phase === "preparing") {
+      // The inactive slot just got new content at opacity 0.
+      // Wait for the browser to paint it, then start the crossfade.
       let cancelled = false;
       requestAnimationFrame(() => {
         if (cancelled) return;
@@ -141,14 +166,15 @@ export function SoakVerseTap({
           dispatch({ type: "PHASE_COMPLETE" });
         });
       });
-      return () => { cancelled = true; };
+      return () => {
+        cancelled = true;
+      };
     }
 
-    const duration = state.phase === "fade-out" ? FADE_OUT_MS : FADE_IN_MS;
-
+    // crossfading → wait for the CSS transition to finish, then complete
     const timer = setTimeout(
       () => dispatch({ type: "PHASE_COMPLETE" }),
-      duration,
+      CROSSFADE_MS,
     );
     return () => clearTimeout(timer);
   }, [state.phase]);
@@ -156,15 +182,13 @@ export function SoakVerseTap({
   /* ── Navigation handler ──────────────────────────────────────────── */
   const handleNav = useCallback(
     (direction: 1 | -1) => {
-      if (state.phase !== "visible") return;
+      if (state.phase !== "idle") return;
       if (Date.now() - state.lastChangeTs < COOLDOWN_MS) return;
 
       const newIndex = state.currentIndex + direction;
-
-      // Past-the-edge: do nothing (exit is via the exit icon now)
       if (newIndex < 0 || newIndex >= section.verses.length) return;
 
-      dispatch({ type: "NAVIGATE", direction });
+      dispatch({ type: "NAVIGATE", newIndex });
     },
     [state.phase, state.lastChangeTs, state.currentIndex, section.verses.length],
   );
@@ -184,21 +208,13 @@ export function SoakVerseTap({
       const deltaX = e.changedTouches[0].clientX - touchStartX.current;
       const deltaY = e.changedTouches[0].clientY - touchStartY.current;
 
-      // Reset
       touchStartX.current = null;
       touchStartY.current = null;
 
-      // Only count horizontal swipes (ignore vertical scrolls)
       if (Math.abs(deltaX) < SWIPE_THRESHOLD_PX) return;
       if (Math.abs(deltaY) > Math.abs(deltaX)) return;
 
-      if (deltaX < 0) {
-        // Swipe left → next verse
-        handleNav(1);
-      } else {
-        // Swipe right → previous verse
-        handleNav(-1);
-      }
+      handleNav(deltaX < 0 ? 1 : -1);
     },
     [handleNav],
   );
@@ -206,21 +222,22 @@ export function SoakVerseTap({
   /* ── Click-zone handler (desktop mouse only) ───────────────────── */
   const handleZoneClick = useCallback(
     (direction: 1 | -1) => {
-      // Ignore synthetic clicks fired after a touch event (mobile)
       if (Date.now() - lastTouchTs.current < 800) return;
       handleNav(direction);
     },
     [handleNav],
   );
 
-  /* ── Exit icon: show on tap in bottom area, auto-hide after delay ── */
+  /* ── Exit icon ─────────────────────────────────────────────────── */
   const showExitIcon = useCallback(() => {
     setExitVisible(true);
     if (exitTimerRef.current) clearTimeout(exitTimerRef.current);
-    exitTimerRef.current = setTimeout(() => setExitVisible(false), EXIT_VISIBLE_MS);
+    exitTimerRef.current = setTimeout(
+      () => setExitVisible(false),
+      EXIT_VISIBLE_MS,
+    );
   }, []);
 
-  // Cleanup timer on unmount
   useEffect(() => {
     return () => {
       if (exitTimerRef.current) clearTimeout(exitTimerRef.current);
@@ -236,17 +253,96 @@ export function SoakVerseTap({
     [],
   );
 
-  /* ── Derived values ──────────────────────────────────────────────── */
-  const verse = section.verses[state.displayedIndex];
-  const tokens = verse ? tokenizeVerse(verse.text) : [];
+  /* ── Slot opacities ────────────────────────────────────────────── */
+  const isXfading = state.phase === "crossfading";
 
-  /* Inline opacity — iOS Safari requires this instead of class toggles
-     for smooth CSS transitions.  0 during fade-out & pause, 1 otherwise. */
-  const verseOpacity =
-    state.phase === "fade-out" || state.phase === "pause" ? 0 : 1;
+  // idle / preparing: active slot visible (1), inactive hidden (0)
+  // crossfading:      active (outgoing) → 0,  inactive (incoming) → 1
+  const slotAOpacity =
+    state.activeSlot === "a"
+      ? isXfading
+        ? 0
+        : mounted
+          ? 1
+          : 0
+      : isXfading
+        ? 1
+        : 0;
 
-  /* ── Verse indicator (e.g. 1 / 5) ───────────────────────────────── */
-  const verseIndicator = `${state.displayedIndex + 1} / ${section.verses.length}`;
+  const slotBOpacity =
+    state.activeSlot === "b"
+      ? isXfading
+        ? 0
+        : mounted
+          ? 1
+          : 0
+      : isXfading
+        ? 1
+        : 0;
+
+  // The "target" slot is whichever holds the latest verse:
+  //   idle → activeSlot;  preparing/crossfading → the incoming slot
+  const targetSlot =
+    state.phase === "idle"
+      ? state.activeSlot
+      : state.activeSlot === "a"
+        ? "b"
+        : "a";
+
+  /* ── Verse data ────────────────────────────────────────────────── */
+  const verseA = section.verses[state.slotA];
+  const verseB = section.verses[state.slotB];
+  const tokensA = verseA ? tokenizeVerse(verseA.text) : [];
+  const tokensB = verseB ? tokenizeVerse(verseB.text) : [];
+
+  const verseIndicator = `${state.currentIndex + 1} / ${section.verses.length}`;
+
+  /* ── Render a verse slot ───────────────────────────────────────── */
+  const renderSlot = (
+    tokens: ReturnType<typeof tokenizeVerse>,
+    opacity: number,
+    slotKey: string,
+    isTarget: boolean,
+  ) => (
+    <div
+      key={slotKey}
+      className="absolute inset-0 flex items-center justify-center px-8"
+      style={{
+        pointerEvents:
+          isTarget && state.phase === "idle" ? "auto" : "none",
+      }}
+    >
+      <p
+        className="soak-verse soak-text max-w-lg"
+        style={{ opacity }}
+        data-testid={isTarget ? "soak-verse" : undefined}
+        aria-live={isTarget ? "polite" : "off"}
+      >
+        {tokens.map((token) => (
+          <span
+            key={token.key}
+            onClick={
+              isTarget
+                ? (e) => handleWordClick(token.key, e)
+                : undefined
+            }
+            className={`soak-word ${
+              isTarget && state.highlightedWords.has(token.key)
+                ? "soak-word-highlighted"
+                : ""
+            }`}
+            data-testid={
+              isTarget ? `soak-word-${token.key}` : undefined
+            }
+            role="button"
+            tabIndex={-1}
+          >
+            {token.text}{" "}
+          </span>
+        ))}
+      </p>
+    </div>
+  );
 
   /* ── Render ──────────────────────────────────────────────────────── */
   return (
@@ -257,8 +353,11 @@ export function SoakVerseTap({
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
     >
-      {/* Click zones — left/right for desktop mouse nav, center for exit reveal */}
-      <div className="fixed inset-0 z-[51] flex" data-testid="soak-click-zones">
+      {/* Click zones — left/right for desktop, center for exit reveal */}
+      <div
+        className="fixed inset-0 z-[51] flex"
+        data-testid="soak-click-zones"
+      >
         <div
           className="w-[30%] h-full cursor-default"
           data-testid="soak-zone-left"
@@ -276,44 +375,23 @@ export function SoakVerseTap({
         />
       </div>
 
-      {/* Verse text layer — breathing wrapper is a SEPARATE composited layer
-           from the opacity-transitioning <p> so iOS Safari can GPU-accelerate both. */}
+      {/* Verse text — two overlapping slots, crossfaded.
+          No DOM swap ever happens during a visible transition. */}
       <div
-        className={`fixed inset-0 z-[52] flex items-center justify-center px-8 pointer-events-none soak-breathe-text ${fontClassName}`}
+        className={`fixed inset-0 z-[52] pointer-events-none soak-breathe-text ${fontClassName}`}
       >
-        <p
-          className="soak-verse soak-text max-w-lg"
-          style={{ opacity: verseOpacity }}
-          data-testid="soak-verse"
-          aria-live="polite"
-        >
-          {tokens.map((token) => (
-            <span
-              key={token.key}
-              onClick={(e) => handleWordClick(token.key, e)}
-              className={`soak-word pointer-events-auto ${
-                state.highlightedWords.has(token.key)
-                  ? "soak-word-highlighted"
-                  : ""
-              }`}
-              data-testid={`soak-word-${token.key}`}
-              role="button"
-              tabIndex={-1}
-            >
-              {token.text}{" "}
-            </span>
-          ))}
-        </p>
+        {renderSlot(tokensA, slotAOpacity, "a", targetSlot === "a")}
+        {renderSlot(tokensB, slotBOpacity, "b", targetSlot === "b")}
       </div>
 
-      {/* Verse indicator — subtle, always visible */}
+      {/* Verse indicator */}
       <div
         className="fixed top-0 left-0 right-0 z-[53] flex justify-center pt-safe"
         style={{ paddingTop: "max(env(safe-area-inset-top), 16px)" }}
       >
         <span
-          className="text-[11px] tracking-[0.2em] uppercase font-light soak-verse"
-          style={{ color: "rgba(255, 252, 240, 0.3)", opacity: verseOpacity }}
+          className="text-[11px] tracking-[0.2em] uppercase font-light"
+          style={{ color: "rgba(255, 252, 240, 0.3)" }}
         >
           {verseIndicator}
         </span>
@@ -325,9 +403,7 @@ export function SoakVerseTap({
         style={{ paddingBottom: "max(env(safe-area-inset-bottom), 24px)" }}
         onClick={(e) => {
           e.stopPropagation();
-          if (!exitVisible) {
-            showExitIcon();
-          }
+          if (!exitVisible) showExitIcon();
         }}
         data-testid="soak-exit-zone"
       >
@@ -347,7 +423,8 @@ export function SoakVerseTap({
               ? "rgba(255, 252, 240, 0.12)"
               : "transparent",
             transform: exitVisible ? "scale(1)" : "scale(0.85)",
-            transition: "opacity 500ms ease, background-color 500ms ease, transform 300ms ease",
+            transition:
+              "opacity 500ms ease, background-color 500ms ease, transform 300ms ease",
           }}
           data-testid="soak-exit-button"
           aria-label="Exit Soak mode"

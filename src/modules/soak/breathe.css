@@ -102,6 +102,7 @@
 
 .soak-verse {
   transition: opacity 800ms ease-in-out;
+  will-change: opacity;
   -webkit-transform: translate3d(0, 0, 0);
   transform: translate3d(0, 0, 0);
 }
