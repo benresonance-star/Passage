@@ -74,6 +74,10 @@ export function ThemeContent({ children }: { children: React.ReactNode }) {
       root.style.setProperty("--overlay", "rgba(0,0,0,0.60)");
       root.style.setProperty("--overlay-surface", "rgba(0,0,0,0.65)");
       root.style.setProperty("--input-bg", "rgba(0,0,0,0.30)");
+
+      // Flow mode — soft warm glow instead of orange
+      root.style.setProperty("--flow-read", "rgba(255,252,240,1)");
+      root.style.setProperty("--flow-unread", "rgba(255,252,240,0.22)");
     } else {
       body.style.backgroundColor = theme.bg;
       body.style.color = theme.text;
@@ -103,6 +107,10 @@ export function ThemeContent({ children }: { children: React.ReactNode }) {
         root.style.setProperty("--overlay-surface", "#18181b");
         root.style.setProperty("--input-bg", "#000000");
       }
+
+      // Flow mode — standard colours for non-Dawn themes
+      root.style.setProperty("--flow-read", "#f97316");       // orange-500
+      root.style.setProperty("--flow-unread", isLight ? "rgba(0,0,0,0.15)" : "#27272a");
     }
   }, [theme, isLight, isDawn]);
 

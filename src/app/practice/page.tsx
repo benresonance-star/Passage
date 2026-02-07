@@ -200,13 +200,14 @@ export default function PracticePage() {
                             return (
                               <span
                                 key={wi}
-                                className={`inline transition-colors duration-200 ${
+                                className="inline transition-colors duration-200"
+                                style={
                                   isRead
-                                    ? "text-orange-500"
+                                    ? { color: "var(--flow-read)" }
                                     : isUnread
-                                    ? "text-zinc-800"
-                                    : ""
-                                }`}
+                                    ? { color: "var(--flow-unread)" }
+                                    : undefined
+                                }
                               >
                                 {word}{" "}
                               </span>
