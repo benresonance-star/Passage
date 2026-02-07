@@ -77,11 +77,11 @@ export default function ChapterPage() {
 
   return (
     <div className="space-y-6 pb-32">
-      <header className={`sticky top-0 backdrop-blur-md pt-4 pb-2 z-10 border-b border-white/10 ${isDawn ? "bg-black/20" : "bg-inherit"}`}>
+      <header className={`sticky top-0 backdrop-blur-md pt-4 pb-2 z-10 ${isDawn ? "bg-transparent border-b border-transparent" : "bg-inherit border-b border-white/10"}`}>
         <div className="flex justify-between items-start">
           <div>
             <h1 className="text-2xl font-bold">{chapter.title}</h1>
-            <div className="flex gap-4 text-zinc-500 text-sm mt-1">
+            <div className={`flex gap-4 text-sm mt-1 ${isDawn ? "text-[var(--theme-ui-subtext)]" : "text-zinc-500"}`}>
               <span>{chapter.chunks.length} Chunks</span>
               <span>{chapter.verses.length} Verses</span>
             </div>
