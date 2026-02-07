@@ -2,10 +2,9 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, BookOpen, Play, Mic, Droplets, RefreshCw, Upload } from "lucide-react";
+import { BookOpen, Play, Mic, Droplets, RefreshCw } from "lucide-react";
 
 const NAV_ITEMS = [
-  { label: "Home", href: "/", icon: Home },
   { label: "Chapter", href: "/chapter", icon: BookOpen },
   { label: "Practice", href: "/practice", icon: Play },
   { label: "Recite", href: "/recite", icon: Mic },

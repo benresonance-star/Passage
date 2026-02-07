@@ -74,7 +74,7 @@ export default function ImportPage() {
     // Cloud Sync
     await pushChapter(newChapter);
 
-    router.push("/");
+    router.push("/chapter");
   };
 
   const hasMarkers = text.includes("<") && text.includes(">");
@@ -83,7 +83,7 @@ export default function ImportPage() {
   return (
     <div className="space-y-6 pb-20">
       <header className="flex items-center gap-4 py-4">
-        <Link href="/" className="text-zinc-400">
+        <Link href="/chapter" className="text-zinc-400">
           <ArrowLeft size={24} />
         </Link>
         <h1 className="text-xl">Import Chapter</h1>

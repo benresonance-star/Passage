@@ -261,7 +261,7 @@ export default function GroupPage() {
       <PromptDialog />
       <ToastContainer />
       <header className="flex items-center gap-4">
-        <Link href="/" className="p-2 text-zinc-500 bg-[var(--surface)] rounded-full border border-[var(--surface-border)]">
+        <Link href="/chapter" className="p-2 text-zinc-500 bg-[var(--surface)] rounded-full border border-[var(--surface-border)]">
           <ArrowLeft size={20} />
         </Link>
         <h1 className="text-2xl font-bold">Study Group</h1>

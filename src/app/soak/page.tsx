@@ -27,7 +27,7 @@ export default function SoakPage() {
 
   useEffect(() => {
     if (isHydrated && (!chapter || !activeChunk)) {
-      router.push("/");
+      router.push("/chapter");
     }
   }, [isHydrated, chapter, activeChunk, router]);
 

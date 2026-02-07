@@ -45,7 +45,7 @@ export default function RecitePage() {
   useEffect(() => {
     if (isHydrated) {
       if (!chapter || !chapterId) {
-        router.push("/");
+        router.push("/chapter");
         return;
       }
 
@@ -68,7 +68,7 @@ export default function RecitePage() {
             }
           }));
         } else {
-          router.push("/");
+          router.push("/chapter");
         }
       }
     }

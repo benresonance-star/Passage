@@ -54,7 +54,7 @@ export default function PracticePage() {
   useEffect(() => {
     if (isHydrated) {
       if (!chapter || !chapterId) {
-        router.push("/");
+        router.push("/chapter");
         return;
       }
 
@@ -74,7 +74,7 @@ export default function PracticePage() {
             }
           }));
         } else {
-          router.push("/");
+          router.push("/chapter");
         }
       }
     }

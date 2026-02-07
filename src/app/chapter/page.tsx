@@ -2,7 +2,8 @@
 
 import { useBCM } from "@/context/BCMContext";
 import { useRouter } from "next/navigation";
-import { Play, Mic, ChevronRight, Eye, EyeOff, Award, Palette, X } from "lucide-react";
+import { Play, Mic, ChevronRight, Eye, EyeOff, Award, Palette, Settings, X } from "lucide-react";
+import Link from "next/link";
 import { useState } from "react";
 
 const THEME_PRESETS = [
@@ -105,6 +106,12 @@ export default function ChapterPage() {
             >
               <Award size={20} />
             </button>
+            <Link
+              href="/"
+              className="p-2 rounded-xl transition-colors text-zinc-500 bg-[var(--theme-ui-bg)]"
+            >
+              <Settings size={20} />
+            </Link>
           </div>
         </div>
       </header>
