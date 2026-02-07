@@ -229,13 +229,10 @@ export function SoakVerseTap({
   const verse = section.verses[state.displayedIndex];
   const tokens = verse ? tokenizeVerse(verse.text) : [];
 
-  const opacity = state.phase === "fade-out" || state.phase === "pause" ? 0 : 1;
-  const transitionDuration =
-    state.phase === "fade-out"
-      ? `${FADE_OUT_MS}ms`
-      : state.phase === "fade-in"
-      ? `${FADE_IN_MS}ms`
-      : "0ms";
+  const isFading = state.phase === "fade-out" || state.phase === "pause";
+  const opacity = isFading ? 0 : 1;
+  // Use the longer of the two durations so fade-out and fade-in both animate smoothly
+  const transitionDuration = `${Math.max(FADE_OUT_MS, FADE_IN_MS)}ms`;
 
   /* ── Verse indicator (e.g. 1 / 5) ───────────────────────────────── */
   const verseIndicator = `${state.displayedIndex + 1} / ${section.verses.length}`;

@@ -10,7 +10,7 @@ import { Cormorant_Garamond } from "next/font/google";
 
 const soakFont = Cormorant_Garamond({
   subsets: ["latin"],
-  weight: ["300", "400"],
+  weight: ["300", "400", "700"],
 });
 
 export default function SoakPage() {
