@@ -1,0 +1,139 @@
+/* ─── Atmospheric Breathing Background ────────────────────────────────
+ *  Sunrise-over-ocean gradient with a slow, seamless breathing cycle.
+ *  The outer element must NEVER be unmounted during verse changes.
+ * ─────────────────────────────────────────────────────────────────── */
+
+.soak-breathe {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+
+  /* Sky → horizon → water gradient, oversized for animation travel */
+  background:
+    linear-gradient(
+      180deg,
+      #1e1b3a 0%,
+      #3d3566 12%,
+      #7b6b96 24%,
+      #b09aaf 36%,
+      #c9ac9a 46%,
+      #dabb8e 54%,
+      #c9a87a 62%,
+      #8eaab0 76%,
+      #5a8090 88%,
+      #3a5f6d 100%
+    );
+  background-size: 100% 220%;
+  animation: soak-sky 25s ease-in-out infinite;
+}
+
+/* Sun-glow layer — warm radial that pulses independently */
+.soak-breathe::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse 70% 45% at 50% 56%,
+    rgba(255, 210, 150, 0.22) 0%,
+    rgba(240, 180, 120, 0.08) 40%,
+    transparent 68%
+  );
+  animation: soak-glow 10s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* Soft vignette for depth */
+.soak-breathe::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse 80% 80% at 50% 50%,
+    transparent 50%,
+    rgba(15, 12, 30, 0.35) 100%
+  );
+  pointer-events: none;
+}
+
+/* ─── Keyframes ───────────────────────────────────────────────────── */
+
+/* Slow vertical drift of the gradient — feels like the sky is breathing */
+@keyframes soak-sky {
+  0%,
+  100% {
+    background-position: 50% 0%;
+  }
+  50% {
+    background-position: 50% 35%;
+  }
+}
+
+/* Independent glow pulse — different cycle length avoids repetition */
+@keyframes soak-glow {
+  0%,
+  100% {
+    opacity: 0.4;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.85;
+    transform: scale(1.12);
+  }
+}
+
+/* ─── Verse Text ──────────────────────────────────────────────────── */
+
+.soak-verse {
+  transition-property: opacity;
+  transition-timing-function: ease-in-out;
+}
+
+.soak-text {
+  font-size: 28px;
+  line-height: 1.85;
+  font-weight: 300;
+  color: rgba(255, 252, 240, 0.92);
+  text-align: center;
+  letter-spacing: 0.01em;
+}
+
+/* ─── Word Tokens ─────────────────────────────────────────────────── */
+
+.soak-word {
+  cursor: default;
+  border-radius: 4px;
+  transition: text-shadow 400ms ease, color 400ms ease;
+  /* Prevent iOS long-press callout */
+  -webkit-touch-callout: none;
+}
+
+.soak-word-highlighted {
+  color: #fffaf0;
+  text-shadow:
+    0 0 10px rgba(255, 220, 160, 0.55),
+    0 0 28px rgba(255, 195, 120, 0.22);
+}
+
+/* ─── Reduced Motion ──────────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .soak-breathe {
+    animation: none;
+    background-size: 100% 160%;
+    background-position: 50% 18%;
+  }
+
+  .soak-breathe::before {
+    animation: none;
+    opacity: 0.6;
+  }
+
+  .soak-word {
+    transition: none;
+  }
+
+  .soak-verse {
+    transition: none;
+  }
+}
+
