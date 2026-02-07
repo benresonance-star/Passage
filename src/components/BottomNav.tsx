@@ -6,9 +6,9 @@ import { BookOpen, Play, Mic, Droplets, RefreshCw } from "lucide-react";
 
 const NAV_ITEMS = [
   { label: "Chapter", href: "/chapter", icon: BookOpen },
+  { label: "Soak", href: "/soak", icon: Droplets },
   { label: "Practice", href: "/practice", icon: Play },
   { label: "Recite", href: "/recite", icon: Mic },
-  { label: "Soak", href: "/soak", icon: Droplets },
   { label: "Review", href: "/review", icon: RefreshCw },
 ];
 
