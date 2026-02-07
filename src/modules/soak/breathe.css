@@ -8,6 +8,13 @@
   inset: 0;
   z-index: 50;
 
+  /* Prevent iOS Safari from hijacking horizontal swipes for back/forward
+     navigation or elastic scrolling. All touch handling is done in JS. */
+  touch-action: none;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+
   /* Sky → horizon → water gradient, oversized for animation travel */
   background:
     linear-gradient(

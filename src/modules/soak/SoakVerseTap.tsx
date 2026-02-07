@@ -350,14 +350,13 @@ export function SoakVerseTap({
       ref={bgRef}
       data-testid="soak-breathe"
       className="soak-breathe"
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
     >
-      {/* Click & swipe zones — topmost interactive layer (z-51).
-          Touch handlers live HERE so iOS Safari reliably captures swipes. */}
+      {/* Click zones — desktop mouse navigation only */}
       <div
         className="fixed inset-0 z-[51] flex"
         data-testid="soak-click-zones"
-        onTouchStart={handleTouchStart}
-        onTouchEnd={handleTouchEnd}
       >
         <div
           className="w-[30%] h-full cursor-default"

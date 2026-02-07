@@ -48,19 +48,17 @@ function completeTransitionAndCooldown() {
 /* ─── Swipe simulation helpers ────────────────────────────────────── */
 
 /**
- * Simulate a horizontal swipe on the click-zones element (topmost touch layer).
+ * Simulate a horizontal swipe on the soak-breathe element (root touch target).
  * Negative deltaX = swipe left (next), positive = swipe right (prev).
  */
 function simulateSwipe(element: HTMLElement, deltaX: number) {
   const startX = 200;
   const startY = 300;
-  // Touch handlers are on the click-zones container
-  const touchTarget = element.querySelector('[data-testid="soak-click-zones"]') || element;
 
-  fireEvent.touchStart(touchTarget, {
+  fireEvent.touchStart(element, {
     touches: [{ clientX: startX, clientY: startY }],
   });
-  fireEvent.touchEnd(touchTarget, {
+  fireEvent.touchEnd(element, {
     changedTouches: [{ clientX: startX + deltaX, clientY: startY }],
   });
 }
@@ -125,13 +123,13 @@ describe("SoakVerseTap", () => {
     waitForReady();
 
     const textBefore = screen.getByTestId("soak-verse").textContent;
-    const touchTarget = screen.getByTestId("soak-click-zones");
+    const element = screen.getByTestId("soak-breathe");
 
     // Vertical swipe (large Y delta, small X delta)
-    fireEvent.touchStart(touchTarget, {
+    fireEvent.touchStart(element, {
       touches: [{ clientX: 200, clientY: 200 }],
     });
-    fireEvent.touchEnd(touchTarget, {
+    fireEvent.touchEnd(element, {
       changedTouches: [{ clientX: 220, clientY: 400 }],
     });
 
