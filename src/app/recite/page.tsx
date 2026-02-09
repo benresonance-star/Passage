@@ -9,6 +9,7 @@ import { updateCard } from "@/lib/scheduler";
 import { calculateUpdatedStreak } from "@/lib/streak";
 import { useWakeLock } from "@/hooks/useWakeLock";
 import { ArrowLeft, Eye, EyeOff } from "lucide-react";
+import { EmptyState } from "@/components/EmptyState";
 
 export default function RecitePage() {
   const { state, setState, isHydrated, syncProgress } = useBCM();
@@ -45,7 +46,7 @@ export default function RecitePage() {
   useEffect(() => {
     if (isHydrated) {
       if (!chapter || !chapterId) {
-        router.push("/chapter");
+        // Don't redirect, the EmptyState will handle it
         return;
       }
 
@@ -67,14 +68,13 @@ export default function RecitePage() {
               }
             }
           }));
-        } else {
-          router.push("/chapter");
         }
       }
     }
   }, [isHydrated, chapter, chapterId, activeChunkId, state.cards, router, setState]);
 
-  if (!isHydrated || !activeChunk || !chapterId) return null;
+  if (!isHydrated) return null;
+  if (!chapter || !chapterId || !activeChunk) return <EmptyState />;
 
   const toggleLine = (index: number) => {
     const newRevealed = new Set(revealedLines);

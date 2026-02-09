@@ -11,6 +11,7 @@ import { useWakeLock } from "@/hooks/useWakeLock";
 import { useAuth } from "@/context/AuthContext";
 import FlowControls from "@/components/FlowControls";
 import { ArrowLeft, RefreshCw, CheckCircle2, AlertCircle, Zap } from "lucide-react";
+import { EmptyState } from "@/components/EmptyState";
 
 type PracticeMode = "read" | "cloze" | "type" | "result";
 
@@ -96,7 +97,8 @@ export default function PracticePage() {
     };
   }, [isFlowMode, isPlaying, currentIndex, words.length, wpm]);
 
-  if (!isHydrated || !activeChunk || !chapterId) return null;
+  if (!isHydrated) return null;
+  if (!chapter || !chapterId || !activeChunk) return <EmptyState />;
 
   const handleNextMode = async () => {
     if (mode === "read") setMode("cloze");

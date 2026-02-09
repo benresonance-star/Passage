@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Play, Mic, ChevronRight, Eye, EyeOff, Award, Palette, Settings, X } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
+import { EmptyState } from "@/components/EmptyState";
 
 const THEME_PRESETS = [
   { name: "OLED", bg: "#000000", text: "#f4f4f5" },
@@ -22,7 +23,8 @@ export default function ChapterPage() {
   const chapterId = state.selectedChapterId;
   const chapter = chapterId ? state.chapters[chapterId] : null;
 
-  if (!isHydrated || !chapter || !chapterId) return null;
+  if (!isHydrated) return null;
+  if (!chapter || !chapterId) return <EmptyState />;
 
   const setActiveChunk = (chunkId: string) => {
     setState((prev) => {
