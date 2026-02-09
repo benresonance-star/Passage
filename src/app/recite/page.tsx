@@ -130,6 +130,9 @@ export default function RecitePage() {
     setIsGraded(true);
   };
 
+  const currentTheme = state.settings.theme || { bg: "#000000", text: "#f4f4f5" };
+  const isDawn = currentTheme.id === "dawn";
+
   return (
     <div className="flex flex-col min-h-[calc(100vh-8rem)]">
       <header className="flex items-center justify-between py-4">
@@ -138,7 +141,7 @@ export default function RecitePage() {
         </button>
         <div className="text-center">
           <h1 className="text-sm font-bold uppercase tracking-widest text-orange-500">Recite Mode</h1>
-          <p className="text-[10px] text-zinc-500 uppercase tracking-tight">
+          <p className={`text-[10px] uppercase tracking-tight ${isDawn ? "text-white/60" : "text-zinc-500"}`}>
             Verses {activeChunk?.verseRange} • {chapter?.title}
           </p>
         </div>
@@ -150,7 +153,7 @@ export default function RecitePage() {
       <div className="flex-1 space-y-4 py-8">
         <div className="text-center mb-8">
           <h2 className="text-xl font-bold">Recite out loud.</h2>
-          <p className="text-zinc-500 text-sm">Tap lines to reveal.</p>
+          <p className={`text-sm ${isDawn ? "text-white/60" : "text-zinc-500"}`}>Tap lines to reveal.</p>
         </div>
 
         <div className="space-y-3">
