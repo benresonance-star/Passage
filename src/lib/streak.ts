@@ -34,3 +34,4 @@ export function shouldResetStreak(lastActivity: string | null): boolean {
   return daysBetween(new Date(), new Date(lastActivity)) > 1;
 }
 
+
