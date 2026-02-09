@@ -362,7 +362,7 @@ export default function PracticePage() {
             onClick={handleNextMode}
             className={`w-full py-4 font-bold rounded-2xl transition-all flex items-center justify-center gap-2 ${
               isDawn 
-                ? "bg-[var(--surface)] border border-[var(--surface-border)] text-[var(--theme-ui-subtext)] uppercase tracking-widest text-xs" 
+                ? "bg-[var(--surface)] border border-[var(--surface-border)] text-[var(--theme-ui-subtext)] hover:text-orange-500 uppercase tracking-widest text-xs" 
                 : "bg-orange-500 text-white shadow-lg shadow-orange-500/20 active:scale-95"
             }`}
           >
@@ -376,7 +376,7 @@ export default function PracticePage() {
             onClick={() => router.push("/chapter")}
             className={`w-full py-4 font-bold rounded-2xl transition-all ${
               isDawn
-                ? "bg-[var(--surface)] border border-[var(--surface-border)] text-[var(--theme-ui-subtext)] uppercase tracking-widest text-xs"
+                ? "bg-[var(--surface)] border border-[var(--surface-border)] text-[var(--theme-ui-subtext)] hover:text-orange-500 uppercase tracking-widest text-xs"
                 : "bg-orange-500 text-white shadow-lg shadow-orange-500/20"
             }`}
           >
