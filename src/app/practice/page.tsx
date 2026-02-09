@@ -329,17 +329,17 @@ export default function PracticePage() {
       </div>
 
       <div className="py-8 space-y-4">
-        <div className="relative">
-          {!isFlowMode ? (
-            <button
-              onClick={() => setIsFlowMode(true)}
-              className="w-full py-4 bg-[var(--surface)] border border-[var(--surface-border)] text-[var(--theme-ui-subtext)] font-bold rounded-2xl flex items-center justify-center gap-2 hover:text-orange-500 transition-all uppercase tracking-widest text-xs"
-            >
-              <Zap size={16} className="fill-current" />
-              Flow Mode
-            </button>
-          ) : (
-            mode === "read" && (
+        {mode === "read" && (
+          <div className="relative">
+            {!isFlowMode ? (
+              <button
+                onClick={() => setIsFlowMode(true)}
+                className="w-full py-4 bg-[var(--surface)] border border-[var(--surface-border)] text-[var(--theme-ui-subtext)] font-bold rounded-2xl flex items-center justify-center gap-2 hover:text-orange-500 transition-all uppercase tracking-widest text-xs"
+              >
+                <Zap size={16} className="fill-current" />
+                Flow Mode
+              </button>
+            ) : (
               <FlowControls 
                 isPlaying={isPlaying}
                 onTogglePlay={() => setIsPlaying(!isPlaying)}
@@ -352,9 +352,9 @@ export default function PracticePage() {
                   setCurrentIndex(-1);
                 }}
               />
-            )
-          )}
-        </div>
+            )}
+          </div>
+        )}
 
         {mode !== "result" && (
           <button
