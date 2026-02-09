@@ -316,12 +316,15 @@ export default function ChapterPage() {
                                     e.stopPropagation();
                                     toggleWordHighlight(part);
                                   }}
-                                  className={`cursor-pointer transition-all duration-200 rounded-sm px-0.5 -mx-0.5 ${
+                                  className={`cursor-pointer transition-all duration-300 rounded-sm px-0.5 -mx-0.5 ${
                                     isHighlighted 
-                                      ? "bg-[#FFCB1F]/30 text-[#FFCB1F] font-black" 
+                                      ? "text-[#FFCB1F] font-black" 
                                       : "hover:bg-white/5"
                                   }`}
-                                  style={isHighlighted ? { fontWeight: 900 } : undefined}
+                                  style={isHighlighted ? { 
+                                    fontWeight: 900,
+                                    textShadow: isDawn ? "0 0 12px rgba(255, 203, 31, 0.4)" : "0 0 8px rgba(255, 203, 31, 0.3)"
+                                  } : undefined}
                                 >
                                   {part}
                                 </span>
