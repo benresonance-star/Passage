@@ -295,22 +295,22 @@ export default function PracticePage() {
               </div>
 
               <div className="flex flex-wrap gap-x-2 gap-y-1 text-lg leading-relaxed">
-                {diffResults.results.map((res, i) => (
-                  <span
-                    key={i}
-                    className={`${
-                      res.status === "correct" 
-                        ? "" 
-                        : res.status === "wrong" 
-                        ? "text-red-500 underline decoration-red-500/50 underline-offset-4" 
-                        : res.status === "missing" 
-                        ? "text-orange-500/50 italic"
-                        : "text-red-400 opacity-50 line-through"
-                    }`}
-                  >
-                    {res.word}
-                  </span>
-                ))}
+                {diffResults.results
+                  .filter(res => res.status !== "extra")
+                  .map((res, i) => (
+                    <span
+                      key={i}
+                      className={`${
+                        res.status === "correct" 
+                          ? (isDawn ? "text-[#FFCB1F] font-bold" : "text-white") 
+                          : res.status === "missing" 
+                          ? (isDawn ? "text-white opacity-50 italic" : "text-orange-500/50 italic")
+                          : ""
+                      }`}
+                    >
+                      {res.word}
+                    </span>
+                  ))}
               </div>
             </div>
 
