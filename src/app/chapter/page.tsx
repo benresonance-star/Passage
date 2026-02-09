@@ -2,9 +2,9 @@
 
 import { useBCM } from "@/context/BCMContext";
 import { useRouter } from "next/navigation";
-import { Play, Mic, ChevronRight, Eye, EyeOff, Award, Palette, Settings, X } from "lucide-react";
+import { Play, Mic, ChevronRight, Eye, EyeOff, Award, Palette, Settings, X, Eraser } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { EmptyState } from "@/components/EmptyState";
 
 const THEME_PRESETS = [
@@ -19,12 +19,65 @@ export default function ChapterPage() {
   const { state, setState, isHydrated } = useBCM();
   const router = useRouter();
   const [showThemeModal, setShowThemeModal] = useState(false);
+  const longPressTimer = useRef<NodeJS.Timeout | null>(null);
 
   const chapterId = state.selectedChapterId;
   const chapter = chapterId ? state.chapters[chapterId] : null;
 
   if (!isHydrated) return null;
   if (!chapter || !chapterId) return <EmptyState />;
+
+  const normalizeWord = (word: string) => {
+    return word.replace(/[^\w]/g, '').toLowerCase();
+  };
+
+  const toggleWordHighlight = (word: string) => {
+    const normalized = normalizeWord(word);
+    if (!normalized) return;
+
+    setState(prev => {
+      const current = prev.settings.highlightedWords || [];
+      const isHighlighted = current.includes(normalized);
+      const next = isHighlighted 
+        ? current.filter(w => w !== normalized)
+        : [...current, normalized];
+      
+      return {
+        ...prev,
+        settings: {
+          ...prev.settings,
+          highlightedWords: next
+        }
+      };
+    });
+  };
+
+  const clearHighlights = () => {
+    setState(prev => ({
+      ...prev,
+      settings: {
+        ...prev.settings,
+        highlightedWords: []
+      }
+    }));
+  };
+
+  const handleLongPressStart = (chunkId: string) => {
+    longPressTimer.current = setTimeout(() => {
+      setActiveChunk(chunkId);
+      // Optional: trigger haptic feedback if available
+      if (window.navigator && window.navigator.vibrate) {
+        window.navigator.vibrate(50);
+      }
+    }, 500);
+  };
+
+  const handleLongPressEnd = () => {
+    if (longPressTimer.current) {
+      clearTimeout(longPressTimer.current);
+      longPressTimer.current = null;
+    }
+  };
 
   const setActiveChunk = (chunkId: string) => {
     setState((prev) => {
@@ -108,6 +161,15 @@ export default function ChapterPage() {
             >
               <Award size={20} />
             </button>
+            {state.settings.highlightedWords && state.settings.highlightedWords.length > 0 && (
+              <button 
+                onClick={clearHighlights}
+                className="p-2 rounded-xl transition-colors text-zinc-500 bg-[var(--theme-ui-bg)]"
+                title="Clear highlights"
+              >
+                <Eraser size={20} />
+              </button>
+            )}
             <Link
               href="/"
               className="p-2 rounded-xl transition-colors text-zinc-500 bg-[var(--theme-ui-bg)]"
@@ -199,7 +261,11 @@ export default function ChapterPage() {
           return (
             <div
               key={chunk.id}
-              onClick={() => setActiveChunk(chunk.id)}
+              onMouseDown={() => handleLongPressStart(chunk.id)}
+              onMouseUp={handleLongPressEnd}
+              onMouseLeave={handleLongPressEnd}
+              onTouchStart={() => handleLongPressStart(chunk.id)}
+              onTouchEnd={handleLongPressEnd}
               className={`group relative space-y-3 transition-all duration-300 rounded-2xl p-4 -mx-4 ${
                 isActive 
                   ? "bg-[var(--theme-ui-bg)] ring-1 ring-[var(--theme-ui-border)] shadow-xl" 
@@ -237,7 +303,30 @@ export default function ChapterPage() {
                         {v.text.split("[LINEBREAK]").map((line, i) => (
                           <span key={i}>
                             {i > 0 && <br />}
-                            {line}
+                            {line.split(/(\s+)/).map((part, pIdx) => {
+                              const normalized = normalizeWord(part);
+                              const isHighlighted = normalized && state.settings.highlightedWords?.includes(normalized);
+                              
+                              if (!normalized) return <span key={pIdx}>{part}</span>;
+                              
+                              return (
+                                <span
+                                  key={pIdx}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    toggleWordHighlight(part);
+                                  }}
+                                  className={`cursor-pointer transition-all duration-200 rounded-sm px-0.5 -mx-0.5 ${
+                                    isHighlighted 
+                                      ? "bg-[#FFCB1F]/30 text-[#FFCB1F] font-black" 
+                                      : "hover:bg-white/5"
+                                  }`}
+                                  style={isHighlighted ? { fontWeight: 900 } : undefined}
+                                >
+                                  {part}
+                                </span>
+                              );
+                            })}
                           </span>
                         ))}
                       </span>

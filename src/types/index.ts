@@ -50,6 +50,7 @@ export interface BCMState {
       text: string;
       id?: string; // "dawn" for the breathing gradient theme
     };
+    highlightedWords?: string[]; // Array of normalized words to highlight
   };
 }
 
