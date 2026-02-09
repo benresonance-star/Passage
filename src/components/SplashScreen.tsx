@@ -102,7 +102,7 @@ export function SplashScreen({ onFadeStart, onComplete }: SplashScreenProps) {
             className="mt-3 text-[13px] tracking-[0.25em] uppercase font-light"
             style={{
               color: "rgba(255, 252, 240, 0.92)",
-              animation: "splash-subtitle-in 2s ease-out 0.6s both",
+              animation: "splash-subtitle-in 2s ease-out 2.5s both",
             }}
           >
             Dwell in the Word
@@ -115,23 +115,23 @@ export function SplashScreen({ onFadeStart, onComplete }: SplashScreenProps) {
         @keyframes splash-title-in {
           0% {
             opacity: 0;
-            transform: translateY(12px) scale(0.97);
+            transform: translateY(-9px) scale(0.97);
             letter-spacing: 0.14em;
           }
           100% {
             opacity: 1;
-            transform: translateY(0) scale(1);
+            transform: translateY(-21px) scale(1);
             letter-spacing: 0.08em;
           }
         }
         @keyframes splash-subtitle-in {
           0% {
             opacity: 0;
-            transform: translateY(6px);
+            transform: translateY(-0.5px);
           }
           100% {
             opacity: 1;
-            transform: translateY(0);
+            transform: translateY(-6.5px);
           }
         }
       `}</style>
