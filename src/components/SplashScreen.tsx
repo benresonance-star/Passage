@@ -100,7 +100,7 @@ export function SplashScreen({ onFadeStart, onComplete }: SplashScreenProps) {
         <p
           className="mt-3 text-[13px] tracking-[0.25em] uppercase font-light"
           style={{
-            color: "rgba(255, 252, 240, 0.45)",
+            color: "rgba(255, 252, 240, 0.92)",
             animation: "splash-subtitle-in 2s ease-out 0.6s both",
           }}
         >
