@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { BookOpen, Play, Mic, Droplets, RefreshCw } from "lucide-react";
+import { useBCM } from "@/context/BCMContext";
 
 const NAV_ITEMS = [
   { label: "Chapter", href: "/chapter", icon: BookOpen },
@@ -14,6 +15,8 @@ const NAV_ITEMS = [
 
 export function BottomNav({ isDawn = false }: { isDawn?: boolean }) {
   const pathname = usePathname();
+  const { state } = useBCM();
+  const hasChapter = !!state.selectedChapterId;
 
   return (
     <nav className={`fixed bottom-0 left-0 right-0 z-[2] pb-safe pt-2 ${
@@ -24,6 +27,23 @@ export function BottomNav({ isDawn = false }: { isDawn?: boolean }) {
       <div className="grid grid-cols-5 h-16 px-2">
         {NAV_ITEMS.map(({ label, href, icon: Icon }) => {
           const isActive = pathname === href;
+          const isPracticeItem = href !== "/chapter";
+          const isDisabled = isPracticeItem && !hasChapter;
+
+          if (isDisabled) {
+            return (
+              <div
+                key={href}
+                className="flex flex-col items-center justify-center gap-1 opacity-20 cursor-not-allowed"
+              >
+                <Icon size={24} className="text-zinc-500" />
+                <span className="text-[10px] font-medium uppercase tracking-wider text-zinc-500">
+                  {label}
+                </span>
+              </div>
+            );
+          }
+
           return (
             <Link
               key={href}
