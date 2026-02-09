@@ -117,7 +117,7 @@ export default function ReviewPage() {
                     </span>
                   </div>
                   <p className={`text-sm mt-2 leading-relaxed line-clamp-2 transition-colors ${
-                    isMemorised ? "text-amber-200/40" : "text-zinc-300"
+                    isMemorised ? "text-amber-200/40" : "text-[var(--theme-text)]"
                   }`}>
                     {chunk.text}
                   </p>

@@ -215,7 +215,7 @@ export default function ChapterPage() {
               </div>
               
               <div className={`chunk-text ${isActive ? "chunk-text-bold" : showAsMemorised ? "opacity-80" : "opacity-90"}`}
-                style={showAsMemorised ? { color: "var(--chunk-memorised)" } : undefined}
+                style={showAsMemorised ? { color: "var(--chunk-memorised)" } : { color: "var(--theme-text)" }}
               >
                 {chunk.verses.map((v, idx) => (
                   <div key={idx} className={v.type === "heading" ? "w-full text-center" : "inline"}>
