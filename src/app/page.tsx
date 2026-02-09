@@ -219,25 +219,25 @@ export default function Home() {
                   onClick={() => handleSwitch(ch.id)}
                   className={`flex items-center justify-between p-4 rounded-xl border transition-all active:scale-[0.98] ${
                     ch.id === selectedChapter.id 
-                      ? "bg-orange-500/5 border-orange-500/20" 
+                      ? "bg-white/5 border-white/20" 
                       : "bg-[var(--surface)] border-[var(--surface-border)] active:bg-[var(--surface-alt)]"
                   }`}
                 >
                   <div className="flex items-center gap-4">
                     <div className={`w-10 h-10 rounded-lg flex items-center justify-center border ${
-                      ch.id === selectedChapter.id ? "bg-orange-500/10 border-orange-500/30 text-orange-500" : "bg-[var(--surface-alt)] border-[var(--surface-border)] text-white"
+                      ch.id === selectedChapter.id ? "bg-white/10 border-white/30 text-white" : "bg-[var(--surface-alt)] border-[var(--surface-border)] text-white"
                     }`}>
                       <BookOpen size={20} />
                     </div>
                     <div>
-                      <p className={`font-bold ${ch.id === selectedChapter.id ? "text-orange-500" : "text-white"}`}>{ch.title}</p>
-                      <p className={`text-[10px] uppercase tracking-widest font-bold ${ch.id === selectedChapter.id ? "text-orange-500/60" : "text-white/70"}`}>
+                      <p className={`font-bold ${ch.id === selectedChapter.id ? "text-white" : "text-white"}`}>{ch.title}</p>
+                      <p className={`text-[10px] uppercase tracking-widest font-bold ${ch.id === selectedChapter.id ? "text-white/60" : "text-white/70"}`}>
                         {Object.values(state.cards[ch.id] || {}).filter(c => c.isMemorised).length} / {ch.chunks.length} Memorised
                       </p>
                     </div>
                   </div>
                   {isAdmin && (
-                    <button onClick={(e) => handleDelete(ch.id, e)} className={`p-2 transition-colors ${ch.id === selectedChapter.id ? "text-orange-500/60 hover:text-red-500" : "text-white/70 hover:text-red-500"}`}>
+                    <button onClick={(e) => handleDelete(ch.id, e)} className={`p-2 transition-colors ${ch.id === selectedChapter.id ? "text-white/60 hover:text-red-500" : "text-white/70 hover:text-red-500"}`}>
                       <Trash2 size={18} />
                     </button>
                   )}
