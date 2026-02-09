@@ -10,7 +10,7 @@ import { calculateUpdatedStreak } from "@/lib/streak";
 import { useWakeLock } from "@/hooks/useWakeLock";
 import { useAuth } from "@/context/AuthContext";
 import FlowControls from "@/components/FlowControls";
-import { ArrowLeft, RefreshCw, CheckCircle2, AlertCircle, Zap } from "lucide-react";
+import { ArrowLeft, RefreshCw, CheckCircle2, AlertCircle, Zap, EyeOff } from "lucide-react";
 import { EmptyState } from "@/components/EmptyState";
 
 type PracticeMode = "read" | "cloze" | "type" | "result";
@@ -360,8 +360,13 @@ export default function PracticePage() {
         {mode !== "result" && (
           <button
             onClick={handleNextMode}
-            className="w-full py-4 bg-orange-500 text-white font-bold rounded-2xl shadow-lg shadow-orange-500/20 active:scale-95 transition-all"
+            className={`w-full py-4 font-bold rounded-2xl transition-all flex items-center justify-center gap-2 ${
+              isDawn 
+                ? "bg-[var(--surface)] border border-[var(--surface-border)] text-[var(--theme-ui-subtext)] uppercase tracking-widest text-xs" 
+                : "bg-orange-500 text-white shadow-lg shadow-orange-500/20 active:scale-95"
+            }`}
           >
+            {isDawn && mode === "read" && <EyeOff size={16} className="fill-current" />}
             {mode === "read" ? "Cloze Mode" : mode === "cloze" ? "Type It" : "Submit"}
           </button>
         )}
@@ -369,7 +374,11 @@ export default function PracticePage() {
         {mode === "result" && (
           <button
             onClick={() => router.push("/chapter")}
-            className="w-full py-4 bg-orange-500 text-white font-bold rounded-2xl shadow-lg shadow-orange-500/20"
+            className={`w-full py-4 font-bold rounded-2xl transition-all ${
+              isDawn
+                ? "bg-[var(--surface)] border border-[var(--surface-border)] text-[var(--theme-ui-subtext)] uppercase tracking-widest text-xs"
+                : "bg-orange-500 text-white shadow-lg shadow-orange-500/20"
+            }`}
           >
             Continue
           </button>
