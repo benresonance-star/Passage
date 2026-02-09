@@ -16,9 +16,9 @@ export function Modal({ open, onClose, title, children }: ModalProps) {
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 animate-in fade-in duration-200">
       <div className="absolute inset-0 bg-[var(--overlay)] backdrop-blur-sm" onClick={onClose} />
-      <div className="absolute inset-x-0 bottom-0 max-w-md mx-auto bg-[var(--overlay-surface)] glass border-t border-[var(--surface-border)] rounded-t-[32px] p-6 pb-[calc(2rem+env(safe-area-inset-bottom))] shadow-2xl animate-in slide-in-from-bottom duration-300">
+      <div className="relative w-full max-w-md bg-[var(--overlay-surface)] glass border border-[var(--surface-border)] rounded-[32px] p-8 shadow-2xl animate-in zoom-in-95 slide-in-from-bottom-10 duration-300 mb-safe">
         {title && (
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-lg font-bold text-white">{title}</h2>
