@@ -37,6 +37,9 @@ export default function PracticePage() {
   const activeChunkId = chapterId ? state.settings.activeChunkId[chapterId] : null;
   const activeChunk = chapter?.chunks.find(c => c.id === activeChunkId);
   const words = activeChunk?.text.split(/\s+/).filter(w => w.length > 0) || [];
+  
+  const currentTheme = state.settings.theme || { bg: "#000000", text: "#f4f4f5" };
+  const isDawn = currentTheme.id === "dawn";
 
   useEffect(() => {
     const handleReset = () => {
