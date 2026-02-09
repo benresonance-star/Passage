@@ -25,11 +25,11 @@ export default function FlowControls({
   };
 
   return (
-    <div className="flex items-center justify-between bg-[var(--surface)] backdrop-blur-xl px-6 py-4 rounded-full border border-[var(--surface-border)] shadow-2xl w-[92%] max-w-md mx-auto pointer-events-auto transition-all animate-in slide-in-from-bottom-4">
+    <div className="flex items-center justify-between bg-[var(--surface)] backdrop-blur-xl px-6 py-4 rounded-2xl border border-[var(--surface-border)] shadow-2xl w-full mx-auto pointer-events-auto transition-all animate-in slide-in-from-bottom-4">
       {/* Exit Button */}
       <button
         onClick={onClose}
-        className="p-2 text-zinc-500 hover:text-white transition-colors"
+        className="p-2 text-white hover:text-orange-500 transition-colors"
       >
         <X size={20} />
       </button>
@@ -38,42 +38,42 @@ export default function FlowControls({
       <div className="flex items-center gap-4">
         <button
           onClick={() => onSkip('backward')}
-          className="p-2 text-zinc-400 hover:text-white transition-colors"
+          className="p-2 text-white hover:text-orange-500 transition-colors"
         >
           <Rewind size={20} />
         </button>
 
         <button
           onClick={onTogglePlay}
-          className="w-12 h-12 flex items-center justify-center bg-orange-500 text-white rounded-full shadow-lg shadow-orange-500/20 active:scale-95 transition-all"
+          className="w-12 h-12 flex items-center justify-center text-white active:scale-95 transition-all"
         >
-          {isPlaying ? <Pause size={24} fill="currentColor" /> : <Play size={24} fill="currentColor" className="ml-1" />}
+          {isPlaying ? <Pause size={28} /> : <Play size={28} className="ml-1" />}
         </button>
 
         <button
           onClick={() => onSkip('forward')}
-          className="p-2 text-zinc-400 hover:text-white transition-colors"
+          className="p-2 text-white hover:text-orange-500 transition-colors"
         >
           <FastForward size={20} />
         </button>
       </div>
 
-      {/* Speed Controls */}
-      <div className="flex items-center gap-3">
+      {/* Speed Controls Container */}
+      <div className="flex items-center bg-[var(--surface-alt)] rounded-xl border border-[var(--surface-border)] px-1">
         <button
           onClick={() => adjustWpm(-50)}
-          className="p-2 text-white/80 hover:text-white transition-colors bg-[var(--surface-alt)] rounded-lg border border-[var(--surface-border)]"
+          className="p-2 text-white hover:text-orange-500 transition-colors"
         >
           <Minus size={16} />
         </button>
         
-        <div className="flex flex-col items-center min-w-[40px]">
-          <span className="text-[14px] font-bold text-white tabular-nums">{wpm}</span>
+        <div className="flex flex-col items-center min-w-[36px]">
+          <span className="text-xs font-bold text-white tabular-nums">{wpm}</span>
         </div>
 
         <button
           onClick={() => adjustWpm(50)}
-          className="p-2 text-white/80 hover:text-white transition-colors bg-[var(--surface-alt)] rounded-lg border border-[var(--surface-border)]"
+          className="p-2 text-white hover:text-orange-500 transition-colors"
         >
           <Plus size={16} />
         </button>
