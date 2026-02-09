@@ -329,33 +329,52 @@ export default function PracticePage() {
       </div>
 
       <div className="py-8 space-y-4">
-        <div className="relative">
-          {/* Flow Controls - Positioned above the main buttons */}
-          {isFlowMode && mode === "read" && (
-            <div className="absolute bottom-full mb-4 left-0 right-0 z-50 pointer-events-none">
-              <FlowControls 
-                isPlaying={isPlaying}
-                onTogglePlay={() => setIsPlaying(!isPlaying)}
-                wpm={wpm}
-                onWpmChange={setWpm}
-                onSkip={(dir) => setCurrentIndex(prev => dir === 'forward' ? Math.min(words.length - 1, prev + 5) : Math.max(-1, prev - 5))}
-                onClose={() => {
-                  setIsFlowMode(false);
-                  setIsPlaying(false);
-                  setCurrentIndex(-1);
-                }}
-              />
-            </div>
-          )}
+        {!isFlowMode && (
+          <div className="relative">
+            {/* Flow Controls - Positioned above the main buttons */}
+            {isFlowMode && mode === "read" && (
+              <div className="absolute bottom-full mb-4 left-0 right-0 z-50 pointer-events-none">
+                <FlowControls 
+                  isPlaying={isPlaying}
+                  onTogglePlay={() => setIsPlaying(!isPlaying)}
+                  wpm={wpm}
+                  onWpmChange={setWpm}
+                  onSkip={(dir) => setCurrentIndex(prev => dir === 'forward' ? Math.min(words.length - 1, prev + 5) : Math.max(-1, prev - 5))}
+                  onClose={() => {
+                    setIsFlowMode(false);
+                    setIsPlaying(false);
+                    setCurrentIndex(-1);
+                  }}
+                />
+              </div>
+            )}
 
-          <button
-            onClick={() => setIsFlowMode(true)}
-            className={`w-full py-4 bg-[var(--surface)] border border-[var(--surface-border)] text-[var(--theme-ui-subtext)] font-bold rounded-2xl flex items-center justify-center gap-2 hover:text-orange-500 transition-all uppercase tracking-widest text-xs ${isFlowMode ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
-          >
-            <Zap size={16} className="fill-current" />
-            Flow Mode
-          </button>
-        </div>
+            <button
+              onClick={() => setIsFlowMode(true)}
+              className={`w-full py-4 bg-[var(--surface)] border border-[var(--surface-border)] text-[var(--theme-ui-subtext)] font-bold rounded-2xl flex items-center justify-center gap-2 hover:text-orange-500 transition-all uppercase tracking-widest text-xs ${isFlowMode ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
+            >
+              <Zap size={16} className="fill-current" />
+              Flow Mode
+            </button>
+          </div>
+        )}
+
+        {isFlowMode && mode === "read" && (
+          <div className="relative">
+            <FlowControls 
+              isPlaying={isPlaying}
+              onTogglePlay={() => setIsPlaying(!isPlaying)}
+              wpm={wpm}
+              onWpmChange={setWpm}
+              onSkip={(dir) => setCurrentIndex(prev => dir === 'forward' ? Math.min(words.length - 1, prev + 5) : Math.max(-1, prev - 5))}
+              onClose={() => {
+                setIsFlowMode(false);
+                setIsPlaying(false);
+                setCurrentIndex(-1);
+              }}
+            />
+          </div>
+        )}
 
         {mode !== "result" && (
           <button
