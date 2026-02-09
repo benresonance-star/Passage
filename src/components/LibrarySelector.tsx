@@ -30,6 +30,10 @@ export default function LibrarySelector({ onSelect }: LibrarySelectorProps) {
       .select("book_name")
       .order("book_name");
     
+    if (error) {
+      console.error("Error fetching books:", error);
+    }
+    
     if (data) {
       const uniqueBooks = Array.from(new Set(data.map((b) => b.book_name)));
       setBooks(uniqueBooks);
@@ -61,7 +65,7 @@ export default function LibrarySelector({ onSelect }: LibrarySelectorProps) {
       .select("*")
       .eq("book_name", book)
       .eq("chapter_number", chapter)
-      .order("id"); // Order by ID to maintain sequence
+      .order("created_at", { ascending: true }); // Order by creation time to preserve sequence
 
     if (data) {
       // Reconstruct the text format expected by parseChapter
