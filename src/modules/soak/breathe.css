@@ -149,10 +149,11 @@
 }
 
 .soak-word-highlighted {
-  color: #fffaf0;
+  color: #ffffff;
+  font-weight: 900;
   text-shadow:
-    0 0 10px rgba(255, 220, 160, 0.55),
-    0 0 28px rgba(255, 195, 120, 0.22);
+    0 0 12px rgba(255, 255, 255, 0.8),
+    0 0 24px rgba(255, 220, 160, 0.4);
 }
 
 /* ─── Reduced Motion ──────────────────────────────────────────────── */

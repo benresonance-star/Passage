@@ -58,8 +58,8 @@ interface SoakState {
   slotB: number;
   /** Transition phase. */
   phase: Phase;
-  /** Set of highlighted word keys (active slot only). */
-  highlightedWords: Set<number>;
+  /** Set of highlighted word keys (global: "verseIndex-wordIndex"). */
+  highlightedWords: Set<string>;
   /** Timestamp when the current verse became fully visible. */
   lastChangeTs: number;
 }
@@ -67,7 +67,7 @@ interface SoakState {
 type SoakAction =
   | { type: "NAVIGATE"; newIndex: number }
   | { type: "PHASE_COMPLETE" }
-  | { type: "TOGGLE_WORD"; key: number };
+  | { type: "TOGGLE_WORD"; globalKey: string };
 
 function soakReducer(state: SoakState, action: SoakAction): SoakState {
   switch (action.type) {
@@ -81,7 +81,6 @@ function soakReducer(state: SoakState, action: SoakAction): SoakState {
           ? { slotA: action.newIndex }
           : { slotB: action.newIndex }),
         phase: "preparing",
-        highlightedWords: new Set(),
       };
     }
 
@@ -102,8 +101,8 @@ function soakReducer(state: SoakState, action: SoakAction): SoakState {
 
     case "TOGGLE_WORD": {
       const next = new Set(state.highlightedWords);
-      if (next.has(action.key)) next.delete(action.key);
-      else next.add(action.key);
+      if (next.has(action.globalKey)) next.delete(action.globalKey);
+      else next.add(action.globalKey);
       return { ...state, highlightedWords: next };
     }
 
@@ -152,7 +151,7 @@ export function SoakVerseTap({
     slotA: 0,
     slotB: 0,
     phase: "idle" as Phase,
-    highlightedWords: new Set<number>(),
+    highlightedWords: new Set<string>(),
     lastChangeTs: Date.now(),
   });
 
@@ -241,9 +240,9 @@ export function SoakVerseTap({
 
   /* ── Word click handler ──────────────────────────────────────────── */
   const handleWordClick = useCallback(
-    (key: number, e: React.MouseEvent) => {
+    (globalKey: string, e: React.MouseEvent) => {
       e.stopPropagation();
-      dispatch({ type: "TOGGLE_WORD", key });
+      dispatch({ type: "TOGGLE_WORD", globalKey });
     },
     [],
   );
@@ -298,51 +297,58 @@ export function SoakVerseTap({
     opacity: number,
     slotKey: string,
     isTarget: boolean,
-  ) => (
-    <div
-      key={slotKey}
-      className="absolute inset-0 flex items-center justify-center px-8"
-      style={{
-        pointerEvents:
-          isTarget && state.phase === "idle" ? "auto" : "none",
-      }}
-    >
-      <p
-        className="soak-verse soak-text max-w-lg"
+  ) => {
+    const verseIndex = slotKey === "a" ? state.slotA : state.slotB;
+
+    return (
+      <div
+        key={slotKey}
+        className="absolute inset-0 flex items-center justify-center px-8"
         style={{
-          opacity,
-          transition: FADE_TRANSITION,
-          WebkitTransition: FADE_TRANSITION,
-          WebkitTransform: "translate3d(0,0,0)",
+          pointerEvents:
+            isTarget && state.phase === "idle" ? "auto" : "none",
         }}
-        data-testid={isTarget ? "soak-verse" : undefined}
-        aria-live={isTarget ? "polite" : "off"}
       >
-        {tokens.map((token) => (
-          <span
-            key={token.key}
-            onClick={
-              isTarget
-                ? (e) => handleWordClick(token.key, e)
-                : undefined
-            }
-            className={`soak-word ${
-              isTarget && state.highlightedWords.has(token.key)
-                ? "soak-word-highlighted"
-                : ""
-            }`}
-            data-testid={
-              isTarget ? `soak-word-${token.key}` : undefined
-            }
-            role="button"
-            tabIndex={-1}
-          >
-            {token.text}{" "}
-          </span>
-        ))}
-      </p>
-    </div>
-  );
+        <p
+          className="soak-verse soak-text max-w-lg"
+          style={{
+            opacity,
+            transition: FADE_TRANSITION,
+            WebkitTransition: FADE_TRANSITION,
+            WebkitTransform: "translate3d(0,0,0)",
+          }}
+          data-testid={isTarget ? "soak-verse" : undefined}
+          aria-live={isTarget ? "polite" : "off"}
+        >
+          {tokens.map((token) => {
+            const globalKey = `${verseIndex}-${token.key}`;
+            const isHighlighted = state.highlightedWords.has(globalKey);
+
+            return (
+              <span
+                key={token.key}
+                onClick={
+                  isTarget
+                    ? (e) => handleWordClick(globalKey, e)
+                    : undefined
+                }
+                className={`soak-word ${
+                  isHighlighted ? "soak-word-highlighted" : ""
+                }`}
+                data-testid={
+                  isTarget ? `soak-word-${token.key}` : undefined
+                }
+                role="button"
+                tabIndex={-1}
+              >
+                {token.text}{" "}
+              </span>
+            );
+          })}
+        </p>
+      </div>
+    );
+  };
 
   /* ── Render ──────────────────────────────────────────────────────── */
   return (
