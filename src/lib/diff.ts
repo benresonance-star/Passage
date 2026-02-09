@@ -12,71 +12,57 @@ function normalize(s: string): string {
 }
 
 /**
- * Compute the Longest Common Subsequence (LCS) table between two word arrays.
- * Returns a 2D table where dp[i][j] = length of LCS of expected[0..i-1] and actual[0..j-1].
- */
-function lcsTable(expected: string[], actual: string[]): number[][] {
-  const m = expected.length;
-  const n = actual.length;
-  const dp: number[][] = Array.from({ length: m + 1 }, () => Array(n + 1).fill(0));
-
-  for (let i = 1; i <= m; i++) {
-    for (let j = 1; j <= n; j++) {
-      if (normalize(expected[i - 1]) === normalize(actual[j - 1])) {
-        dp[i][j] = dp[i - 1][j - 1] + 1;
-      } else {
-        dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1]);
-      }
-    }
-  }
-
-  return dp;
-}
-
-/**
- * Backtrack through the LCS table to produce a word-level diff.
- * This approach gracefully handles inserted, deleted, and substituted words
- * without causing cascading mismatches from a single early error.
- */
-function backtrackDiff(expected: string[], actual: string[], dp: number[][]): DiffResult[] {
-  const results: DiffResult[] = [];
-  let i = expected.length;
-  let j = actual.length;
-
-  // Collect results in reverse, then flip
-  const reversed: DiffResult[] = [];
-
-  while (i > 0 || j > 0) {
-    if (i > 0 && j > 0 && normalize(expected[i - 1]) === normalize(actual[j - 1])) {
-      // Match
-      reversed.push({ word: actual[j - 1], status: "correct" });
-      i--;
-      j--;
-    } else if (j > 0 && (i === 0 || dp[i][j - 1] >= dp[i - 1][j])) {
-      // Extra word in actual (user typed a word that doesn't belong)
-      reversed.push({ word: actual[j - 1], status: "extra" });
-      j--;
-    } else {
-      // Missing word from expected (user skipped a word)
-      reversed.push({ word: expected[i - 1], status: "missing", expected: expected[i - 1] });
-      i--;
-    }
-  }
-
-  return reversed.reverse();
-}
-
-/**
- * Calculate a word-level diff between expected and actual text using LCS.
- * Returns individual word results and an overall accuracy percentage.
+ * Calculate a word-level diff using sequential matching with a look-ahead window.
+ * This approach prevents the algorithm from jumping too far ahead for common words
+ * (like "the" or "desires") and correctly identifies missing words in sequence.
  */
 export function calculateDiff(expected: string, actual: string) {
   const expectedWords = expected.split(/\s+/).filter(w => w.length > 0);
   const actualWords = actual.split(/\s+/).filter(w => w.length > 0);
+  
+  const results: DiffResult[] = [];
+  let expIdx = 0;
+  const WINDOW_SIZE = 8; // Look ahead up to 8 words for a match
 
-  const dp = lcsTable(expectedWords, actualWords);
-  const results = backtrackDiff(expectedWords, actualWords, dp);
+  for (let actIdx = 0; actIdx < actualWords.length; actIdx++) {
+    const actWord = actualWords[actIdx];
+    const normAct = normalize(actWord);
+    
+    // Try to find the word within the window of expected words
+    let matchIdx = -1;
+    const searchLimit = Math.min(expIdx + WINDOW_SIZE, expectedWords.length);
+    
+    for (let i = expIdx; i < searchLimit; i++) {
+      if (normalize(expectedWords[i]) === normAct) {
+        matchIdx = i;
+        break;
+      }
+    }
 
+    if (matchIdx !== -1) {
+      // Match found! 
+      // 1. Mark all words we skipped over as MISSING
+      for (let i = expIdx; i < matchIdx; i++) {
+        results.push({ word: expectedWords[i], status: "missing", expected: expectedWords[i] });
+      }
+      
+      // 2. Mark the current word as CORRECT
+      results.push({ word: expectedWords[matchIdx], status: "correct" });
+      
+      // 3. Advance expected pointer
+      expIdx = matchIdx + 1;
+    } else {
+      // No match found in the window. This is an EXTRA word.
+      results.push({ word: actWord, status: "extra" });
+    }
+  }
+
+  // After processing all actual words, any remaining expected words are MISSING
+  for (let i = expIdx; i < expectedWords.length; i++) {
+    results.push({ word: expectedWords[i], status: "missing", expected: expectedWords[i] });
+  }
+
+  // Calculate accuracy based on number of correct matches relative to total expected words
   const correctCount = results.filter(r => r.status === "correct").length;
   const accuracy = expectedWords.length > 0
     ? Math.round((correctCount / expectedWords.length) * 100)
