@@ -25,7 +25,7 @@ export default function FlowControls({
   };
 
   return (
-    <div className="flex items-center justify-between bg-[var(--surface)] backdrop-blur-xl px-6 py-4 rounded-2xl border border-[var(--surface-border)] shadow-2xl w-full mx-auto pointer-events-auto transition-all animate-in slide-in-from-bottom-4">
+    <div className="flex items-center justify-between bg-[var(--surface)] backdrop-blur-xl px-6 py-2 rounded-2xl border border-[var(--surface-border)] shadow-2xl w-full mx-auto pointer-events-auto transition-all animate-in slide-in-from-bottom-4">
       {/* Exit Button */}
       <button
         onClick={onClose}
@@ -45,9 +45,9 @@ export default function FlowControls({
 
         <button
           onClick={onTogglePlay}
-          className="w-12 h-12 flex items-center justify-center text-white active:scale-95 transition-all"
+          className="w-10 h-10 flex items-center justify-center text-white active:scale-95 transition-all"
         >
-          {isPlaying ? <Pause size={28} /> : <Play size={28} className="ml-1" />}
+          {isPlaying ? <Pause size={24} /> : <Play size={24} className="ml-1" />}
         </button>
 
         <button
@@ -62,20 +62,20 @@ export default function FlowControls({
       <div className="flex items-center bg-[var(--surface-alt)] rounded-xl border border-[var(--surface-border)] px-1">
         <button
           onClick={() => adjustWpm(-50)}
-          className="p-2 text-white hover:text-orange-500 transition-colors"
+          className="p-1.5 text-white hover:text-orange-500 transition-colors"
         >
-          <Minus size={16} />
+          <Minus size={14} />
         </button>
         
-        <div className="flex flex-col items-center min-w-[36px]">
-          <span className="text-xs font-bold text-white tabular-nums">{wpm}</span>
+        <div className="flex flex-col items-center min-w-[32px]">
+          <span className="text-[10px] font-bold text-white tabular-nums">{wpm}</span>
         </div>
 
         <button
           onClick={() => adjustWpm(50)}
-          className="p-2 text-white hover:text-orange-500 transition-colors"
+          className="p-1.5 text-white hover:text-orange-500 transition-colors"
         >
-          <Plus size={16} />
+          <Plus size={14} />
         </button>
       </div>
     </div>
