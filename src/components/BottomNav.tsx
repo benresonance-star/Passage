@@ -27,14 +27,14 @@ export function BottomNav({ isDawn = false }: { isDawn?: boolean }) {
       <div className="grid grid-cols-5 h-16 px-2">
         {NAV_ITEMS.map(({ label, href, icon: Icon }) => {
           const isActive = pathname === href;
-          const isPracticeItem = href !== "/chapter";
+          const isPracticeItem = href !== "/chapter" && href !== "/";
           const isDisabled = isPracticeItem && !hasChapter;
 
           if (isDisabled) {
             return (
               <div
                 key={href}
-                className="flex flex-col items-center justify-center gap-1 opacity-20 cursor-not-allowed"
+                className="flex flex-col items-center justify-center gap-1 opacity-20 cursor-not-allowed pointer-events-none"
               >
                 <Icon size={24} className="text-zinc-500" />
                 <span className="text-[10px] font-medium uppercase tracking-wider text-zinc-500">
