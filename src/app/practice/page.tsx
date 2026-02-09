@@ -237,11 +237,11 @@ export default function PracticePage() {
 
         {mode === "cloze" && activeChunk && (
           <div className="space-y-8 animate-in fade-in duration-500">
-            <p className="chunk-text-bold text-center leading-relaxed font-mono tracking-tight">
+            <div className="chunk-text-bold text-center leading-relaxed px-4">
               {state.settings.clozeLevel === "mnemonic" 
                 ? generateMnemonic(activeChunk.text)
                 : hideWords(activeChunk.text, state.settings.clozeLevel as number, activeChunk.id)}
-            </p>
+            </div>
             <div className="flex justify-center gap-2 flex-wrap px-4">
               {([0, 20, 40, 60, 80] as const).map((level) => (
                 <button
