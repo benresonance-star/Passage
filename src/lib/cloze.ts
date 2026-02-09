@@ -11,12 +11,13 @@ function mulberry32(a: number) {
 export function hideWords(text: string, percentage: number, chunkId: string): string {
   if (percentage === 0) return text;
   
-  const words = text.split(/(\s+)/); // Keep whitespace
+  // Split into tokens: words (\w+), punctuation ([^\w\s]+), and whitespace (\s+)
+  const tokens = text.split(/(\w+|[^\w\s]+|\s+)/).filter(Boolean);
   const wordIndices: number[] = [];
   
-  // Find only actual word indices (not whitespace)
-  words.forEach((w, i) => {
-    if (/\w+/.test(w)) wordIndices.push(i);
+  // Find only actual word indices (alphanumeric)
+  tokens.forEach((t, i) => {
+    if (/^\w+$/.test(t)) wordIndices.push(i);
   });
 
   // Use chunkId as seed for deterministic hiding
@@ -33,25 +34,26 @@ export function hideWords(text: string, percentage: number, chunkId: string): st
 
   const hiddenIndices = new Set(wordIndices.slice(0, countToHide));
 
-  return words.map((w, i) => {
+  return tokens.map((t, i) => {
     if (hiddenIndices.has(i)) {
-      return "_".repeat(w.length);
+      return "_".repeat(t.length);
     }
-    return w;
+    return t;
   }).join("");
 }
 
 export function generateMnemonic(text: string): string {
-  const words = text.split(/(\s+)/);
+  // Split into tokens: words (\w+), punctuation ([^\w\s]+), and whitespace (\s+)
+  const tokens = text.split(/(\w+|[^\w\s]+|\s+)/).filter(Boolean);
   
-  return words.map((w) => {
-    if (/\w+/.test(w)) {
+  return tokens.map((t) => {
+    if (/^\w+$/.test(t)) {
       // Keep first character, underscore the rest
-      const firstChar = w.charAt(0);
-      const rest = "_".repeat(w.length - 1);
+      const firstChar = t.charAt(0);
+      const rest = "_".repeat(t.length - 1);
       return firstChar + rest;
     }
-    return w;
+    return t;
   }).join("");
 }
 
