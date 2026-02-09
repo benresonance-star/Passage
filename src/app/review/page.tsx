@@ -150,7 +150,7 @@ export default function ReviewPage() {
                       : "bg-[var(--surface-alt)] text-white border-[var(--surface-border)]"
                   }`}
                 >
-                  <Award size={16} fill={isMemorised ? "currentColor" : "none"} />
+                  <Award size={16} fill="none" />
                   {isMemorised ? "Memorised" : "Mark Memorised"}
                 </button>
               </div>
