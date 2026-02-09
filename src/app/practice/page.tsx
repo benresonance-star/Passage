@@ -23,6 +23,19 @@ export default function PracticePage() {
   const [isFlowMode, setIsFlowMode] = useState(false);
   const [typedText, setTypedText] = useState("");
   const [diffResults, setDiffResults] = useState<{ results: DiffResult[]; accuracy: number } | null>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Auto-grow textarea
+  useEffect(() => {
+    if (mode === "type" && textareaRef.current) {
+      const textarea = textareaRef.current;
+      textarea.style.height = 'auto';
+      // Calculate max height: viewport height minus top space, bottom nav, and footer
+      const maxH = window.innerHeight - 320; 
+      const newHeight = Math.min(textarea.scrollHeight, maxH);
+      textarea.style.height = `${newHeight}px`;
+    }
+  }, [typedText, mode]);
 
   // Flow State
   const [currentIndex, setCurrentIndex] = useState(-1);
@@ -162,7 +175,7 @@ export default function PracticePage() {
 
 
   return (
-    <div className="flex flex-col min-h-[calc(100vh-8rem)] relative">
+    <div className="flex flex-col h-[calc(100dvh-5rem)] max-w-2xl mx-auto px-4 relative">
       <header className="flex items-center justify-between py-4">
         <button onClick={handleBack} className="text-zinc-500 p-2 -ml-2">
           <ArrowLeft size={24} />
@@ -178,7 +191,7 @@ export default function PracticePage() {
         <div className="w-10" />
       </header>
 
-      <div className="flex-1 flex flex-col justify-center">
+      <div className={`flex-1 flex flex-col ${mode === "type" ? "justify-start pt-12" : "justify-center"}`}>
         {mode === "read" && activeChunk && (
           <div className="animate-in fade-in duration-500">
             <div className="space-y-6">
@@ -273,10 +286,11 @@ export default function PracticePage() {
         {mode === "type" && (
           <div className="space-y-6 animate-in fade-in duration-500">
             <textarea
+              ref={textareaRef}
               autoFocus
               value={typedText}
               onChange={(e) => setTypedText(e.target.value)}
-              className="w-full h-64 bg-[var(--theme-ui-bg)] border border-[var(--theme-ui-border)] rounded-2xl p-6 chunk-text-bold leading-relaxed focus:outline-none focus:ring-2 focus:ring-orange-500/50 resize-none"
+              className="w-full min-h-[16rem] bg-[var(--theme-ui-bg)] border border-[var(--theme-ui-border)] rounded-2xl p-6 chunk-text-bold leading-relaxed focus:outline-none focus:ring-2 focus:ring-orange-500/50 resize-none overflow-y-auto scrollbar-hide"
               placeholder="Type from memory..."
               style={{ color: 'var(--theme-text)' }}
             />
