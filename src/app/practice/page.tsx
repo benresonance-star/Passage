@@ -249,36 +249,11 @@ export default function PracticePage() {
         )}
 
         {mode === "cloze" && activeChunk && (
-          <div className="space-y-8 animate-in fade-in duration-500">
+          <div className="animate-in fade-in duration-500">
             <div className="chunk-text-bold text-center leading-relaxed px-4">
               {state.settings.clozeLevel === "mnemonic" 
                 ? generateMnemonic(activeChunk.text)
                 : hideWords(activeChunk.text, state.settings.clozeLevel as number, activeChunk.id)}
-            </div>
-            <div className="flex justify-center gap-2 flex-wrap px-4">
-              {([0, 20, 40, 60, 80] as const).map((level) => (
-                <button
-                  key={level}
-                  onClick={() => setState(p => ({ ...p, settings: { ...p.settings, clozeLevel: level } }))}
-                  className={`px-3 py-1 rounded-full text-xs font-bold transition-colors ${
-                    state.settings.clozeLevel === level 
-                      ? "bg-orange-500 text-white" 
-                      : "bg-[var(--surface)] text-[var(--theme-ui-subtext)] border border-[var(--surface-border)]"
-                  }`}
-                >
-                  {level}%
-                </button>
-              ))}
-              <button
-                onClick={() => setState(p => ({ ...p, settings: { ...p.settings, clozeLevel: "mnemonic" } }))}
-                className={`px-3 py-1 rounded-full text-xs font-bold transition-colors uppercase tracking-widest ${
-                  state.settings.clozeLevel === "mnemonic" 
-                    ? "bg-amber-500 text-black" 
-                    : "bg-[var(--surface)] text-[var(--theme-ui-subtext)] border border-[var(--surface-border)]"
-                }`}
-              >
-                Abc
-              </button>
             </div>
           </div>
         )}
@@ -343,6 +318,34 @@ export default function PracticePage() {
       </div>
 
       <div className="py-8 space-y-4">
+        {mode === "cloze" && (
+          <div className="flex justify-between gap-2 px-1 mb-2 animate-in slide-in-from-bottom-2 duration-500">
+            {([0, 20, 40, 60, 80] as const).map((level) => (
+              <button
+                key={level}
+                onClick={() => setState(p => ({ ...p, settings: { ...p.settings, clozeLevel: level } }))}
+                className={`flex-1 py-2 rounded-xl text-[10px] font-bold transition-all active:scale-95 ${
+                  state.settings.clozeLevel === level 
+                    ? "bg-orange-500 text-white shadow-lg shadow-orange-500/20" 
+                    : "bg-[var(--surface)] text-[var(--theme-ui-subtext)] border border-[var(--surface-border)]"
+                }`}
+              >
+                {level}%
+              </button>
+            ))}
+            <button
+              onClick={() => setState(p => ({ ...p, settings: { ...p.settings, clozeLevel: "mnemonic" } }))}
+              className={`flex-1 py-2 rounded-xl text-[10px] font-bold transition-all active:scale-95 uppercase tracking-widest ${
+                state.settings.clozeLevel === "mnemonic" 
+                  ? "bg-amber-500 text-black shadow-lg shadow-amber-500/20" 
+                  : "bg-[var(--surface)] text-[var(--theme-ui-subtext)] border border-[var(--surface-border)]"
+              }`}
+            >
+              Abc
+            </button>
+          </div>
+        )}
+
         {mode === "read" && (
           <div className="relative">
             {!isFlowMode ? (
