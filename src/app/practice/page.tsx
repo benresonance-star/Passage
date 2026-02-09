@@ -304,7 +304,7 @@ export default function PracticePage() {
                         res.status === "correct" 
                           ? (isDawn ? "text-[#FFCB1F]" : "text-white") 
                           : res.status === "missing" 
-                          ? (isDawn ? "text-white opacity-50 italic" : "text-orange-500/50 italic")
+                          ? (isDawn ? "text-white/50" : "text-orange-500/50")
                           : ""
                       }`}
                     >
@@ -317,7 +317,7 @@ export default function PracticePage() {
             <button
               onClick={() => {
                 setTypedText("");
-                setMode("read");
+                setMode("type");
               }}
               className="w-full py-4 bg-[var(--theme-ui-bg)] font-bold rounded-2xl flex items-center justify-center gap-2 border border-[var(--theme-ui-border)]"
             >
