@@ -57,7 +57,7 @@ export function parseChapter(text: string, stripRefs: boolean = true): { title: 
         // HEURISTIC: If it starts with a quote or doesn't look like a heading (e.g. not all caps/short),
         // and we have a previous scripture verse, append it to that verse.
         const looksLikeContinuation = lastVerse?.type === "scripture" && 
-          (trimmedSegment.startsWith("“") || trimmedSegment.startsWith("\"") || trimmedSegment.match(/^[a-z]/));
+          (trimmedSegment.startsWith("“") || trimmedSegment.startsWith("\"") || trimmedSegment.startsWith("'") || trimmedSegment.match(/^[a-z]/));
 
         if (looksLikeContinuation && lastVerse) {
           // Append to previous verse
