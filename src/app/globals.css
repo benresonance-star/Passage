@@ -50,9 +50,17 @@
     transition-duration: 300ms;
   }
 
+  html[data-dawn] .chunk-text {
+    font-size: 22.5px; /* 18px * 1.25 */
+  }
+
   .chunk-text-bold {
     font-size: 20px;
     font-weight: 700;
+  }
+
+  html[data-dawn] .chunk-text-bold {
+    font-size: 25px; /* 20px * 1.25 */
   }
 }
 
