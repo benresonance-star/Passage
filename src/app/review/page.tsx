@@ -146,8 +146,8 @@ export default function ReviewPage() {
                   }}
                   className={`col-span-2 flex items-center justify-center gap-2 py-3 text-sm font-bold rounded-xl border transition-all active:scale-95 ${
                     isMemorised 
-                      ? "bg-amber-500 text-zinc-950 border-amber-400" 
-                      : "bg-[var(--surface-alt)] text-zinc-400 border-[var(--surface-border)]"
+                      ? "bg-[var(--chunk-memorised)] text-white border-[var(--chunk-memorised)]" 
+                      : "bg-[var(--surface-alt)] text-white border-[var(--surface-border)]"
                   }`}
                 >
                   <Award size={16} fill={isMemorised ? "currentColor" : "none"} />
