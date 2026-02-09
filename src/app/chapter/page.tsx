@@ -120,9 +120,9 @@ export default function ChapterPage() {
 
       {/* Theme Modal */}
       {showThemeModal && (
-        <div className="fixed inset-0 z-50 animate-in fade-in duration-300">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-in fade-in duration-300">
           <div className="absolute inset-0 bg-[var(--overlay)] backdrop-blur-sm" onClick={() => setShowThemeModal(false)} />
-          <div className="absolute inset-x-0 bottom-0 max-w-md mx-auto bg-[var(--overlay-surface)] glass border-t border-[var(--surface-border)] rounded-t-[32px] p-8 pb-12 shadow-2xl animate-in slide-in-from-bottom duration-500">
+          <div className="relative w-full max-w-md bg-[var(--overlay-surface)] glass border border-[var(--surface-border)] rounded-[32px] p-8 shadow-2xl animate-in zoom-in-95 duration-300">
             <div className="flex justify-between items-center mb-8">
               <h2 className="text-xl font-bold text-white text-center w-full ml-8">Appearance</h2>
               <button onClick={() => setShowThemeModal(false)} className="p-2 text-zinc-500">
