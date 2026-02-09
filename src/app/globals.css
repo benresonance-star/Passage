@@ -51,7 +51,7 @@
   }
 
   html[data-dawn] .chunk-text {
-    font-size: 22.5px; /* 18px * 1.25 */
+    font-size: 20px;
   }
 
   .chunk-text-bold {
@@ -60,7 +60,7 @@
   }
 
   html[data-dawn] .chunk-text-bold {
-    font-size: 25px; /* 20px * 1.25 */
+    font-size: 22.5px;
   }
 }
 
