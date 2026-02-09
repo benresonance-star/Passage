@@ -223,7 +223,9 @@ export default function PracticePage() {
                 })()}
               </div>
               
-              <p className={`text-center text-zinc-500 text-sm italic transition-opacity duration-500 ${isFlowMode ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+              <p className={`text-center transition-opacity duration-500 text-sm italic ${
+                isDawn ? "text-white" : "text-zinc-500"
+              } ${isFlowMode ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
                 Read the text carefully.
               </p>
             </div>
@@ -345,10 +347,10 @@ export default function PracticePage() {
 
           <button
             onClick={() => setIsFlowMode(true)}
-            className={`w-full py-3 bg-[var(--surface)] border border-[var(--surface-border)] text-[var(--theme-ui-subtext)] font-bold rounded-2xl flex items-center justify-center gap-2 hover:text-orange-500 transition-all uppercase tracking-widest text-xs ${isFlowMode ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
+            className={`w-full py-4 bg-[var(--surface)] border border-[var(--surface-border)] text-[var(--theme-ui-subtext)] font-bold rounded-2xl flex items-center justify-center gap-2 hover:text-orange-500 transition-all uppercase tracking-widest text-xs ${isFlowMode ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
           >
             <Zap size={16} className="fill-current" />
-            Start Flow Mode
+            Flow Mode
           </button>
         </div>
 
