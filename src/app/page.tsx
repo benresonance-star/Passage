@@ -225,19 +225,19 @@ export default function Home() {
                 >
                   <div className="flex items-center gap-4">
                     <div className={`w-10 h-10 rounded-lg flex items-center justify-center border ${
-                      ch.id === selectedChapter.id ? "bg-orange-500/10 border-orange-500/30 text-orange-500" : "bg-[var(--surface-alt)] border-[var(--surface-border)] text-[var(--theme-ui-subtext)]"
+                      ch.id === selectedChapter.id ? "bg-orange-500/10 border-orange-500/30 text-orange-500" : "bg-[var(--surface-alt)] border-[var(--surface-border)] text-white"
                     }`}>
                       <BookOpen size={20} />
                     </div>
                     <div>
                       <p className={`font-bold ${ch.id === selectedChapter.id ? "text-orange-500" : "text-white"}`}>{ch.title}</p>
-                      <p className="text-[10px] text-[var(--theme-ui-subtext)] uppercase tracking-widest font-bold">
+                      <p className={`text-[10px] uppercase tracking-widest font-bold ${ch.id === selectedChapter.id ? "text-orange-500/60" : "text-white/70"}`}>
                         {Object.values(state.cards[ch.id] || {}).filter(c => c.isMemorised).length} / {ch.chunks.length} Memorised
                       </p>
                     </div>
                   </div>
                   {isAdmin && (
-                    <button onClick={(e) => handleDelete(ch.id, e)} className="p-2 text-[var(--theme-ui-subtext)] hover:text-red-500 transition-colors">
+                    <button onClick={(e) => handleDelete(ch.id, e)} className={`p-2 transition-colors ${ch.id === selectedChapter.id ? "text-orange-500/60 hover:text-red-500" : "text-white/70 hover:text-red-500"}`}>
                       <Trash2 size={18} />
                     </button>
                   )}
