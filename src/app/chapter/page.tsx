@@ -20,6 +20,7 @@ export default function ChapterPage() {
   const router = useRouter();
   const [showThemeModal, setShowThemeModal] = useState(false);
   const longPressTimer = useRef<NodeJS.Timeout | null>(null);
+  const touchStartPos = useRef<{ x: number, y: number } | null>(null);
 
   const chapterId = state.selectedChapterId;
   const chapter = chapterId ? state.chapters[chapterId] : null;
@@ -62,14 +63,31 @@ export default function ChapterPage() {
     }));
   };
 
-  const handleLongPressStart = (chunkId: string) => {
+  const handleLongPressStart = (chunkId: string, e?: React.TouchEvent | React.MouseEvent) => {
+    if (e && 'touches' in e) {
+      touchStartPos.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    }
+
     longPressTimer.current = setTimeout(() => {
       setActiveChunk(chunkId);
       // Optional: trigger haptic feedback if available
       if (window.navigator && window.navigator.vibrate) {
         window.navigator.vibrate(50);
       }
-    }, 500);
+    }, 600);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!touchStartPos.current || !longPressTimer.current) return;
+
+    const touch = e.touches[0];
+    const dx = Math.abs(touch.clientX - touchStartPos.current.x);
+    const dy = Math.abs(touch.clientY - touchStartPos.current.y);
+
+    // If moved more than 10px, cancel the long press
+    if (dx > 10 || dy > 10) {
+      handleLongPressEnd();
+    }
   };
 
   const handleLongPressEnd = () => {
@@ -77,6 +95,7 @@ export default function ChapterPage() {
       clearTimeout(longPressTimer.current);
       longPressTimer.current = null;
     }
+    touchStartPos.current = null;
   };
 
   const setActiveChunk = (chunkId: string) => {
@@ -264,8 +283,10 @@ export default function ChapterPage() {
               onMouseDown={() => handleLongPressStart(chunk.id)}
               onMouseUp={handleLongPressEnd}
               onMouseLeave={handleLongPressEnd}
-              onTouchStart={() => handleLongPressStart(chunk.id)}
+              onTouchStart={(e) => handleLongPressStart(chunk.id, e)}
+              onTouchMove={handleTouchMove}
               onTouchEnd={handleLongPressEnd}
+              onContextMenu={(e) => e.preventDefault()}
               className={`group relative space-y-3 transition-all duration-300 rounded-2xl p-4 -mx-4 ${
                 isActive 
                   ? "bg-[var(--theme-ui-bg)] ring-1 ring-[var(--theme-ui-border)] shadow-xl" 
