@@ -49,21 +49,36 @@ export function parseChapter(text: string, stripRefs: boolean = true): { title: 
         });
         currentParagraph = false;
       } else {
-        // This is a heading or text between verses
-        // Split by double newline to detect paragraph breaks vs headings
-        const parts = trimmedSegment.split(/\n\s*\n/);
-        for (const part of parts) {
-          const trimmedPart = part.trim();
-          if (!trimmedPart) {
-            currentParagraph = true;
-            continue;
+        // This is a segment that doesn't start with a verse tag.
+        // It could be a heading, OR it could be orphaned text (like a quote) belonging to the previous verse.
+        
+        const lastVerse = verses.length > 0 ? verses[verses.length - 1] : null;
+        
+        // HEURISTIC: If it starts with a quote or doesn't look like a heading (e.g. not all caps/short),
+        // and we have a previous scripture verse, append it to that verse.
+        const looksLikeContinuation = lastVerse?.type === "scripture" && 
+          (trimmedSegment.startsWith("“") || trimmedSegment.startsWith("\"") || trimmedSegment.match(/^[a-z]/));
+
+        if (looksLikeContinuation && lastVerse) {
+          // Append to previous verse
+          const continuationText = trimmedSegment.replace(/\n/g, "[LINEBREAK]");
+          lastVerse.text += "[LINEBREAK]" + continuationText;
+        } else {
+          // Treat as heading(s)
+          const parts = trimmedSegment.split(/\n\s*\n/);
+          for (const part of parts) {
+            const trimmedPart = part.trim();
+            if (!trimmedPart) {
+              currentParagraph = true;
+              continue;
+            }
+            
+            verses.push({
+              text: trimmedPart.replace(/\n/g, " "),
+              type: "heading",
+            });
+            currentParagraph = false;
           }
-          
-          verses.push({
-            text: trimmedPart.replace(/\n/g, " "), // Headings don't usually need line breaks
-            type: "heading",
-          });
-          currentParagraph = false;
         }
       }
     }
