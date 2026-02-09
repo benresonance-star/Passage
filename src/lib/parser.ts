@@ -19,35 +19,52 @@ export function parseChapter(text: string, stripRefs: boolean = true): { title: 
   if (firstIdx !== -1) {
     title = lines[firstIdx].replace(/[<>]/g, "");
     
+    // Join the rest of the text to process multi-line verses
+    const remainingText = lines.slice(firstIdx + 1).join("\n");
+    
+    // Split the text into segments: either a verse block or a heading block
+    // A verse block starts with <n>
+    // A heading block is anything else between verse blocks
+    const segments = remainingText.split(/(?=<(?:\d+)>)/);
+    
     let currentParagraph = false;
     
-    for (let i = firstIdx + 1; i < lines.length; i++) {
-      const line = lines[i];
-      if (line.length === 0) {
-        currentParagraph = true;
-        continue;
-      }
+    for (const segment of segments) {
+      const trimmedSegment = segment.trim();
+      if (!trimmedSegment) continue;
 
-      const verseMatch = line.match(/<(\d+)>([\s\S]*?)(?=<|$)/g);
+      const verseMatch = trimmedSegment.match(/^<(\d+)>([\s\S]*)/);
       
       if (verseMatch) {
-        verseMatch.forEach((v) => {
-          const m = v.match(/<(\d+)>([\s\S]*)/);
-          if (m) {
-            verses.push({
-              number: parseInt(m[1]),
-              text: (currentParagraph ? "[PARAGRAPH] " : "") + m[2].trim(),
-              type: "scripture",
-            });
-            currentParagraph = false;
-          }
-        });
-      } else {
+        const num = parseInt(verseMatch[1]);
+        let text = verseMatch[2].trim();
+        
+        // Preserve internal newlines as [LINEBREAK]
+        text = text.replace(/\n/g, "[LINEBREAK]");
+        
         verses.push({
-          text: line,
-          type: "heading",
+          number: num,
+          text: (currentParagraph ? "[PARAGRAPH] " : "") + text,
+          type: "scripture",
         });
         currentParagraph = false;
+      } else {
+        // This is a heading or text between verses
+        // Split by double newline to detect paragraph breaks vs headings
+        const parts = trimmedSegment.split(/\n\s*\n/);
+        for (const part of parts) {
+          const trimmedPart = part.trim();
+          if (!trimmedPart) {
+            currentParagraph = true;
+            continue;
+          }
+          
+          verses.push({
+            text: trimmedPart.replace(/\n/g, " "), // Headings don't usually need line breaks
+            type: "heading",
+          });
+          currentParagraph = false;
+        }
       }
     }
   }
@@ -117,7 +134,7 @@ export function chunkVerses(verses: Verse[], title: string, maxVersesPerChunk: n
             ...bv,
             text: bv.text.replace("[PARAGRAPH] ", "").trim()
           })),
-          text: scriptureVerses.map(sv => sv.text.replace("[PARAGRAPH] ", "").trim()).join(" "),
+          text: scriptureVerses.map(sv => sv.text.replace("[PARAGRAPH] ", "").replace(/\[LINEBREAK\]/g, " ").trim()).join(" "),
         });
         
         currentBatch = [];

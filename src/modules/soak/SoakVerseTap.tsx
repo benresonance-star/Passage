@@ -324,6 +324,10 @@ export function SoakVerseTap({
             const globalKey = `${verseIndex}-${token.key}`;
             const isHighlighted = state.highlightedWords.has(globalKey);
 
+            if (token.text === "[LINEBREAK]") {
+              return <br key={token.key} />;
+            }
+
             return (
               <span
                 key={token.key}

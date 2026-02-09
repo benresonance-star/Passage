@@ -8,14 +8,32 @@ import { DisplayToken } from "./types";
  * that resets per verse — no duplicate-key collisions.
  */
 export function tokenizeVerse(text: string): DisplayToken[] {
-  return text
-    .split(/\s+/)
-    .filter(Boolean)
-    .map((word, index) => ({
-      text: word,
-      isWord: true,
-      key: index,
-    }));
+  // First split by [LINEBREAK] to preserve them as special tokens
+  const lines = text.split("[LINEBREAK]");
+  const tokens: DisplayToken[] = [];
+  let keyIndex = 0;
+
+  lines.forEach((line, lineIdx) => {
+    const words = line.split(/\s+/).filter(Boolean);
+    words.forEach((word) => {
+      tokens.push({
+        text: word,
+        isWord: true,
+        key: keyIndex++,
+      });
+    });
+
+    // Add a linebreak token if this isn't the last line
+    if (lineIdx < lines.length - 1) {
+      tokens.push({
+        text: "[LINEBREAK]",
+        isWord: false,
+        key: keyIndex++,
+      });
+    }
+  });
+
+  return tokens;
 }
 
 

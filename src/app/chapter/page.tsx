@@ -232,7 +232,12 @@ export default function ChapterPage() {
                         >
                           {v.number}
                         </span>
-                        {v.text}
+                        {v.text.split("[LINEBREAK]").map((line, i) => (
+                          <span key={i}>
+                            {i > 0 && <br />}
+                            {line}
+                          </span>
+                        ))}
                       </span>
                     )}
                   </div>
