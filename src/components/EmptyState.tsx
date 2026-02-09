@@ -9,7 +9,7 @@ interface EmptyStateProps {
 }
 
 export function EmptyState({ 
-  message = "No chapter is currently loaded. Please load a chapter to start via the settings menu.",
+  message = "No chapter is currently loaded. Please import a chapter to begin.",
   showImportButton = true 
 }: EmptyStateProps) {
   return (
