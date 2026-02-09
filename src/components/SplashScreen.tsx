@@ -78,34 +78,36 @@ export function SplashScreen({ onFadeStart, onComplete }: SplashScreenProps) {
     >
       {/* Centered title */}
       <div
-        className={`fixed inset-0 z-[10000] flex flex-col items-center justify-center ${splashFont.className}`}
+        className={`fixed inset-0 z-[10000] flex items-center justify-center ${splashFont.className}`}
         style={{
           transition: `opacity ${FADE_OUT_MS}ms ease-in-out`,
           opacity,
         }}
       >
-        <h1
-          className="text-[42px] tracking-[0.08em] font-light"
-          style={{
-            color: "rgba(255, 252, 240, 0.92)",
-            textShadow:
-              "0 0 30px rgba(255, 210, 150, 0.25), 0 0 60px rgba(255, 195, 120, 0.1)",
-            animation: "splash-title-in 1.8s ease-out both",
-          }}
-        >
-          Passage
-        </h1>
+        <div className="text-center">
+          <h1
+            className="text-[42px] tracking-[0.08em] font-light"
+            style={{
+              color: "rgba(255, 252, 240, 0.92)",
+              textShadow:
+                "0 0 30px rgba(255, 210, 150, 0.25), 0 0 60px rgba(255, 195, 120, 0.1)",
+              animation: "splash-title-in 1.8s ease-out both",
+            }}
+          >
+            Passage
+          </h1>
 
-        {/* Subtle tagline that fades in after the title */}
-        <p
-          className="mt-3 text-[13px] tracking-[0.25em] uppercase font-light"
-          style={{
-            color: "rgba(255, 252, 240, 0.92)",
-            animation: "splash-subtitle-in 2s ease-out 0.6s both",
-          }}
-        >
-          Dwell in the Word
-        </p>
+          {/* Subtle tagline that fades in after the title */}
+          <p
+            className="mt-3 text-[13px] tracking-[0.25em] uppercase font-light"
+            style={{
+              color: "rgba(255, 252, 240, 0.92)",
+              animation: "splash-subtitle-in 2s ease-out 0.6s both",
+            }}
+          >
+            Dwell in the Word
+          </p>
+        </div>
       </div>
 
       {/* Inline keyframes for the title entrance — scoped to splash lifetime */}
