@@ -175,8 +175,8 @@ export default function PracticePage() {
 
 
   return (
-    <div className="flex flex-col h-[calc(100dvh-5rem)] max-w-2xl mx-auto px-4 relative">
-      <header className="flex items-center justify-between py-4">
+    <div className="flex flex-col h-[calc(100dvh-5rem)] max-w-2xl mx-auto relative">
+      <header className="flex items-center justify-between py-4 px-4">
         <button onClick={handleBack} className="text-zinc-500 p-2 -ml-2">
           <ArrowLeft size={24} />
         </button>
@@ -193,7 +193,7 @@ export default function PracticePage() {
 
       <div className={`flex-1 flex flex-col ${mode === "type" ? "justify-start pt-12" : "justify-center"}`}>
         {mode === "read" && activeChunk && (
-          <div className="animate-in fade-in duration-500">
+          <div className="animate-in fade-in duration-500 px-4">
             <div className="space-y-6">
               <div className="chunk-text-bold text-center leading-relaxed px-4">
                 {(() => {
@@ -249,7 +249,7 @@ export default function PracticePage() {
         )}
 
         {mode === "cloze" && activeChunk && (
-          <div className="animate-in fade-in duration-500">
+          <div className="animate-in fade-in duration-500 px-4">
             <div className="chunk-text-bold text-center leading-relaxed px-4">
               {state.settings.clozeLevel === "mnemonic" 
                 ? generateMnemonic(activeChunk.text)
@@ -259,7 +259,7 @@ export default function PracticePage() {
         )}
 
         {mode === "type" && (
-          <div className="space-y-6 animate-in fade-in duration-500">
+          <div className="space-y-6 animate-in fade-in duration-500 px-4">
             <textarea
               ref={textareaRef}
               autoFocus
@@ -273,7 +273,7 @@ export default function PracticePage() {
         )}
 
         {mode === "result" && diffResults && (
-          <div className="space-y-8 animate-in zoom-in-95 duration-300">
+          <div className="space-y-8 animate-in zoom-in-95 duration-300 px-4">
             <div className="bg-[var(--theme-ui-bg)] border border-[var(--theme-ui-border)] rounded-3xl p-6 space-y-6">
               <div className="flex justify-between items-center">
                 <div className="flex items-center gap-2">
@@ -317,9 +317,9 @@ export default function PracticePage() {
         )}
       </div>
 
-      <div className="py-8 space-y-4">
+      <div className="py-8 space-y-4 px-4">
         {mode === "cloze" && (
-          <div className="flex justify-between gap-2 px-1 mb-2 animate-in slide-in-from-bottom-2 duration-500">
+          <div className="flex justify-between gap-2 mb-2 animate-in slide-in-from-bottom-2 duration-500">
             {([0, 20, 40, 60, 80] as const).map((level) => (
               <button
                 key={level}
