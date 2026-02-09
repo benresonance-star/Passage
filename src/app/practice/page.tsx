@@ -294,7 +294,7 @@ export default function PracticePage() {
                 <div className="text-[var(--theme-ui-subtext)] text-sm">Accuracy</div>
               </div>
 
-              <div className="flex flex-wrap gap-x-2 gap-y-1 text-lg leading-relaxed">
+              <div className="flex flex-wrap gap-x-2 gap-y-1 chunk-text-bold leading-relaxed">
                 {diffResults.results
                   .filter(res => res.status !== "extra")
                   .map((res, i) => (
@@ -302,7 +302,7 @@ export default function PracticePage() {
                       key={i}
                       className={`${
                         res.status === "correct" 
-                          ? (isDawn ? "text-[#FFCB1F] font-bold" : "text-white") 
+                          ? (isDawn ? "text-[#FFCB1F]" : "text-white") 
                           : res.status === "missing" 
                           ? (isDawn ? "text-white opacity-50 italic" : "text-orange-500/50 italic")
                           : ""
