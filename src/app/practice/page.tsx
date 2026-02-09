@@ -276,9 +276,9 @@ export default function PracticePage() {
               autoFocus
               value={typedText}
               onChange={(e) => setTypedText(e.target.value)}
-              className="w-full h-64 bg-[var(--theme-ui-bg)] border border-[var(--theme-ui-border)] rounded-2xl p-6 text-xl leading-relaxed focus:outline-none focus:ring-2 focus:ring-orange-500/50 resize-none color-inherit"
+              className="w-full h-64 bg-[var(--theme-ui-bg)] border border-[var(--theme-ui-border)] rounded-2xl p-6 chunk-text-bold leading-relaxed focus:outline-none focus:ring-2 focus:ring-orange-500/50 resize-none"
               placeholder="Type from memory..."
-              style={{ color: 'inherit' }}
+              style={{ color: 'var(--theme-text)' }}
             />
           </div>
         )}
