@@ -274,94 +274,95 @@ export default function ChapterPage() {
       <div className="flex-1 overflow-y-auto px-4 pt-8 pb-safe space-y-8 scrollbar-hide">
         <div className="pb-20">
           {chapter.chunks.map((chunk) => {
-          const isActive = activeChunkId === chunk.id;
-          const isMemorised = state.cards[chapterId]?.[chunk.id]?.isMemorised;
-          const showAsMemorised = isMemorised && state.settings.showMemorised;
+            const isActive = activeChunkId === chunk.id;
+            const isMemorised = state.cards[chapterId]?.[chunk.id]?.isMemorised;
+            const showAsMemorised = isMemorised && state.settings.showMemorised;
 
-          return (
-            <div
-              key={chunk.id}
-              onMouseDown={() => handleLongPressStart(chunk.id)}
-              onMouseUp={handleLongPressEnd}
-              onMouseLeave={handleLongPressEnd}
-              onTouchStart={(e) => handleLongPressStart(chunk.id, e)}
-              onTouchMove={handleTouchMove}
-              onTouchEnd={handleLongPressEnd}
-              onContextMenu={(e) => e.preventDefault()}
-              className={`group relative space-y-3 transition-all duration-300 rounded-2xl p-4 ${
-                isActive 
-                  ? "bg-[var(--theme-ui-bg)] ring-1 ring-[var(--theme-ui-border)] shadow-xl" 
-                  : "active:bg-[var(--theme-ui-bg)]"
-              }`}
-            >
-              <div className="flex justify-between items-center">
-                <span className={`text-[10px] font-bold uppercase tracking-[0.2em] ${
-                  isActive ? "text-[var(--chunk-active)]" : showAsMemorised ? "text-[var(--chunk-memorised)]" : "text-[var(--theme-ui-subtext)]"
-                }`}>
-                  Verse {chunk.verseRange}
-                </span>
-              </div>
-              
-              <div className={`chunk-text ${isActive ? "chunk-text-bold" : showAsMemorised ? "opacity-80" : "opacity-90"}`}
-                style={showAsMemorised ? { color: "var(--chunk-memorised)" } : { color: "var(--theme-text)" }}
+            return (
+              <div
+                key={chunk.id}
+                onMouseDown={() => handleLongPressStart(chunk.id)}
+                onMouseUp={handleLongPressEnd}
+                onMouseLeave={handleLongPressEnd}
+                onTouchStart={(e) => handleLongPressStart(chunk.id, e)}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleLongPressEnd}
+                onContextMenu={(e) => e.preventDefault()}
+                className={`group relative space-y-3 transition-all duration-300 rounded-2xl p-4 ${
+                  isActive 
+                    ? "bg-[var(--theme-ui-bg)] ring-1 ring-[var(--theme-ui-border)] shadow-xl" 
+                    : "active:bg-[var(--theme-ui-bg)]"
+                }`}
               >
-                {chunk.verses.map((v, idx) => (
-                  <div key={idx} className={v.type === "heading" ? "w-full text-center" : "inline"}>
-                    {v.type === "heading" ? (
-                      state.settings.showHeadings && (
-                        <h3 className="text-[11px] font-bold uppercase tracking-[0.2em] my-4 block w-full"
-                          style={{ color: showAsMemorised ? "var(--chunk-memorised-sub)" : "var(--theme-ui-subtext)" }}
-                        >
-                          {v.text}
-                        </h3>
-                      )
-                    ) : (
-                      <span className="inline-block mr-2">
-                        <span className="text-[12px] align-top opacity-50 mr-1 italic font-normal"
-                          style={showAsMemorised ? { color: "var(--chunk-memorised-sub)" } : undefined}
-                        >
-                          {v.number}
-                        </span>
-                        {v.text.split("[LINEBREAK]").map((line, i) => (
-                          <span key={i}>
-                            {i > 0 && <br />}
-                            {line.split(/(\s+)/).map((part, pIdx) => {
-                              const normalized = normalizeWord(part);
-                              const isHighlighted = normalized && state.settings.highlightedWords?.includes(normalized);
-                              
-                              if (!normalized) return <span key={pIdx}>{part}</span>;
-                              
-                              return (
-                                <span
-                                  key={pIdx}
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    toggleWordHighlight(part);
-                                  }}
-                                  className={`cursor-pointer transition-all duration-300 rounded-sm px-0.5 -mx-0.5 ${
-                                    isHighlighted 
-                                      ? "text-[#FFCB1F] font-black" 
-                                      : "hover:bg-white/5"
-                                  }`}
-                                  style={isHighlighted ? { 
-                                    fontWeight: 900,
-                                    textShadow: isDawn ? "0 0 12px rgba(255, 203, 31, 0.4)" : "0 0 8px rgba(255, 203, 31, 0.3)"
-                                  } : undefined}
-                                >
-                                  {part}
-                                </span>
-                              );
-                            })}
+                <div className="flex justify-between items-center">
+                  <span className={`text-[10px] font-bold uppercase tracking-[0.2em] ${
+                    isActive ? "text-[var(--chunk-active)]" : showAsMemorised ? "text-[var(--chunk-memorised)]" : "text-[var(--theme-ui-subtext)]"
+                  }`}>
+                    Verse {chunk.verseRange}
+                  </span>
+                </div>
+                
+                <div className={`chunk-text ${isActive ? "chunk-text-bold" : showAsMemorised ? "opacity-80" : "opacity-90"}`}
+                  style={showAsMemorised ? { color: "var(--chunk-memorised)" } : { color: "var(--theme-text)" }}
+                >
+                  {chunk.verses.map((v, idx) => (
+                    <div key={idx} className={v.type === "heading" ? "w-full text-center" : "inline"}>
+                      {v.type === "heading" ? (
+                        state.settings.showHeadings && (
+                          <h3 className="text-[11px] font-bold uppercase tracking-[0.2em] my-4 block w-full"
+                            style={{ color: showAsMemorised ? "var(--chunk-memorised-sub)" : "var(--theme-ui-subtext)" }}
+                          >
+                            {v.text}
+                          </h3>
+                        )
+                      ) : (
+                        <span className="inline-block mr-2">
+                          <span className="text-[12px] align-top opacity-50 mr-1 italic font-normal"
+                            style={showAsMemorised ? { color: "var(--chunk-memorised-sub)" } : undefined}
+                          >
+                            {v.number}
                           </span>
-                        ))}
-                      </span>
-                    )}
-                  </div>
-                ))}
+                          {v.text.split("[LINEBREAK]").map((line, i) => (
+                            <span key={i}>
+                              {i > 0 && <br />}
+                              {line.split(/(\s+)/).map((part, pIdx) => {
+                                const normalized = normalizeWord(part);
+                                const isHighlighted = normalized && state.settings.highlightedWords?.includes(normalized);
+                                
+                                if (!normalized) return <span key={pIdx}>{part}</span>;
+                                
+                                return (
+                                  <span
+                                    key={pIdx}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      toggleWordHighlight(part);
+                                    }}
+                                    className={`cursor-pointer transition-all duration-300 rounded-sm px-0.5 -mx-0.5 ${
+                                      isHighlighted 
+                                        ? "text-[#FFCB1F] font-black" 
+                                        : "hover:bg-white/5"
+                                    }`}
+                                    style={isHighlighted ? { 
+                                      fontWeight: 900,
+                                      textShadow: isDawn ? "0 0 12px rgba(255, 203, 31, 0.4)" : "0 0 8px rgba(255, 203, 31, 0.3)"
+                                    } : undefined}
+                                  >
+                                    {part}
+                                  </span>
+                                );
+                              })}
+                            </span>
+                          ))}
+                        </span>
+                      )}
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
     </div>
   );
