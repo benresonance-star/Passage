@@ -247,7 +247,7 @@ export default function ChapterPage() {
                     type="color" 
                     value={currentTheme.bg} 
                     onChange={(e) => setTheme(e.target.value, currentTheme.text)}
-                    className={`w-12 h-12 rounded-lg bg-transparent cursor-pointer border-2 ${isSepia ? "border-black" : "border-transparent"}`}
+                    className="w-12 h-12 rounded-lg bg-transparent cursor-pointer"
                   />
                 </div>
                 <div className="flex items-center justify-between">
@@ -256,7 +256,7 @@ export default function ChapterPage() {
                     type="color" 
                     value={currentTheme.text} 
                     onChange={(e) => setTheme(currentTheme.bg, e.target.value)}
-                    className={`w-12 h-12 rounded-lg bg-transparent cursor-pointer border-2 ${isSepia ? "border-black" : "border-transparent"}`}
+                    className="w-12 h-12 rounded-lg bg-transparent cursor-pointer"
                   />
                 </div>
               </div>
