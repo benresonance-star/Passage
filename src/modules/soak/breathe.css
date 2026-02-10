@@ -5,11 +5,11 @@
 
 .soak-breathe {
   position: fixed;
-  top: -100px;
-  left: -100px;
-  right: -100px;
-  bottom: -100px;
+  inset: 0;
+  height: 100dvh;
+  width: 100vw;
   z-index: 50;
+  min-height: -webkit-fill-available;
 
   /* Prevent iOS Safari from hijacking horizontal swipes for back/forward
      navigation or elastic scrolling. All touch handling is done in JS. */
