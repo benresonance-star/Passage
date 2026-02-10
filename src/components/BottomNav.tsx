@@ -19,12 +19,12 @@ export function BottomNav({ isDawn = false }: { isDawn?: boolean }) {
   const hasChapter = !!state.selectedChapterId;
 
   return (
-    <nav className={`fixed bottom-0 left-0 right-0 z-[2] transition-all duration-300 ${
+    <nav className={`fixed bottom-0 left-0 right-0 z-[2] transition-all duration-300 pb-[env(safe-area-inset-bottom)] ${
       isDawn 
         ? "bg-black/30 backdrop-blur-md border-t border-white/10" 
         : "bg-[var(--surface)] border-t border-[var(--surface-border)]"
     }`}>
-      <div className="grid grid-cols-5 h-16 px-2 pb-[env(safe-area-inset-bottom)]">
+      <div className="grid grid-cols-5 h-16 px-2">
         {NAV_ITEMS.map(({ label, href, icon: Icon }) => {
           const isActive = pathname === href;
           const isPracticeItem = href !== "/chapter" && href !== "/";
