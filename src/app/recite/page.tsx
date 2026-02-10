@@ -135,7 +135,7 @@ export default function RecitePage() {
 
   return (
     <div className="flex flex-col min-h-[calc(100vh-8rem)]">
-      <header className="flex items-center justify-between py-4">
+      <header className="flex items-center justify-between pt-[env(safe-area-inset-top)] pb-4">
         <button onClick={() => router.push("/chapter")} className="text-zinc-500 p-2 -ml-2">
           <ArrowLeft size={24} />
         </button>

@@ -68,7 +68,7 @@ export default function ReviewPage() {
 
   return (
     <div className="space-y-6 pb-20">
-      <header className="py-4">
+      <header className="pt-[env(safe-area-inset-top)] pb-4">
         <h1 className="text-2xl font-bold">Chapter Mastery</h1>
         <div className="flex items-center gap-2 mt-1">
           <div className="flex-1 h-1.5 bg-[var(--surface)] rounded-full overflow-hidden border border-[var(--surface-border)]">

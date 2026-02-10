@@ -107,8 +107,8 @@ export default function ImportPage() {
   const versions = Object.values(state.versions);
 
   return (
-    <div className="space-y-6 pb-20">
-      <header className="flex items-center gap-4 py-4">
+    <div className="space-y-6 pb-20 pt-[env(safe-area-inset-top)]">
+      <header className="flex items-center gap-4 py-4 px-1">
         <Link href="/chapter" className="text-zinc-400">
           <ArrowLeft size={24} />
         </Link>
