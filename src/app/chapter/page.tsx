@@ -165,24 +165,6 @@ export default function ChapterPage() {
             </div>
           </div>
           <div className="flex gap-2">
-            <button 
-              onClick={() => setShowThemeModal(true)}
-              className="p-2 rounded-xl transition-colors text-zinc-500 bg-[var(--theme-ui-bg)]"
-            >
-              <Palette size={20} />
-            </button>
-            <button 
-              onClick={toggleHeadings}
-              className={`p-2 rounded-xl transition-colors ${state.settings.showHeadings ? "text-orange-500 bg-orange-500/10" : "text-zinc-500 bg-[var(--theme-ui-bg)]"}`}
-            >
-              {state.settings.showHeadings ? <Eye size={20} /> : <EyeOff size={20} />}
-            </button>
-            <button 
-              onClick={toggleMemorised}
-              className={`p-2 rounded-xl transition-colors ${state.settings.showMemorised ? "text-amber-400 bg-amber-400/10" : "text-zinc-500 bg-[var(--theme-ui-bg)]"}`}
-            >
-              <Award size={20} />
-            </button>
             {state.settings.highlightedWords && state.settings.highlightedWords.length > 0 && (
               <button 
                 onClick={clearHighlights}
@@ -192,6 +174,12 @@ export default function ChapterPage() {
                 <Eraser size={20} />
               </button>
             )}
+            <button 
+              onClick={() => setShowThemeModal(true)}
+              className="p-2 rounded-xl transition-colors text-zinc-500 bg-[var(--theme-ui-bg)]"
+            >
+              <Palette size={20} />
+            </button>
             <Link
               href="/"
               className="p-2 rounded-xl transition-colors text-zinc-500 bg-[var(--theme-ui-bg)]"
