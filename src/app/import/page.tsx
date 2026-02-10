@@ -8,6 +8,7 @@ import { SM2Card, Chapter, BibleVersion } from "@/types";
 import { ArrowLeft, Save, AlertTriangle, Check, BookOpen, Type, ChevronDown } from "lucide-react";
 import Link from "next/link";
 import LibrarySelector from "@/components/LibrarySelector";
+import { useConfirm, useToast } from "@/components/AppModal";
 
 export default function ImportPage() {
   const [text, setText] = useState("");
@@ -17,6 +18,8 @@ export default function ImportPage() {
   const [bookName, setBookName] = useState("");
   const { state, setState, pushChapter } = useBCM();
   const router = useRouter();
+  const { confirm, ConfirmDialog } = useConfirm();
+  const { toast, ToastContainer } = useToast();
 
   const handleImport = async (importText?: string, importBook?: string, importVersion?: string) => {
     const finalLines = importText || text;
@@ -26,9 +29,21 @@ export default function ImportPage() {
     const finalVersion = importVersion || versionId;
 
     const { title, verses } = parseChapter(finalLines, stripRefs);
-    const chunks = chunkVerses(verses, title, 4, finalBook, finalVersion);
     const chapterId = getChapterSlug(title, finalBook, finalVersion);
 
+    // Check for duplicates
+    if (state.chapters[chapterId]) {
+      const shouldOverwrite = await confirm({
+        title: "Duplicate Chapter",
+        message: `"${title}" is already in your library. Do you want to overwrite it?`,
+        confirmLabel: "Overwrite",
+        destructive: true,
+      });
+
+      if (!shouldOverwrite) return;
+    }
+
+    const chunks = chunkVerses(verses, title, 4, finalBook, finalVersion);
     const initialCards: Record<string, SM2Card> = {};
     const now = new Date().toISOString();
 
@@ -204,6 +219,8 @@ export default function ImportPage() {
           </>
         )}
       </div>
+      <ConfirmDialog />
+      <ToastContainer />
     </div>
   );
 }
