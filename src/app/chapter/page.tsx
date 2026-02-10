@@ -151,9 +151,9 @@ export default function ChapterPage() {
   const isDawn = currentTheme.id === "dawn";
 
   return (
-    <div className="space-y-6 pb-32">
-      <header className={`sticky top-0 backdrop-blur-md pt-4 pb-2 z-10 ${isDawn ? "bg-transparent border-b border-transparent" : "bg-inherit border-b border-white/10"}`}>
-        <div className="flex justify-between items-start">
+    <div className="flex flex-col h-screen max-h-[100dvh]">
+      <header className={`sticky top-0 backdrop-blur-md pt-safe pb-2 z-10 ${isDawn ? "bg-transparent border-b border-transparent" : "bg-inherit border-b border-white/10"}`}>
+        <div className="px-4 pt-4 flex justify-between items-start">
           <div>
             <h1 className="text-2xl font-bold">{chapter.title}</h1>
             <div className={`flex gap-4 text-sm mt-1 ${isDawn ? "text-[var(--theme-ui-subtext)]" : "text-zinc-500"}`}>
@@ -271,7 +271,7 @@ export default function ChapterPage() {
         </div>
       )}
 
-      <div className="space-y-8">
+      <div className="flex-1 overflow-y-auto px-4 py-8 space-y-8 scrollbar-hide">
         {chapter.chunks.map((chunk) => {
           const isActive = activeChunkId === chunk.id;
           const isMemorised = state.cards[chapterId]?.[chunk.id]?.isMemorised;
@@ -287,7 +287,7 @@ export default function ChapterPage() {
               onTouchMove={handleTouchMove}
               onTouchEnd={handleLongPressEnd}
               onContextMenu={(e) => e.preventDefault()}
-              className={`group relative space-y-3 transition-all duration-300 rounded-2xl p-4 -mx-4 ${
+              className={`group relative space-y-3 transition-all duration-300 rounded-2xl p-4 ${
                 isActive 
                   ? "bg-[var(--theme-ui-bg)] ring-1 ring-[var(--theme-ui-border)] shadow-xl" 
                   : "active:bg-[var(--theme-ui-bg)]"

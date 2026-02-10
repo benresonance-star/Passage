@@ -24,6 +24,10 @@
     color: var(--color-foreground);
     -webkit-tap-highlight-color: transparent;
     user-select: none;
+    overflow: hidden; /* Prevent body scroll, use inner scroll containers */
+    height: 100dvh;
+    width: 100vw;
+    position: fixed;
   }
 
   /* Allow selection in specific areas like the practice/type recall */

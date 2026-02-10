@@ -19,7 +19,7 @@ export function BottomNav({ isDawn = false }: { isDawn?: boolean }) {
   const hasChapter = !!state.selectedChapterId;
 
   return (
-    <nav className={`fixed bottom-0 left-0 right-0 z-[2] pb-safe pt-2 ${
+    <nav className={`fixed bottom-0 left-0 right-0 z-[2] pb-safe pt-2 transition-all duration-300 ${
       isDawn 
         ? "bg-black/30 backdrop-blur-md border-t border-white/10" 
         : "bg-[var(--surface)] border-t border-[var(--surface-border)]"
