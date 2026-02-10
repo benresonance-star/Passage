@@ -23,6 +23,8 @@
     overflow: hidden;
     position: fixed;
     width: 100%;
+    /* Force GPU to handle safe areas */
+    -webkit-overflow-scrolling: touch;
   }
 
   html {

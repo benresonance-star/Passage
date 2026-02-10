@@ -5,11 +5,19 @@
 
 .soak-breathe {
   position: fixed;
-  inset: 0;
-  height: 100dvh;
-  width: 100vw;
+  /* Use negative inset to force over-bleed past home indicator */
+  top: -10dvh;
+  left: -10vw;
+  right: -10vw;
+  bottom: -10dvh;
+  height: 120dvh;
+  width: 120vw;
   z-index: 50;
   min-height: -webkit-fill-available;
+  /* Force hardware acceleration */
+  transform: translate3d(0,0,0);
+  backface-visibility: hidden;
+  perspective: 1000;
 
   /* Prevent iOS Safari from hijacking horizontal swipes for back/forward
      navigation or elastic scrolling. All touch handling is done in JS. */

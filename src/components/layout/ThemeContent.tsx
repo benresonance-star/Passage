@@ -56,6 +56,7 @@ export function ThemeContent({ children }: { children: React.ReactNode }) {
     if (isDawn) {
       // Dawn: transparent body so the gradient div shows through
       body.style.backgroundColor = "transparent";
+      root.style.backgroundColor = "#3d3566"; // Match Dawn's primary dark color
       body.style.color = theme.text;
 
       body.classList.remove("theme-light", "theme-dark");
@@ -86,6 +87,7 @@ export function ThemeContent({ children }: { children: React.ReactNode }) {
       root.style.setProperty("--chunk-memorised-sub", "rgba(255,203,31,0.6)");
     } else {
       body.style.backgroundColor = theme.bg;
+      root.style.backgroundColor = theme.bg; // Force HTML tag to match theme
       body.style.color = theme.text;
 
       body.classList.remove("theme-light", "theme-dark");
