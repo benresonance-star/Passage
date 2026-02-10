@@ -68,12 +68,11 @@ export function SplashScreen({ onFadeStart, onComplete }: SplashScreenProps) {
 
   return (
     <div
-      className="soak-breathe fixed inset-0 w-screen h-screen"
+      className="soak-breathe fixed inset-0"
       style={{
         zIndex: 9999,
         transition: `opacity ${FADE_OUT_MS}ms ease-in-out`,
         opacity,
-        minHeight: "-webkit-fill-available"
       }}
       aria-hidden={phase === "done"}
     >

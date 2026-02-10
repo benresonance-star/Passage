@@ -5,7 +5,10 @@
 
 .soak-breathe {
   position: fixed;
-  inset: 0;
+  top: -100px;
+  left: -100px;
+  right: -100px;
+  bottom: -100px;
   z-index: 50;
 
   /* Prevent iOS Safari from hijacking horizontal swipes for back/forward
