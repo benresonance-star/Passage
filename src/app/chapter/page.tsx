@@ -149,6 +149,7 @@ export default function ChapterPage() {
   const activeChunkId = state.settings.activeChunkId[chapterId];
   const currentTheme = state.settings.theme || { bg: "#000000", text: "#f4f4f5" };
   const isDawn = currentTheme.id === "dawn";
+  const isSepia = currentTheme.bg === "#fdf6e3";
 
   return (
     <div className="flex flex-col h-screen max-h-[100dvh]">
@@ -205,7 +206,7 @@ export default function ChapterPage() {
           <div className="absolute inset-0 bg-[var(--overlay)] backdrop-blur-sm" onClick={() => setShowThemeModal(false)} />
           <div className="relative w-full max-w-md bg-[var(--overlay-surface)] glass border border-[var(--surface-border)] rounded-[32px] p-8 shadow-2xl animate-in zoom-in-95 duration-300">
             <div className="flex justify-between items-center mb-8">
-              <h2 className="text-xl font-bold text-white text-center w-full ml-8">Appearance</h2>
+              <h2 className={`text-xl font-bold text-center w-full ml-8 ${isSepia ? "text-zinc-800" : "text-white"}`}>Appearance</h2>
               <button onClick={() => setShowThemeModal(false)} className="p-2 text-zinc-500">
                 <X size={24} />
               </button>
@@ -233,7 +234,7 @@ export default function ChapterPage() {
                           backgroundColor: p.bg
                         }}
                       />
-                      <span className="font-bold text-sm text-white">{p.name}</span>
+                      <span className={`font-bold text-sm ${isSepia ? "text-zinc-800" : "text-white"}`}>{p.name}</span>
                     </button>
                   );
                 })}
@@ -241,21 +242,21 @@ export default function ChapterPage() {
 
               <div className="space-y-4 pt-4 border-t border-[var(--surface-border)]">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-bold text-zinc-400">Background</span>
+                  <span className={`text-sm font-bold ${isSepia ? "text-zinc-600" : "text-zinc-400"}`}>Background</span>
                   <input 
                     type="color" 
                     value={currentTheme.bg} 
                     onChange={(e) => setTheme(e.target.value, currentTheme.text)}
-                    className="w-12 h-12 rounded-lg bg-transparent cursor-pointer"
+                    className={`w-12 h-12 rounded-lg bg-transparent cursor-pointer border-2 ${isSepia ? "border-black" : "border-transparent"}`}
                   />
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-bold text-zinc-400">Text Color</span>
+                  <span className={`text-sm font-bold ${isSepia ? "text-zinc-600" : "text-zinc-400"}`}>Text Color</span>
                   <input 
                     type="color" 
                     value={currentTheme.text} 
                     onChange={(e) => setTheme(currentTheme.bg, e.target.value)}
-                    className="w-12 h-12 rounded-lg bg-transparent cursor-pointer"
+                    className={`w-12 h-12 rounded-lg bg-transparent cursor-pointer border-2 ${isSepia ? "border-black" : "border-transparent"}`}
                   />
                 </div>
               </div>
@@ -263,7 +264,7 @@ export default function ChapterPage() {
 
             <button 
               onClick={() => setShowThemeModal(false)}
-              className="w-full mt-12 py-4 bg-[var(--surface-alt)] text-white font-bold rounded-2xl border border-[var(--surface-border)] active:scale-95 transition-transform"
+              className={`w-full mt-12 py-4 bg-[var(--surface-alt)] font-bold rounded-2xl border border-[var(--surface-border)] active:scale-95 transition-transform ${isSepia ? "text-zinc-800" : "text-white"}`}
             >
               Done
             </button>

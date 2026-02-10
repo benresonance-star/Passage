@@ -17,12 +17,15 @@ export function BottomNav({ isDawn = false }: { isDawn?: boolean }) {
   const pathname = usePathname();
   const { state } = useBCM();
   const hasChapter = !!state.selectedChapterId;
+  const isSepia = state.settings.theme?.bg === "#fdf6e3";
 
   return (
     <nav className={`fixed bottom-0 left-0 right-0 z-[2] transition-all duration-300 pb-[env(safe-area-inset-bottom)] ${
       isDawn 
         ? "bg-black/30 backdrop-blur-md border-t border-white/10" 
-        : "bg-[var(--surface)] border-t border-[var(--surface-border)]"
+        : isSepia
+          ? "bg-white border-t border-zinc-200"
+          : "bg-[var(--surface)] border-t border-[var(--surface-border)]"
     }`}>
       <div className="grid grid-cols-5 h-16 px-2">
         {NAV_ITEMS.map(({ label, href, icon: Icon }) => {
