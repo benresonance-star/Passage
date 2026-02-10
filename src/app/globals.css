@@ -8,7 +8,7 @@
 @layer base {
   @supports (padding: env(safe-area-inset-top)) {
     .pt-safe {
-      padding-top: env(safe-area-inset-top);
+      padding-top: max(12px, env(safe-area-inset-top));
     }
     .pb-safe {
       padding-bottom: env(safe-area-inset-bottom);

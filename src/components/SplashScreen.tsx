@@ -68,7 +68,7 @@ export function SplashScreen({ onFadeStart, onComplete }: SplashScreenProps) {
 
   return (
     <div
-      className="soak-breathe"
+      className="soak-breathe fixed inset-0"
       style={{
         zIndex: 9999,
         transition: `opacity ${FADE_OUT_MS}ms ease-in-out`,

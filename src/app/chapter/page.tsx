@@ -153,7 +153,7 @@ export default function ChapterPage() {
   return (
     <div className="flex flex-col h-screen max-h-[100dvh]">
       <header className={`sticky top-0 backdrop-blur-md pt-safe pb-2 z-10 ${isDawn ? "bg-transparent border-b border-transparent" : "bg-inherit border-b border-white/10"}`}>
-        <div className="px-4 pt-4 flex justify-between items-start">
+        <div className="px-4 flex justify-between items-start">
           <div>
             <h1 className="text-2xl font-bold">{chapter.title}</h1>
             <div className={`flex gap-4 text-sm mt-1 ${isDawn ? "text-[var(--theme-ui-subtext)]" : "text-zinc-500"}`}>
@@ -271,7 +271,7 @@ export default function ChapterPage() {
         </div>
       )}
 
-      <div className="flex-1 overflow-y-auto px-4 py-8 space-y-8 scrollbar-hide">
+      <div className="flex-1 overflow-y-auto px-4 pt-8 pb-32 space-y-8 scrollbar-hide">
         {chapter.chunks.map((chunk) => {
           const isActive = activeChunkId === chunk.id;
           const isMemorised = state.cards[chapterId]?.[chunk.id]?.isMemorised;
