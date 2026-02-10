@@ -318,86 +318,100 @@ export default function PracticePage() {
       </div>
 
       <div className="py-8 space-y-4 px-4 flex-shrink-0">
-        {mode === "cloze" && (
-          <div className="flex justify-between gap-2 mb-2 animate-in slide-in-from-bottom-2 duration-500">
-            {([0, 20, 40, 60, 80] as const).map((level) => (
-              <button
-                key={level}
-                onClick={() => setState(p => ({ ...p, settings: { ...p.settings, clozeLevel: level } }))}
-                className={`flex-1 py-2 rounded-xl text-[10px] font-bold transition-all active:scale-95 ${
-                  state.settings.clozeLevel === level 
-                    ? "bg-orange-500 text-white shadow-lg shadow-orange-500/20" 
-                    : "bg-[var(--surface)] text-[var(--theme-ui-subtext)] border border-[var(--surface-border)]"
-                }`}
-              >
-                {level}%
-              </button>
-            ))}
+        {mode === "read" && !isFlowMode ? (
+          <div className="flex gap-3">
             <button
-              onClick={() => setState(p => ({ ...p, settings: { ...p.settings, clozeLevel: "mnemonic" } }))}
-              className={`flex-1 py-2 rounded-xl text-[10px] font-bold transition-all active:scale-95 uppercase tracking-widest ${
-                state.settings.clozeLevel === "mnemonic" 
-                  ? "bg-amber-500 text-black shadow-lg shadow-amber-500/20" 
-                  : "bg-[var(--surface)] text-[var(--theme-ui-subtext)] border border-[var(--surface-border)]"
+              onClick={() => setIsFlowMode(true)}
+              className="flex-1 py-4 bg-[var(--surface)] border border-[var(--surface-border)] text-[var(--theme-ui-subtext)] font-bold rounded-2xl flex items-center justify-center gap-2 hover:text-orange-500 transition-all uppercase tracking-widest text-xs"
+            >
+              <Zap size={16} className="fill-current" />
+              Flow
+            </button>
+            <button
+              onClick={handleNextMode}
+              className={`flex-1 py-4 font-bold rounded-2xl transition-all flex items-center justify-center gap-2 ${
+                isDawn 
+                  ? "bg-[var(--surface)] border border-[var(--surface-border)] text-[var(--theme-ui-subtext)] hover:text-orange-500 uppercase tracking-widest text-xs" 
+                  : "bg-orange-500 text-white shadow-lg shadow-orange-500/20 active:scale-95"
               }`}
             >
-              Abc
+              {isDawn && <EyeOff size={16} className="fill-current" />}
+              Cloze Mode
             </button>
           </div>
-        )}
-
-        {mode === "read" && (
-          <div className="relative">
-            {!isFlowMode ? (
-              <button
-                onClick={() => setIsFlowMode(true)}
-                className="w-full py-4 bg-[var(--surface)] border border-[var(--surface-border)] text-[var(--theme-ui-subtext)] font-bold rounded-2xl flex items-center justify-center gap-2 hover:text-orange-500 transition-all uppercase tracking-widest text-xs"
-              >
-                <Zap size={16} className="fill-current" />
-                Flow Mode
-              </button>
-            ) : (
-              <FlowControls 
-                isPlaying={isPlaying}
-                onTogglePlay={() => setIsPlaying(!isPlaying)}
-                wpm={wpm}
-                onWpmChange={setWpm}
-                onSkip={(dir) => setCurrentIndex(prev => dir === 'forward' ? Math.min(words.length - 1, prev + 5) : Math.max(-1, prev - 5))}
-                onClose={() => {
-                  setIsFlowMode(false);
-                  setIsPlaying(false);
-                  setCurrentIndex(-1);
-                }}
-              />
+        ) : (
+          <>
+            {mode === "cloze" && (
+              <div className="flex justify-between gap-2 mb-2 animate-in slide-in-from-bottom-2 duration-500">
+                {([0, 20, 40, 60, 80] as const).map((level) => (
+                  <button
+                    key={level}
+                    onClick={() => setState(p => ({ ...p, settings: { ...p.settings, clozeLevel: level } }))}
+                    className={`flex-1 py-2 rounded-xl text-[10px] font-bold transition-all active:scale-95 ${
+                      state.settings.clozeLevel === level 
+                        ? "bg-orange-500 text-white shadow-lg shadow-orange-500/20" 
+                        : "bg-[var(--surface)] text-[var(--theme-ui-subtext)] border border-[var(--surface-border)]"
+                    }`}
+                  >
+                    {level}%
+                  </button>
+                ))}
+                <button
+                  onClick={() => setState(p => ({ ...p, settings: { ...p.settings, clozeLevel: "mnemonic" } }))}
+                  className={`flex-1 py-2 rounded-xl text-[10px] font-bold transition-all active:scale-95 uppercase tracking-widest ${
+                    state.settings.clozeLevel === "mnemonic" 
+                      ? "bg-amber-500 text-black shadow-lg shadow-amber-500/20" 
+                      : "bg-[var(--surface)] text-[var(--theme-ui-subtext)] border border-[var(--surface-border)]"
+                  }`}
+                >
+                  Abc
+                </button>
+              </div>
             )}
-          </div>
-        )}
 
-        {mode !== "result" && (
-          <button
-            onClick={handleNextMode}
-            className={`w-full py-4 font-bold rounded-2xl transition-all flex items-center justify-center gap-2 ${
-              isDawn 
-                ? "bg-[var(--surface)] border border-[var(--surface-border)] text-[var(--theme-ui-subtext)] hover:text-orange-500 uppercase tracking-widest text-xs" 
-                : "bg-orange-500 text-white shadow-lg shadow-orange-500/20 active:scale-95"
-            }`}
-          >
-            {isDawn && mode === "read" && <EyeOff size={16} className="fill-current" />}
-            {mode === "read" ? "Cloze Mode" : mode === "cloze" ? "Type It" : "Submit"}
-          </button>
-        )}
-        
-        {mode === "result" && (
-          <button
-            onClick={() => router.push("/chapter")}
-            className={`w-full py-4 font-bold rounded-2xl transition-all ${
-              isDawn
-                ? "bg-[var(--surface)] border border-[var(--surface-border)] text-[var(--theme-ui-subtext)] hover:text-orange-500 uppercase tracking-widest text-xs"
-                : "bg-orange-500 text-white shadow-lg shadow-orange-500/20"
-            }`}
-          >
-            Continue
-          </button>
+            {mode === "read" && isFlowMode && (
+              <div className="relative">
+                <FlowControls 
+                  isPlaying={isPlaying}
+                  onTogglePlay={() => setIsPlaying(!isPlaying)}
+                  wpm={wpm}
+                  onWpmChange={setWpm}
+                  onSkip={(dir) => setCurrentIndex(prev => dir === 'forward' ? Math.min(words.length - 1, prev + 5) : Math.max(-1, prev - 5))}
+                  onClose={() => {
+                    setIsFlowMode(false);
+                    setIsPlaying(false);
+                    setCurrentIndex(-1);
+                  }}
+                />
+              </div>
+            )}
+
+            {mode !== "result" && mode !== "read" && (
+              <button
+                onClick={handleNextMode}
+                className={`w-full py-4 font-bold rounded-2xl transition-all flex items-center justify-center gap-2 ${
+                  isDawn 
+                    ? "bg-[var(--surface)] border border-[var(--surface-border)] text-[var(--theme-ui-subtext)] hover:text-orange-500 uppercase tracking-widest text-xs" 
+                    : "bg-orange-500 text-white shadow-lg shadow-orange-500/20 active:scale-95"
+                }`}
+              >
+                {mode === "cloze" ? "Type It" : "Submit"}
+              </button>
+            )}
+            
+            {mode === "result" && (
+              <button
+                onClick={() => router.push("/chapter")}
+                className={`w-full py-4 font-bold rounded-2xl transition-all ${
+                  isDawn
+                    ? "bg-[var(--surface)] border border-[var(--surface-border)] text-[var(--theme-ui-subtext)] hover:text-orange-500 uppercase tracking-widest text-xs"
+                    : "bg-orange-500 text-white shadow-lg shadow-orange-500/20"
+                }`}
+              >
+                Continue
+              </button>
+            )}
+          </>
         )}
       </div>
     </div>
