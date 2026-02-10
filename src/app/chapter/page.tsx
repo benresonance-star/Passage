@@ -151,6 +151,8 @@ export default function ChapterPage() {
   const isDawn = currentTheme.id === "dawn";
   const isSepia = currentTheme.bg === "#fdf6e3";
 
+  const isIPhone = typeof window !== "undefined" && /iPhone/.test(navigator.userAgent);
+
   return (
     <div className="flex flex-col h-screen max-h-[100dvh]">
       <header className={`sticky top-0 backdrop-blur-md pt-[env(safe-area-inset-top)] pb-2 z-10 ${isDawn ? "bg-transparent border-b border-transparent" : "bg-inherit border-b border-white/10"}`}>
@@ -247,7 +249,7 @@ export default function ChapterPage() {
                     type="color" 
                     value={currentTheme.bg} 
                     onChange={(e) => setTheme(e.target.value, currentTheme.text)}
-                    className="w-12 h-12 rounded-lg bg-transparent cursor-pointer"
+                    className={`w-12 h-12 rounded-lg bg-transparent cursor-pointer ${isIPhone ? "border-2 border-black" : ""}`}
                   />
                 </div>
                 <div className="flex items-center justify-between">
@@ -256,7 +258,7 @@ export default function ChapterPage() {
                     type="color" 
                     value={currentTheme.text} 
                     onChange={(e) => setTheme(currentTheme.bg, e.target.value)}
-                    className="w-12 h-12 rounded-lg bg-transparent cursor-pointer"
+                    className={`w-12 h-12 rounded-lg bg-transparent cursor-pointer ${isIPhone ? "border-2 border-black" : ""}`}
                   />
                 </div>
               </div>
