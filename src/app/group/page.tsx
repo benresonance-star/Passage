@@ -258,7 +258,7 @@ export default function GroupPage() {
   );
 
   return (
-    <div className="space-y-8 py-6 pt-[env(safe-area-inset-top)] px-1">
+    <div className="space-y-8 pt-[env(safe-area-inset-top)] pb-[calc(64px+env(safe-area-inset-bottom)+2rem)] px-4">
       <ConfirmDialog />
       <PromptDialog />
       <ToastContainer />

@@ -175,8 +175,8 @@ export default function PracticePage() {
 
 
   return (
-    <div className="flex flex-col h-[calc(100dvh-5rem)] max-w-2xl mx-auto relative">
-      <header className="flex items-center justify-between pt-[env(safe-area-inset-top)] pb-4 px-4">
+    <div className="flex flex-col h-[calc(100dvh-64px-env(safe-area-inset-bottom))] max-w-2xl mx-auto relative">
+      <header className="flex items-center justify-between pt-[env(safe-area-inset-top)] pb-4 px-4 flex-shrink-0">
         <button onClick={handleBack} className="text-zinc-500 p-2 -ml-2">
           <ArrowLeft size={24} />
         </button>
@@ -191,7 +191,7 @@ export default function PracticePage() {
         <div className="w-10" />
       </header>
 
-      <div className={`flex-1 flex flex-col ${mode === "type" ? "justify-start pt-12" : "justify-center"}`}>
+      <div className={`flex-1 overflow-y-auto scrollbar-hide flex flex-col ${mode === "type" ? "justify-start pt-12" : "justify-center"}`}>
         {mode === "read" && activeChunk && (
           <div className="animate-in fade-in duration-500 px-4">
             <div className="space-y-6">
@@ -317,7 +317,7 @@ export default function PracticePage() {
         )}
       </div>
 
-      <div className="py-8 space-y-4 px-4">
+      <div className="py-8 space-y-4 px-4 flex-shrink-0">
         {mode === "cloze" && (
           <div className="flex justify-between gap-2 mb-2 animate-in slide-in-from-bottom-2 duration-500">
             {([0, 20, 40, 60, 80] as const).map((level) => (

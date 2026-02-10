@@ -134,8 +134,8 @@ export default function RecitePage() {
   const isDawn = currentTheme.id === "dawn";
 
   return (
-    <div className="flex flex-col min-h-[calc(100vh-8rem)]">
-      <header className="flex items-center justify-between pt-[env(safe-area-inset-top)] pb-4">
+    <div className="flex flex-col h-[calc(100dvh-64px-env(safe-area-inset-bottom))] max-w-2xl mx-auto relative">
+      <header className="flex items-center justify-between pt-[env(safe-area-inset-top)] pb-4 px-4 flex-shrink-0">
         <button onClick={() => router.push("/chapter")} className="text-zinc-500 p-2 -ml-2">
           <ArrowLeft size={24} />
         </button>
@@ -150,7 +150,7 @@ export default function RecitePage() {
         </button>
       </header>
 
-      <div className="flex-1 space-y-4 py-8">
+      <div className="flex-1 overflow-y-auto scrollbar-hide space-y-4 py-8 px-4">
         <div className="text-center mb-8">
           <h2 className="text-xl font-bold">Recite out loud.</h2>
           <p className={`text-sm ${isDawn ? "text-white/60" : "text-zinc-500"}`}>Tap lines to reveal.</p>
@@ -175,7 +175,7 @@ export default function RecitePage() {
         </div>
       </div>
 
-      <div className="py-8">
+      <div className="py-8 flex-shrink-0 px-4">
         <button
           onClick={async () => {
             if (!isGraded) {

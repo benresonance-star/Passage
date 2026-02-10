@@ -67,7 +67,7 @@ export default function ReviewPage() {
   const effectiveActiveChunkId = activeChunkId || chapter.chunks[0]?.id;
 
   return (
-    <div className="space-y-6 pb-20">
+    <div className="space-y-6 pb-[calc(64px+env(safe-area-inset-bottom)+2rem)] px-4">
       <header className="pt-[env(safe-area-inset-top)] pb-4">
         <h1 className="text-2xl font-bold">Chapter Mastery</h1>
         <div className="flex items-center gap-2 mt-1">
