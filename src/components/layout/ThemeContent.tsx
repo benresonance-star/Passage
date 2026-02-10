@@ -139,7 +139,7 @@ export function ThemeContent({ children }: { children: React.ReactNode }) {
           onComplete={() => setShowSplash(false)}
         />
       )}
-      <main className={`relative z-[1] min-h-screen pb-24 max-w-md mx-auto px-4 pt-safe ${isDawn ? dawnFont.className : ""}`}>
+      <main className={`relative z-[1] min-h-screen pb-24 max-w-md mx-auto px-4 ${isDawn ? dawnFont.className : ""}`}>
         {children}
       </main>
       <BottomNav isDawn={isDawn} />
