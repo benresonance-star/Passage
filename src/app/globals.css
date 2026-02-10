@@ -11,24 +11,17 @@
       padding-top: max(12px, env(safe-area-inset-top));
     }
     .pb-safe {
-      padding-bottom: 0;
+      padding-bottom: env(safe-area-inset-bottom);
     }
   }
 
   html, body {
-    height: 100dvh;
+    min-height: 100%;
+    min-height: -webkit-fill-available;
     margin: 0;
     padding: 0;
     background-color: #000000;
-    overflow: hidden;
-    position: fixed;
     width: 100%;
-    /* Force GPU to handle safe areas */
-    -webkit-overflow-scrolling: touch;
-  }
-
-  html {
-    scrollbar-gutter: stable;
   }
 
   body {
@@ -37,9 +30,7 @@
     -webkit-tap-highlight-color: transparent;
     user-select: none;
     overflow: hidden; /* Prevent body scroll, use inner scroll containers */
-    height: 100dvh;
     width: 100vw;
-    position: fixed;
   }
 
   /* Allow selection in specific areas like the practice/type recall */
@@ -84,7 +75,13 @@
 
 .dawn-bg {
   position: fixed;
-  inset: 0;
+  /* Use negative inset to force over-bleed past home indicator */
+  top: -10dvh;
+  left: -10vw;
+  right: -10vw;
+  bottom: -10dvh;
+  height: 120dvh;
+  width: 120vw;
   z-index: 0;
   pointer-events: none;
   background:
@@ -103,6 +100,10 @@
     );
   background-size: 100% 220%;
   animation: dawn-sky 25s ease-in-out infinite;
+  /* Force hardware acceleration */
+  transform: translate3d(0,0,0);
+  backface-visibility: hidden;
+  perspective: 1000;
 }
 
 .dawn-bg::before {

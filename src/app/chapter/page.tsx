@@ -271,8 +271,9 @@ export default function ChapterPage() {
         </div>
       )}
 
-      <div className="flex-1 overflow-y-auto px-4 pt-8 pb-20 space-y-8 scrollbar-hide">
-        {chapter.chunks.map((chunk) => {
+      <div className="flex-1 overflow-y-auto px-4 pt-8 pb-safe space-y-8 scrollbar-hide">
+        <div className="pb-20">
+          {chapter.chunks.map((chunk) => {
           const isActive = activeChunkId === chunk.id;
           const isMemorised = state.cards[chapterId]?.[chunk.id]?.isMemorised;
           const showAsMemorised = isMemorised && state.settings.showMemorised;
