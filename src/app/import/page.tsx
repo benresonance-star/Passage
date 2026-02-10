@@ -4,8 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useBCM } from "@/context/BCMContext";
 import { parseChapter, chunkVerses, getChapterSlug } from "@/lib/parser";
-import { SM2Card, Chapter } from "@/types";
-import { ArrowLeft, Save, AlertTriangle, Check, BookOpen, Type } from "lucide-react";
+import { SM2Card, Chapter, BibleVersion } from "@/types";
+import { ArrowLeft, Save, AlertTriangle, Check, BookOpen, Type, ChevronDown } from "lucide-react";
 import Link from "next/link";
 import LibrarySelector from "@/components/LibrarySelector";
 
@@ -13,16 +13,21 @@ export default function ImportPage() {
   const [text, setText] = useState("");
   const [stripRefs, setStripRefs] = useState(true);
   const [mode, setMode] = useState<"library" | "paste">("library");
-  const { setState, pushChapter } = useBCM();
+  const [versionId, setVersionId] = useState("niv");
+  const [bookName, setBookName] = useState("");
+  const { state, setState, pushChapter } = useBCM();
   const router = useRouter();
 
-  const handleImport = async (importText?: string) => {
+  const handleImport = async (importText?: string, importBook?: string, importVersion?: string) => {
     const finalLines = importText || text;
     if (!finalLines.trim()) return;
 
+    const finalBook = importBook || bookName || "My Book";
+    const finalVersion = importVersion || versionId;
+
     const { title, verses } = parseChapter(finalLines, stripRefs);
-    const chunks = chunkVerses(verses, title);
-    const chapterId = getChapterSlug(title);
+    const chunks = chunkVerses(verses, title, 4, finalBook, finalVersion);
+    const chapterId = getChapterSlug(title, finalBook, finalVersion);
 
     const initialCards: Record<string, SM2Card> = {};
     const now = new Date().toISOString();
@@ -43,6 +48,8 @@ export default function ImportPage() {
 
     const newChapter: Chapter = {
       id: chapterId,
+      versionId: finalVersion,
+      bookName: finalBook,
       title,
       fullText: finalLines,
       verses,
@@ -82,6 +89,8 @@ export default function ImportPage() {
 
   const hasMarkers = text.includes("<") && text.includes(">");
 
+  const versions = Object.values(state.versions);
+
   return (
     <div className="space-y-6 pb-20">
       <header className="flex items-center gap-4 py-4">
@@ -115,7 +124,7 @@ export default function ImportPage() {
 
       <div className="space-y-4">
         {mode === "library" ? (
-          <LibrarySelector onSelect={(t) => handleImport(t)} />
+          <LibrarySelector onSelect={(t, b, v) => handleImport(t, b, v)} />
         ) : (
           <>
             <div className="bg-[var(--surface)] rounded-xl p-4 border border-[var(--surface-border)]">
@@ -125,12 +134,42 @@ export default function ImportPage() {
               </pre>
             </div>
 
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-zinc-400">Version</label>
+                <div className="relative">
+                  <select
+                    value={versionId}
+                    onChange={(e) => setVersionId(e.target.value)}
+                    className="w-full bg-[var(--surface)] border border-[var(--surface-border)] rounded-xl p-3 text-white appearance-none focus:outline-none focus:ring-2 focus:ring-orange-500/50"
+                  >
+                    {versions.map((v) => (
+                      <option key={v.id} value={v.id}>
+                        {v.abbreviation}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 pointer-events-none" />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-zinc-400">Book Name</label>
+                <input
+                  type="text"
+                  value={bookName}
+                  onChange={(e) => setBookName(e.target.value)}
+                  placeholder="e.g. Romans"
+                  className="w-full bg-[var(--surface)] border border-[var(--surface-border)] rounded-xl p-3 text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50"
+                />
+              </div>
+            </div>
+
             <div className="space-y-2">
               <label className="text-sm font-medium text-zinc-400">Chapter Text</label>
               <textarea
                 value={text}
                 onChange={(e) => setText(e.target.value)}
-                className="w-full h-80 bg-[var(--surface)] border border-[var(--surface-border)] rounded-xl p-4 text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50 resize-none"
+                className="w-full h-60 bg-[var(--surface)] border border-[var(--surface-border)] rounded-xl p-4 text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50 resize-none"
                 placeholder="Paste your chapter here..."
               />
             </div>
@@ -156,7 +195,7 @@ export default function ImportPage() {
 
             <button
               onClick={() => handleImport()}
-              disabled={!text.trim()}
+              disabled={!text.trim() || !bookName.trim()}
               className="w-full py-4 bg-orange-500 hover:bg-orange-600 disabled:opacity-50 disabled:hover:bg-orange-500 text-white font-bold rounded-xl flex items-center justify-center gap-2 transition-colors shadow-lg shadow-orange-500/10"
             >
               <Save size={20} />

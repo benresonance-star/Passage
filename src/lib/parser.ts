@@ -88,19 +88,29 @@ export function parseChapter(text: string, stripRefs: boolean = true): { title: 
 }
 
 /**
- * Generates a stable, deterministic ID from a chapter title.
+ * Generates a stable, deterministic ID from a chapter title, book name, and version.
  * Used to ensure all devices use the same key for the same content.
  */
-export function getChapterSlug(title: string): string {
-  return title
+export function getChapterSlug(title: string, bookName?: string, versionId?: string): string {
+  const base = title
     .toLowerCase()
     .trim()
     .replace(/[^\w\s-]/g, "") // remove special chars
     .replace(/[\s_-]+/g, "-") // replace spaces/underscores with hyphens
     .replace(/^-+|-+$/g, ""); // remove leading/trailing hyphens
+
+  if (bookName && versionId) {
+    const versionPart = versionId.toLowerCase().trim();
+    const bookPart = bookName.toLowerCase().trim().replace(/[\s_-]+/g, "-");
+    // If title already contains book name, we avoid redundancy if possible, 
+    // but for simplicity and stability, we use a strict hierarchy: version-book-chapter
+    return `${versionPart}-${bookPart}-${base}`;
+  }
+  
+  return base;
 }
 
-export function chunkVerses(verses: Verse[], title: string, maxVersesPerChunk: number = 4): Chunk[] {
+export function chunkVerses(verses: Verse[], title: string, maxVersesPerChunk: number = 4, bookName?: string, versionId?: string): Chunk[] {
   const chunks: Chunk[] = [];
   let currentBatch: Verse[] = [];
   let scriptureCount = 0;
@@ -140,7 +150,7 @@ export function chunkVerses(verses: Verse[], title: string, maxVersesPerChunk: n
         const startVerse = scriptureVerses[0].number;
         const endVerse = scriptureVerses[scriptureVerses.length - 1].number;
         const verseRange = startVerse === endVerse ? `${startVerse}` : `${startVerse}-${endVerse}`;
-        const chapterId = getChapterSlug(title);
+        const chapterId = getChapterSlug(title, bookName, versionId);
         
         chunks.push({
           id: `${chapterId}-v${verseRange}`,

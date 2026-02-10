@@ -5,6 +5,9 @@ import { parseChapter, chunkVerses, getChapterSlug } from "./parser";
 const STORAGE_KEY = "bcm_v1_state";
 
 export const INITIAL_STATE: BCMState = {
+  versions: {
+    niv: { id: "niv", name: "New International Version", abbreviation: "NIV" },
+  },
   chapters: {},
   selectedChapterId: null,
   cards: {},
@@ -24,8 +27,10 @@ export const INITIAL_STATE: BCMState = {
 function seedData(state: BCMState): BCMState {
   const { title, verses } = parseChapter(ROMANS_8_SEED.fullText!);
   const finalTitle = title || "Romans 8";
-  const chunks = chunkVerses(verses, finalTitle);
-  const chapterId = getChapterSlug(finalTitle);
+  const bookName = ROMANS_8_SEED.bookName || "Romans";
+  const versionId = ROMANS_8_SEED.versionId || "niv";
+  const chunks = chunkVerses(verses, finalTitle, 4, bookName, versionId);
+  const chapterId = getChapterSlug(finalTitle, bookName, versionId);
   const now = new Date().toISOString();
 
   const initialCards: Record<string, SM2Card> = {};
@@ -45,7 +50,9 @@ function seedData(state: BCMState): BCMState {
 
   const starterChapter: Chapter = {
     id: chapterId,
-    title: title || "Romans 8",
+    versionId,
+    bookName,
+    title: finalTitle,
     fullText: ROMANS_8_SEED.fullText!,
     verses,
     chunks,
@@ -80,13 +87,15 @@ export function loadState(): BCMState {
 
     // Migration for v1 (single chapter) to v2 (multi-chapter)
     if (parsed.chapter && !parsed.chapters) {
-      const chapterId = getChapterSlug(parsed.chapter.title);
+      const chapterId = getChapterSlug(parsed.chapter.title, "Romans", "niv");
       const migratedState: BCMState = {
         ...INITIAL_STATE,
         chapters: {
           [chapterId]: {
             ...parsed.chapter,
             id: chapterId,
+            versionId: "niv",
+            bookName: "Romans",
             createdAt: new Date().toISOString(),
           }
         },
@@ -104,6 +113,53 @@ export function loadState(): BCMState {
           }
         }
       };
+      return migratedState;
+    }
+
+    // Migration for v2.1 (adding Bible Version and Book Name)
+    if (parsed.chapters && !parsed.versions) {
+      const migratedState: BCMState = {
+        ...INITIAL_STATE,
+        ...parsed,
+        versions: INITIAL_STATE.versions,
+        chapters: {},
+        cards: {},
+        stats: {},
+        settings: {
+          ...parsed.settings,
+          activeChunkId: {}
+        }
+      };
+
+      // Re-key all chapters with new deterministic IDs
+      Object.values(parsed.chapters as Record<string, any>).forEach((ch) => {
+        const bookName = ch.bookName || "Romans"; // Default for existing
+        const versionId = ch.versionId || "niv";
+        const newChapterId = getChapterSlug(ch.title, bookName, versionId);
+        
+        migratedState.chapters[newChapterId] = {
+          ...ch,
+          id: newChapterId,
+          versionId,
+          bookName,
+        };
+
+        if (parsed.cards && parsed.cards[ch.id]) {
+          migratedState.cards[newChapterId] = parsed.cards[ch.id];
+        }
+        if (parsed.stats && parsed.stats[ch.id]) {
+          migratedState.stats[newChapterId] = parsed.stats[ch.id];
+        }
+        if (parsed.settings?.activeChunkId?.[ch.id]) {
+          migratedState.settings.activeChunkId[newChapterId] = parsed.settings.activeChunkId[ch.id];
+        }
+      });
+
+      if (parsed.selectedChapterId && parsed.chapters[parsed.selectedChapterId]) {
+        const sel = parsed.chapters[parsed.selectedChapterId];
+        migratedState.selectedChapterId = getChapterSlug(sel.title, sel.bookName || "Romans", sel.versionId || "niv");
+      }
+
       return migratedState;
     }
 

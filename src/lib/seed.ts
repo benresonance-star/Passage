@@ -2,6 +2,8 @@ import { Chapter, SM2Card } from "@/types";
 
 export const ROMANS_8_SEED: Partial<Chapter> = {
   title: "Romans 8",
+  bookName: "Romans",
+  versionId: "niv",
   fullText: `Romans 8
 
 Life Through the Spirit

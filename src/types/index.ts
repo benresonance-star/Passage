@@ -23,8 +23,16 @@ export interface SM2Card {
   isMemorised: boolean;
 }
 
+export interface BibleVersion {
+  id: string; // e.g. "niv"
+  name: string; // e.g. "New International Version"
+  abbreviation: string; // e.g. "NIV"
+}
+
 export interface Chapter {
   id: string;
+  versionId: string;
+  bookName: string;
   title: string;
   fullText: string;
   verses: Verse[];
@@ -33,6 +41,7 @@ export interface Chapter {
 }
 
 export interface BCMState {
+  versions: Record<string, BibleVersion>;
   chapters: Record<string, Chapter>;
   selectedChapterId: string | null;
   cards: Record<string, Record<string, SM2Card>>; // Keyed by chapterId, then chunkId
