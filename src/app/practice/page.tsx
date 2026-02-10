@@ -335,8 +335,8 @@ export default function PracticePage() {
                   : "bg-orange-500 text-white shadow-lg shadow-orange-500/20 active:scale-95"
               }`}
             >
-              {isDawn && <EyeOff size={16} className="fill-current" />}
-              Cloze Mode
+              <EyeOff size={16} className="fill-current" />
+              Cloze
             </button>
           </div>
         ) : (
