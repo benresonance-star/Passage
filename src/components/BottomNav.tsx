@@ -39,7 +39,7 @@ export function BottomNav({ isDawn = false }: { isDawn?: boolean }) {
                 className="flex flex-col items-center justify-center gap-1 opacity-20 cursor-not-allowed pointer-events-none"
               >
                 <Icon size={24} className="text-zinc-500" />
-                <span className="text-[9px] font-medium uppercase tracking-wider text-zinc-500">
+                <span className="text-[10px] font-medium uppercase tracking-wider text-zinc-500">
                   {label}
                 </span>
               </div>
@@ -67,7 +67,7 @@ export function BottomNav({ isDawn = false }: { isDawn?: boolean }) {
               }`}
             >
               <Icon size={24} />
-              <span className="text-[9px] font-medium uppercase tracking-wider">
+              <span className="text-[10px] font-medium uppercase tracking-wider">
                 {label}
               </span>
             </Link>
