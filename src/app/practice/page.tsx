@@ -209,8 +209,8 @@ export default function PracticePage() {
   };
 
   return (
-    <div className="flex flex-col h-[calc(100dvh-64px-env(safe-area-inset-bottom))] max-w-2xl mx-auto relative">
-      <header className="flex items-center justify-between pt-[env(safe-area-inset-top)] pb-4 px-4 flex-shrink-0">
+    <div className="flex flex-col h-[calc(100dvh-64px-env(safe-area-inset-bottom))] max-w-2xl mx-auto relative pt-safe">
+      <header className="flex items-center justify-between pb-4 px-4 flex-shrink-0">
         <button onClick={handleBack} className="text-zinc-500 p-2 -ml-2">
           <ArrowLeft size={24} />
         </button>

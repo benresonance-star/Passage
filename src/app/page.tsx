@@ -113,28 +113,24 @@ export default function Home() {
   };
 
   return (
-    <div className="space-y-8 py-6">
+    <div className="space-y-8 py-4">
       <ConfirmDialog />
-      <header className="flex justify-between items-start">
-        <div className="flex items-center gap-4">
-          <BookOpen size={52} className="text-orange-500" />
-          <div className="space-y-1">
-            <h1 className="text-3xl font-bold tracking-[0.05em]">Passage</h1>
-            <p className="text-[var(--theme-ui-subtext)]">Bible Chapter Memoriser</p>
-          </div>
+      <header className="flex justify-between items-center">
+        <div className="flex items-center">
+          <BookOpen size={48} className="text-orange-500" />
         </div>
         <div className="flex gap-2">
           <Link 
             href="/group"
-            className={`p-2 transition-colors rounded-full border border-[var(--surface-border)] ${user ? "text-orange-500 bg-orange-500/10" : "text-[var(--theme-ui-subtext)] bg-[var(--surface)]"}`}
+            className={`p-2.5 transition-colors rounded-full border border-[var(--surface-border)] ${user ? "text-orange-500 bg-orange-500/10" : "text-[var(--theme-ui-subtext)] bg-[var(--surface)]"}`}
           >
-            <Users size={20} />
+            <Users size={22} />
           </Link>
           <button 
             onClick={() => setShowInfo(true)}
-            className="p-2 text-[var(--theme-ui-subtext)] hover:text-white transition-colors bg-[var(--surface)] rounded-full border border-[var(--surface-border)]"
+            className="p-2.5 text-[var(--theme-ui-subtext)] hover:text-white transition-colors bg-[var(--surface)] rounded-full border border-[var(--surface-border)]"
           >
-            <Info size={20} />
+            <Info size={22} />
           </button>
         </div>
       </header>

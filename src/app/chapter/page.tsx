@@ -163,8 +163,8 @@ export default function ChapterPage() {
   const isIPhone = typeof window !== "undefined" && /iPhone/.test(navigator.userAgent);
 
   return (
-    <div className="fixed inset-0 flex flex-col bg-inherit">
-      <header className={`sticky top-0 backdrop-blur-md pt-[max(env(safe-area-inset-top),16px)] pb-2 z-10 ${isDawn ? "bg-transparent border-b border-transparent" : "bg-inherit border-b border-white/10"}`}>
+    <div className="fixed inset-0 flex flex-col bg-inherit pt-safe">
+      <header className={`sticky top-0 backdrop-blur-md pb-2 z-10 ${isDawn ? "bg-transparent border-b border-transparent" : "bg-inherit border-b border-white/10"}`}>
         <div className="px-4 flex justify-between items-start">
           <div>
             <h1 className="text-2xl font-bold">{chapter.title}</h1>

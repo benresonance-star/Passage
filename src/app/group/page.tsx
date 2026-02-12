@@ -258,11 +258,11 @@ export default function GroupPage() {
   );
 
   return (
-    <div className="space-y-8 pt-[env(safe-area-inset-top)] pb-[calc(64px+env(safe-area-inset-bottom)+2rem)] px-4">
+    <div className="space-y-8 pt-safe pb-[calc(64px+env(safe-area-inset-bottom)+2rem)] px-4">
       <ConfirmDialog />
       <PromptDialog />
       <ToastContainer />
-      <header className="flex items-center gap-4">
+      <header className="flex items-center gap-4 py-4">
         <Link href="/chapter" className="p-2 text-zinc-500 bg-[var(--surface)] rounded-full border border-[var(--surface-border)]">
           <ArrowLeft size={20} />
         </Link>
