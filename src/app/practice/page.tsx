@@ -394,9 +394,9 @@ export default function PracticePage() {
             </button>
             <button
               onClick={handleNextMode}
-              className={`flex-1 py-4 font-bold rounded-2xl transition-all flex flex-col items-center justify-center gap-1 ${
+              className={`flex-1 py-4 font-bold rounded-2xl transition-all flex flex-col items-center justify-center gap-1 uppercase tracking-widest text-[9px] ${
                 isDawn 
-                  ? "bg-[var(--surface)] border border-[var(--surface-border)] text-[var(--theme-ui-subtext)] hover:text-orange-500 uppercase tracking-widest text-[9px]" 
+                  ? "bg-[var(--surface)] border border-[var(--surface-border)] text-[var(--theme-ui-subtext)] hover:text-orange-500" 
                   : "bg-orange-500 text-white shadow-lg shadow-orange-500/20 active:scale-95"
               }`}
             >
@@ -457,9 +457,9 @@ export default function PracticePage() {
                   if (!isGraded) await handleGrade(0.75);
                   router.push("/chapter");
                 } : handleNextMode}
-                className={`w-full py-4 font-bold rounded-2xl transition-all flex items-center justify-center gap-2 ${
+                className={`w-full py-4 font-bold rounded-2xl transition-all flex items-center justify-center gap-2 uppercase tracking-widest text-[9px] ${
                   isDawn 
-                    ? "bg-[var(--surface)] border border-[var(--surface-border)] text-[var(--theme-ui-subtext)] hover:text-orange-500 uppercase tracking-widest text-xs" 
+                    ? "bg-[var(--surface)] border border-[var(--surface-border)] text-[var(--theme-ui-subtext)] hover:text-orange-500" 
                     : "bg-orange-500 text-white shadow-lg shadow-orange-500/20 active:scale-95"
                 }`}
               >
@@ -470,9 +470,9 @@ export default function PracticePage() {
             {mode === "result" && (
               <button
                 onClick={() => router.push("/chapter")}
-                className={`w-full py-4 font-bold rounded-2xl transition-all ${
+                className={`w-full py-4 font-bold rounded-2xl transition-all uppercase tracking-widest text-[9px] ${
                   isDawn
-                    ? "bg-[var(--surface)] border border-[var(--surface-border)] text-[var(--theme-ui-subtext)] hover:text-orange-500 uppercase tracking-widest text-xs"
+                    ? "bg-[var(--surface)] border border-[var(--surface-border)] text-[var(--theme-ui-subtext)] hover:text-orange-500"
                     : "bg-orange-500 text-white shadow-lg shadow-orange-500/20"
                 }`}
               >
