@@ -216,7 +216,7 @@ export default function PracticePage() {
         </button>
         <div className="text-center">
           <h1 className="text-sm font-bold uppercase tracking-widest text-orange-500">
-            {mode === "read" ? "Read Mode" : mode === "cloze" ? "Cloze Mode" : mode === "type" ? "Recall Mode" : mode === "recite" ? "Recite Mode" : "Results"}
+            {isFlowMode ? "Flow Mode" : mode === "read" ? "Read Mode" : mode === "cloze" ? "Cloze Mode" : mode === "type" ? "Recall Mode" : mode === "recite" ? "Recite Mode" : "Results"}
           </h1>
           <p className="text-[10px] text-zinc-500 uppercase tracking-tight">
             Verses {activeChunk?.verseRange} • {chapter?.title}
@@ -275,18 +275,20 @@ export default function PracticePage() {
                   ));
                 })()}
               </div>
-              <p className={`text-center transition-opacity duration-500 text-sm italic ${
-                isDawn ? "text-white" : "text-zinc-500"
-              } ${isFlowMode ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
-                Read the text carefully.
-              </p>
-              {isFlowMode && (
-                <p className={`text-center animate-in fade-in duration-1000 text-sm italic ${
+              <div className="relative h-6">
+                <p className={`absolute inset-0 text-center transition-opacity duration-500 text-sm italic ${
                   isDawn ? "text-white" : "text-zinc-500"
-                }`}>
-                  Read the text slowly and deeply.
+                } ${isFlowMode ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+                  Read the text carefully.
                 </p>
-              )}
+                {isFlowMode && (
+                  <p className={`absolute inset-0 text-center animate-in fade-in duration-1000 text-sm italic ${
+                    isDawn ? "text-white" : "text-zinc-500"
+                  }`}>
+                    Read the text slowly and deeply.
+                  </p>
+                )}
+              </div>
             </div>
           </div>
         )}
