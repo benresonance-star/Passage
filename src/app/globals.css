@@ -29,6 +29,25 @@
   --theme-text: #433422;
 }
 
+[data-theme='night-dusk'] {
+  --surface: #1a1816;
+  --surface-border: #2d2a26;
+  --theme-ui-bg: #121110;
+  --theme-ui-border: #2d2a26;
+  --theme-ui-subtext: #8c7e6e;
+  --theme-text: #f2e8d5;
+  
+  /* Flow specific */
+  --flow-read: #f2e8d5;
+  --flow-unread: rgba(242, 232, 213, 0.2);
+  --flow-glow: 0 0 20px rgba(255, 184, 108, 0.25);
+
+  /* Button overrides */
+  --btn-surface: #2d2a26;
+  --btn-border: #4a453e;
+  --btn-text: #f2e8d5;
+}
+
 [data-theme='dawn'] {
   --surface: rgba(0, 0, 0, 0.3);
   --surface-border: rgba(255, 255, 255, 0.1);

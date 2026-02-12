@@ -11,6 +11,7 @@ const THEME_PRESETS = [
   { name: "OLED", bg: "#000000", text: "#f4f4f5" },
   { name: "Midnight", bg: "#0f172a", text: "#e2e8f0" },
   { name: "Sepia", bg: "#fdf6e3", text: "#433422" },
+  { name: "Night Dusk", bg: "#1a1816", text: "#f2e8d5", id: "night-dusk" },
   { name: "Classic", bg: "#18181b", text: "#d4d4d8" },
   { name: "Dawn", bg: "#3d3566", text: "#fffcf0", id: "dawn" },
 ];
@@ -232,6 +233,9 @@ export default function ChapterPage() {
                         className="w-6 h-6 rounded-full border border-white/10 shadow-inner flex-shrink-0"
                         style={p.id === "dawn" ? {
                           background: "linear-gradient(180deg, #3d3566 0%, #dabb8e 50%, #5a8090 100%)"
+                        } : p.id === "night-dusk" ? {
+                          background: "linear-gradient(180deg, #1a1816 0%, #2d2a26 100%)",
+                          backgroundColor: "#1a1816"
                         } : {
                           backgroundColor: p.bg
                         }}
