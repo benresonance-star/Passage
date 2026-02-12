@@ -133,7 +133,21 @@ export default function ReviewPage() {
                   Practice
                 </button>
                 <button
-                  onClick={() => setActiveAndNavigate(chunk.id, "/recite")}
+                  onClick={() => {
+                    setState(prev => ({
+                      ...prev,
+                      settings: {
+                        ...prev.settings,
+                        activeChunkId: {
+                          ...prev.settings.activeChunkId,
+                          [chapterId]: chunk.id
+                        }
+                      }
+                    }));
+                    router.push("/practice");
+                    // We'll let PracticePage handle the initial mode via state if needed,
+                    // but for now it defaults to read mode which has the Recite button.
+                  }}
                   className="flex items-center justify-center gap-2 py-3 bg-[var(--surface-alt)] text-white text-sm font-bold rounded-xl active:scale-95 transition-transform border border-[var(--surface-border)]"
                 >
                   <Mic size={16} />

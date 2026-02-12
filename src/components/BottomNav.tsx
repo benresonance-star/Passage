@@ -9,7 +9,6 @@ const NAV_ITEMS = [
   { label: "Chapter", href: "/chapter", icon: BookOpen },
   { label: "Soak", href: "/soak", icon: Droplets },
   { label: "Practice", href: "/practice", icon: Play },
-  { label: "Recite", href: "/recite", icon: Mic },
   { label: "Review", href: "/review", icon: RefreshCw },
 ];
 
@@ -27,7 +26,7 @@ export function BottomNav({ isDawn = false }: { isDawn?: boolean }) {
           ? "bg-white border-t border-zinc-200"
           : "bg-[var(--surface)] border-t border-[var(--surface-border)]"
     }`}>
-      <div className="grid grid-cols-5 h-16 px-2">
+      <div className="grid grid-cols-4 h-16 px-2">
         {NAV_ITEMS.map(({ label, href, icon: Icon }) => {
           const isActive = pathname === href;
           const isPracticeItem = href !== "/chapter" && href !== "/";

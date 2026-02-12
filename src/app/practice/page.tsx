@@ -9,11 +9,12 @@ import { updateCard } from "@/lib/scheduler";
 import { calculateUpdatedStreak } from "@/lib/streak";
 import { useWakeLock } from "@/hooks/useWakeLock";
 import { useAuth } from "@/context/AuthContext";
+import { splitIntoLines } from "@/lib/parser";
 import FlowControls from "@/components/FlowControls";
-import { ArrowLeft, RefreshCw, CheckCircle2, AlertCircle, Zap, EyeOff } from "lucide-react";
+import { ArrowLeft, RefreshCw, CheckCircle2, Zap, EyeOff, Eye, Mic } from "lucide-react";
 import { EmptyState } from "@/components/EmptyState";
 
-type PracticeMode = "read" | "cloze" | "type" | "result";
+type PracticeMode = "read" | "cloze" | "type" | "result" | "recite";
 
 export default function PracticePage() {
   const { state, setState, isHydrated, syncProgress } = useBCM();
@@ -24,6 +25,10 @@ export default function PracticePage() {
   const [typedText, setTypedText] = useState("");
   const [diffResults, setDiffResults] = useState<{ results: DiffResult[]; accuracy: number } | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Recite State
+  const [revealedLines, setRevealedLines] = useState<Set<number>>(new Set());
+  const [isGraded, setIsGraded] = useState(false);
 
   // Auto-grow textarea
   useEffect(() => {
@@ -51,6 +56,13 @@ export default function PracticePage() {
   const activeChunk = chapter?.chunks.find(c => c.id === activeChunkId);
   const words = activeChunk?.text.split(/\s+/).filter(w => w.length > 0) || [];
   
+  const scriptureText = activeChunk?.verses
+    .filter(v => v.type === "scripture")
+    .map(v => v.text)
+    .join(" ") || "";
+  const lines = scriptureText ? splitIntoLines(scriptureText) : [];
+  const isAllRevealed = revealedLines.size === lines.length && lines.length > 0;
+
   const currentTheme = state.settings.theme || { bg: "#000000", text: "#f4f4f5" };
   const isDawn = currentTheme.id === "dawn";
 
@@ -62,6 +74,8 @@ export default function PracticePage() {
       setDiffResults(null);
       setCurrentIndex(-1);
       setIsPlaying(false);
+      setRevealedLines(new Set());
+      setIsGraded(false);
     };
 
     window.addEventListener("bcm-reset-practice", handleReset);
@@ -116,6 +130,40 @@ export default function PracticePage() {
   if (!isHydrated) return null;
   if (!chapter || !chapterId || !activeChunk) return <EmptyState />;
 
+  const handleGrade = async (score: number) => {
+    const currentCard = state.cards[chapterId]?.[activeChunk.id];
+    if (currentCard) {
+      const updatedCard = updateCard(currentCard, score);
+      
+      setState(prev => {
+        const stats = prev.stats[chapterId] || { streak: 0, lastActivity: null };
+        const newStreak = calculateUpdatedStreak(stats.streak, stats.lastActivity);
+
+        return {
+          ...prev,
+          cards: {
+            ...prev.cards,
+            [chapterId]: {
+              ...prev.cards[chapterId],
+              [activeChunk.id]: updatedCard
+            }
+          },
+          stats: {
+            ...prev.stats,
+            [chapterId]: {
+              streak: newStreak,
+              lastActivity: new Date().toISOString()
+            }
+          }
+        };
+      });
+
+      if (user && chapter) {
+        await syncProgress(chapter.title, activeChunk.id, updatedCard);
+      }
+    }
+  };
+
   const handleNextMode = async () => {
     if (mode === "read") setMode("cloze");
     else if (mode === "cloze") setMode("type");
@@ -124,39 +172,7 @@ export default function PracticePage() {
       const results = calculateDiff(activeChunk.text, typedText);
       setDiffResults(results);
       setMode("result");
-
-      const currentCard = state.cards[chapterId]?.[activeChunk.id];
-      if (currentCard) {
-        const score = results.accuracy / 100;
-        const updatedCard = updateCard(currentCard, score);
-        
-        setState(prev => {
-          const stats = prev.stats[chapterId] || { streak: 0, lastActivity: null };
-          const newStreak = calculateUpdatedStreak(stats.streak, stats.lastActivity);
-
-          return {
-            ...prev,
-            cards: {
-              ...prev.cards,
-              [chapterId]: {
-                ...prev.cards[chapterId],
-                [activeChunk.id]: updatedCard
-              }
-            },
-            stats: {
-              ...prev.stats,
-              [chapterId]: {
-                streak: newStreak,
-                lastActivity: new Date().toISOString()
-              }
-            }
-          };
-        });
-
-        if (user && chapter) {
-          await syncProgress(chapter.title, activeChunk.id, updatedCard);
-        }
-      }
+      await handleGrade(results.accuracy / 100);
     }
   };
 
@@ -168,11 +184,29 @@ export default function PracticePage() {
       return;
     }
     if (mode === "cloze") setMode("read");
+    else if (mode === "recite") setMode("read");
     else if (mode === "type") setMode("cloze");
     else if (mode === "result") setMode("type");
     else router.push("/chapter");
   };
 
+  const toggleLine = (index: number) => {
+    const newRevealed = new Set(revealedLines);
+    if (newRevealed.has(index)) {
+      newRevealed.delete(index);
+    } else {
+      newRevealed.add(index);
+    }
+    setRevealedLines(newRevealed);
+  };
+
+  const handleRevealToggle = () => {
+    if (isAllRevealed) {
+      setRevealedLines(new Set());
+    } else {
+      setRevealedLines(new Set(lines.map((_, i) => i)));
+    }
+  };
 
   return (
     <div className="flex flex-col h-[calc(100dvh-64px-env(safe-area-inset-bottom))] max-w-2xl mx-auto relative">
@@ -182,13 +216,19 @@ export default function PracticePage() {
         </button>
         <div className="text-center">
           <h1 className="text-sm font-bold uppercase tracking-widest text-orange-500">
-            {mode === "read" ? "Read Mode" : mode === "cloze" ? "Cloze Mode" : mode === "type" ? "Recall Mode" : "Results"}
+            {mode === "read" ? "Read Mode" : mode === "cloze" ? "Cloze Mode" : mode === "type" ? "Recall Mode" : mode === "recite" ? "Recite Mode" : "Results"}
           </h1>
           <p className="text-[10px] text-zinc-500 uppercase tracking-tight">
             Verses {activeChunk?.verseRange} • {chapter?.title}
           </p>
         </div>
-        <div className="w-10" />
+        {mode === "recite" ? (
+          <button onClick={handleRevealToggle} className="text-zinc-500 p-2 -mr-2">
+            {isAllRevealed ? <EyeOff size={20} /> : <Eye size={20} />}
+          </button>
+        ) : (
+          <div className="w-10" />
+        )}
       </header>
 
       <div className={`flex-1 overflow-y-auto scrollbar-hide flex flex-col ${mode === "type" ? "justify-start pt-12" : "justify-center"}`}>
@@ -197,10 +237,7 @@ export default function PracticePage() {
             <div className="space-y-6">
               <div className="chunk-text-bold text-center leading-relaxed px-4">
                 {(() => {
-                  // Single-layer rendering: each word is individually colored
-                  // based on flow progress — no overlay, no alignment drift.
                   let globalWordIdx = 0;
-
                   return activeChunk.verses.map((v, idx) => (
                     <span key={idx} className={v.type === "heading" ? "block" : "inline"}>
                       {v.type === "heading" ? (
@@ -238,12 +275,35 @@ export default function PracticePage() {
                   ));
                 })()}
               </div>
-              
               <p className={`text-center transition-opacity duration-500 text-sm italic ${
                 isDawn ? "text-white" : "text-zinc-500"
               } ${isFlowMode ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
                 Read the text carefully.
               </p>
+            </div>
+          </div>
+        )}
+
+        {mode === "recite" && (
+          <div className="space-y-4 py-8 px-4 animate-in fade-in duration-500">
+            <div className="text-center mb-8">
+              <h2 className="text-xl font-bold">Recite out loud.</h2>
+              <p className={`text-sm ${isDawn ? "text-white/60" : "text-zinc-500"}`}>Tap lines to reveal.</p>
+            </div>
+            <div className="space-y-3">
+              {lines.map((line, i) => (
+                <div
+                  key={i}
+                  onClick={() => toggleLine(i)}
+                  className={`p-4 rounded-xl transition-all duration-300 cursor-pointer border ${
+                    revealedLines.has(i)
+                      ? "bg-[var(--theme-ui-bg)] shadow-lg border-[var(--theme-ui-border)]"
+                      : "bg-[var(--theme-ui-bg)] text-transparent border-transparent opacity-40"
+                  }`}
+                >
+                  <p className="text-lg leading-relaxed select-none">{line}</p>
+                </div>
+              ))}
             </div>
           </div>
         )}
@@ -282,7 +342,6 @@ export default function PracticePage() {
                 </div>
                 <div className="text-[var(--theme-ui-subtext)] text-sm">Accuracy</div>
               </div>
-
               <div className="flex flex-wrap gap-x-2 gap-y-1 chunk-text-bold leading-relaxed">
                 {diffResults.results
                   .filter(res => res.status !== "extra")
@@ -302,7 +361,6 @@ export default function PracticePage() {
                   ))}
               </div>
             </div>
-
             <button
               onClick={() => {
                 setTypedText("");
@@ -319,19 +377,26 @@ export default function PracticePage() {
 
       <div className="py-8 space-y-4 px-4 flex-shrink-0">
         {mode === "read" && !isFlowMode ? (
-          <div className="flex gap-3">
+          <div className="flex gap-2">
             <button
               onClick={() => setIsFlowMode(true)}
-              className="flex-1 py-4 bg-[var(--surface)] border border-[var(--surface-border)] text-[var(--theme-ui-subtext)] font-bold rounded-2xl flex items-center justify-center gap-2 hover:text-orange-500 transition-all uppercase tracking-widest text-xs"
+              className="flex-1 py-4 bg-[var(--surface)] border border-[var(--surface-border)] text-[var(--theme-ui-subtext)] font-bold rounded-2xl flex flex-col items-center justify-center gap-1 hover:text-orange-500 transition-all uppercase tracking-widest text-[9px]"
             >
               <Zap size={16} className="fill-current" />
               Flow
             </button>
             <button
+              onClick={() => setMode("recite")}
+              className="flex-1 py-4 bg-[var(--surface)] border border-[var(--surface-border)] text-[var(--theme-ui-subtext)] font-bold rounded-2xl flex flex-col items-center justify-center gap-1 hover:text-orange-500 transition-all uppercase tracking-widest text-[9px]"
+            >
+              <Mic size={16} />
+              Recite
+            </button>
+            <button
               onClick={handleNextMode}
-              className={`flex-1 py-4 font-bold rounded-2xl transition-all flex items-center justify-center gap-2 ${
+              className={`flex-1 py-4 font-bold rounded-2xl transition-all flex flex-col items-center justify-center gap-1 ${
                 isDawn 
-                  ? "bg-[var(--surface)] border border-[var(--surface-border)] text-[var(--theme-ui-subtext)] hover:text-orange-500 uppercase tracking-widest text-xs" 
+                  ? "bg-[var(--surface)] border border-[var(--surface-border)] text-[var(--theme-ui-subtext)] hover:text-orange-500 uppercase tracking-widest text-[9px]" 
                   : "bg-orange-500 text-white shadow-lg shadow-orange-500/20 active:scale-95"
               }`}
             >
@@ -388,14 +453,17 @@ export default function PracticePage() {
 
             {mode !== "result" && mode !== "read" && (
               <button
-                onClick={handleNextMode}
+                onClick={mode === "recite" ? async () => {
+                  if (!isGraded) await handleGrade(0.75);
+                  router.push("/chapter");
+                } : handleNextMode}
                 className={`w-full py-4 font-bold rounded-2xl transition-all flex items-center justify-center gap-2 ${
                   isDawn 
                     ? "bg-[var(--surface)] border border-[var(--surface-border)] text-[var(--theme-ui-subtext)] hover:text-orange-500 uppercase tracking-widest text-xs" 
                     : "bg-orange-500 text-white shadow-lg shadow-orange-500/20 active:scale-95"
                 }`}
               >
-                {mode === "cloze" ? "Type It" : "Submit"}
+                {mode === "cloze" ? "Type It" : mode === "recite" ? "Done" : "Submit"}
               </button>
             )}
             
