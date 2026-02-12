@@ -116,11 +116,33 @@ export default function ReviewPage() {
                       Verse {chunk.verseRange}
                     </span>
                   </div>
-                  <p className={`text-sm mt-2 leading-relaxed transition-colors ${
+                  <div className={`text-sm mt-2 leading-relaxed transition-colors ${
                     isMemorised ? "text-[var(--chunk-memorised)]" : "text-[var(--theme-text)]"
                   }`}>
-                    {chunk.text}
-                  </p>
+                    {chunk.verses.map((v, idx) => (
+                      <span key={idx} className={v.type === "heading" ? "block text-center" : "inline"}>
+                        {v.type === "heading" ? (
+                          state.settings.showHeadings && (
+                            <span className="text-[10px] font-bold uppercase tracking-wider block my-2 opacity-50">
+                              {v.text}
+                            </span>
+                          )
+                        ) : (
+                          <span className="inline-block mr-1.5">
+                            <span className="text-[10px] align-top opacity-40 mr-1 italic font-normal">
+                              {v.number}
+                            </span>
+                            {v.text.split("[LINEBREAK]").map((line, i) => (
+                              <span key={i}>
+                                {i > 0 && <br />}
+                                {line}
+                              </span>
+                            ))}
+                          </span>
+                        )}
+                      </span>
+                    ))}
+                  </div>
                 </div>
               </div>
 
