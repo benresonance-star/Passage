@@ -387,21 +387,27 @@ export default function PracticePage() {
           <div className="flex gap-2">
             <button
               onClick={() => setIsFlowMode(true)}
-              className="flex-1 py-4 font-bold rounded-2xl flex flex-col items-center justify-center gap-1 transition-all uppercase tracking-widest text-[11px] bg-[var(--surface)] border border-[var(--surface-border)] text-[var(--theme-text)] hover:text-orange-500"
+              className={`flex-1 py-4 font-bold rounded-2xl flex flex-col items-center justify-center gap-1 transition-all uppercase tracking-widest bg-[var(--surface)] border border-[var(--surface-border)] text-[var(--theme-text)] hover:text-orange-500 ${
+                isDawn ? "text-[13px]" : "text-[11px]"
+              }`}
             >
               <Zap size={16} className="fill-current" />
               FLOW
             </button>
             <button
               onClick={() => setMode("recite")}
-              className="flex-1 py-4 font-bold rounded-2xl flex flex-col items-center justify-center gap-1 transition-all uppercase tracking-widest text-[11px] bg-[var(--surface)] border border-[var(--surface-border)] text-[var(--theme-text)] hover:text-orange-500"
+              className={`flex-1 py-4 font-bold rounded-2xl flex flex-col items-center justify-center gap-1 transition-all uppercase tracking-widest bg-[var(--surface)] border border-[var(--surface-border)] text-[var(--theme-text)] hover:text-orange-500 ${
+                isDawn ? "text-[13px]" : "text-[11px]"
+              }`}
             >
               <Mic size={16} />
               RECITE
             </button>
             <button
               onClick={handleNextMode}
-              className="flex-1 py-4 font-bold rounded-2xl transition-all flex flex-col items-center justify-center gap-1 uppercase tracking-widest text-[11px] bg-[var(--surface)] border border-[var(--surface-border)] text-[var(--theme-text)] hover:text-orange-500"
+              className={`flex-1 py-4 font-bold rounded-2xl transition-all flex flex-col items-center justify-center gap-1 uppercase tracking-widest bg-[var(--surface)] border border-[var(--surface-border)] text-[var(--theme-text)] hover:text-orange-500 ${
+                isDawn ? "text-[13px]" : "text-[11px]"
+              }`}
             >
               <EyeOff size={16} className="fill-current" />
               CLOZE
@@ -415,7 +421,9 @@ export default function PracticePage() {
                   <button
                     key={level}
                     onClick={() => setState(p => ({ ...p, settings: { ...p.settings, clozeLevel: level } }))}
-                    className={`flex-1 py-2 rounded-xl text-[11px] font-bold transition-all active:scale-95 ${
+                    className={`flex-1 py-2 rounded-xl font-bold transition-all active:scale-95 ${
+                      isDawn ? "text-[13px]" : "text-[11px]"
+                    } ${
                       state.settings.clozeLevel === level 
                         ? (isDawn ? "bg-white text-black shadow-lg shadow-white/20" : "bg-orange-500 text-white shadow-lg shadow-orange-500/20")
                         : (isDawn ? "bg-white/10 text-white border border-white/20" : "bg-[var(--surface)] text-[var(--theme-ui-subtext)] border border-[var(--surface-border)]")
@@ -426,7 +434,9 @@ export default function PracticePage() {
                 ))}
                 <button
                   onClick={() => setState(p => ({ ...p, settings: { ...p.settings, clozeLevel: "mnemonic" } }))}
-                  className={`flex-1 py-2 rounded-xl text-[11px] font-bold transition-all active:scale-95 uppercase tracking-widest ${
+                  className={`flex-1 py-2 rounded-xl font-bold transition-all active:scale-95 uppercase tracking-widest ${
+                    isDawn ? "text-[13px]" : "text-[11px]"
+                  } ${
                     state.settings.clozeLevel === "mnemonic" 
                       ? (isDawn ? "bg-[#FFCB1F] text-black shadow-lg shadow-[#FFCB1F]/20" : "bg-amber-500 text-black shadow-lg shadow-amber-500/20")
                       : (isDawn ? "bg-white/10 text-white border border-white/20" : "bg-[var(--surface)] text-[var(--theme-ui-subtext)] border border-[var(--surface-border)]")
@@ -460,7 +470,9 @@ export default function PracticePage() {
                   if (!isGraded) await handleGrade(0.75);
                   router.push("/chapter");
                 } : handleNextMode}
-                className="w-full py-4 font-bold rounded-2xl transition-all flex items-center justify-center gap-2 uppercase tracking-widest text-[11px] bg-[var(--surface)] border border-[var(--surface-border)] text-[var(--theme-text)] hover:text-orange-500"
+                className={`w-full py-4 font-bold rounded-2xl transition-all flex items-center justify-center gap-2 uppercase tracking-widest bg-[var(--surface)] border border-[var(--surface-border)] text-[var(--theme-text)] hover:text-orange-500 ${
+                  isDawn ? "text-[13px]" : "text-[11px]"
+                }`}
               >
                 {mode === "cloze" ? "Type It" : mode === "recite" ? "Done" : "Submit"}
               </button>
@@ -469,7 +481,9 @@ export default function PracticePage() {
             {mode === "result" && (
               <button
                 onClick={() => router.push("/chapter")}
-                className="w-full py-4 font-bold rounded-2xl transition-all uppercase tracking-widest text-[11px] bg-[var(--surface)] border border-[var(--surface-border)] text-[var(--theme-text)] hover:text-orange-500"
+                className={`w-full py-4 font-bold rounded-2xl transition-all uppercase tracking-widest bg-[var(--surface)] border border-[var(--surface-border)] text-[var(--theme-text)] hover:text-orange-500 ${
+                  isDawn ? "text-[13px]" : "text-[11px]"
+                }`}
               >
                 Continue
               </button>
