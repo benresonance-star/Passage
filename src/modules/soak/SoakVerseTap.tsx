@@ -358,11 +358,14 @@ export function SoakVerseTap({
   return (
     <div
       ref={bgRef}
-      data-testid="soak-breathe"
-      className="soak-breathe"
+      data-testid="soak-breathe-container"
+      className="fixed inset-0 overflow-hidden"
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
     >
+      {/* Background layer — handles over-bleed and breathing animation */}
+      <div className="soak-breathe" data-testid="soak-breathe-bg" />
+
       {/* Click zones — desktop mouse navigation only */}
       <div
         className="fixed inset-0 z-[51] flex"
