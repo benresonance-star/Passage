@@ -22,6 +22,7 @@ export default function ChapterPage() {
   const [showThemeModal, setShowThemeModal] = useState(false);
   const longPressTimer = useRef<NodeJS.Timeout | null>(null);
   const touchStartPos = useRef<{ x: number, y: number } | null>(null);
+  const isLongPressActive = useRef(false);
 
   const chapterId = state.selectedChapterId;
   const chapter = chapterId ? state.chapters[chapterId] : null;
@@ -68,9 +69,12 @@ export default function ChapterPage() {
     if (e && 'touches' in e) {
       touchStartPos.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
     }
+    
+    isLongPressActive.current = false;
 
     longPressTimer.current = setTimeout(() => {
       setActiveChunk(chunkId);
+      isLongPressActive.current = true;
       // Optional: trigger haptic feedback if available
       if (window.navigator && window.navigator.vibrate) {
         window.navigator.vibrate(50);
@@ -343,6 +347,10 @@ export default function ChapterPage() {
                                     key={pIdx}
                                     onClick={(e) => {
                                       e.stopPropagation();
+                                      if (isLongPressActive.current) {
+                                        isLongPressActive.current = false;
+                                        return;
+                                      }
                                       toggleWordHighlight(part);
                                     }}
                                     className={`cursor-pointer rounded-sm px-0.5 -mx-0.5 ${
