@@ -23,6 +23,7 @@ export default function ChapterPage() {
   const longPressTimer = useRef<NodeJS.Timeout | null>(null);
   const touchStartPos = useRef<{ x: number, y: number } | null>(null);
   const isLongPressActive = useRef(false);
+  const wordTouchStartTime = useRef<number>(0);
 
   const chapterId = state.selectedChapterId;
   const chapter = chapterId ? state.chapters[chapterId] : null;
@@ -345,15 +346,32 @@ export default function ChapterPage() {
                                 return (
                                   <span
                                     key={pIdx}
+                                    onTouchStart={(e) => {
+                                      // Don't stopPropagation here to allow chunk long-press
+                                      wordTouchStartTime.current = Date.now();
+                                    }}
+                                    onTouchEnd={(e) => {
+                                      const duration = Date.now() - wordTouchStartTime.current;
+                                      if (duration < 500 && !isLongPressActive.current) {
+                                        e.preventDefault(); // Prevent ghost click
+                                        e.stopPropagation();
+                                        toggleWordHighlight(part);
+                                      }
+                                    }}
                                     onClick={(e) => {
-                                      e.stopPropagation();
+                                      // Fallback for mouse users
                                       if (isLongPressActive.current) {
                                         isLongPressActive.current = false;
                                         return;
                                       }
-                                      toggleWordHighlight(part);
+                                      // If touch events already handled it, this might still fire
+                                      // but toggleWordHighlight is idempotent in its effect (toggles back)
+                                      // so we only call it if it wasn't a touch interaction
+                                      if (e.detail !== 0) { // detail is 0 for synthetic clicks
+                                        toggleWordHighlight(part);
+                                      }
                                     }}
-                                    className={`cursor-pointer rounded-sm px-0.5 -mx-0.5 ${
+                                    className={`cursor-pointer rounded-sm px-0.5 -mx-0.5 touch-manipulation ${
                                       isHighlighted 
                                         ? "text-[#FFCB1F] font-black" 
                                         : "hover:bg-white/5 transition-colors duration-300"
