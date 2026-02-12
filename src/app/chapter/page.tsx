@@ -84,8 +84,8 @@ export default function ChapterPage() {
     const dx = Math.abs(touch.clientX - touchStartPos.current.x);
     const dy = Math.abs(touch.clientY - touchStartPos.current.y);
 
-    // If moved more than 10px, cancel the long press
-    if (dx > 10 || dy > 10) {
+    // If moved more than 20px, cancel the long press
+    if (dx > 20 || dy > 20) {
       handleLongPressEnd();
     }
   };
@@ -154,7 +154,7 @@ export default function ChapterPage() {
   const isIPhone = typeof window !== "undefined" && /iPhone/.test(navigator.userAgent);
 
   return (
-    <div className="flex flex-col h-screen max-h-[100dvh]">
+    <div className="fixed inset-0 flex flex-col bg-inherit">
       <header className={`sticky top-0 backdrop-blur-md pt-[env(safe-area-inset-top)] pb-2 z-10 ${isDawn ? "bg-transparent border-b border-transparent" : "bg-inherit border-b border-white/10"}`}>
         <div className="px-4 pt-2 flex justify-between items-start">
           <div>
@@ -274,7 +274,7 @@ export default function ChapterPage() {
         </div>
       )}
 
-      <div className="flex-1 overflow-y-auto px-4 pt-8 pb-safe space-y-8 scrollbar-hide">
+      <div className="flex-1 overflow-y-auto px-4 pt-8 pb-safe space-y-8 scrollbar-hide ios-scroll-container">
         <div className="pb-20">
           {chapter.chunks.map((chunk) => {
             const isActive = activeChunkId === chunk.id;
@@ -341,10 +341,10 @@ export default function ChapterPage() {
                                       e.stopPropagation();
                                       toggleWordHighlight(part);
                                     }}
-                                    className={`cursor-pointer transition-all duration-300 rounded-sm px-0.5 -mx-0.5 ${
+                                    className={`cursor-pointer rounded-sm px-0.5 -mx-0.5 ${
                                       isHighlighted 
                                         ? "text-[#FFCB1F] font-black" 
-                                        : "hover:bg-white/5"
+                                        : "hover:bg-white/5 transition-colors duration-300"
                                     }`}
                                     style={isHighlighted ? { 
                                       fontWeight: 900,
