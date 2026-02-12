@@ -429,8 +429,8 @@ export default function PracticePage() {
                     onClick={() => setState(p => ({ ...p, settings: { ...p.settings, clozeLevel: level } }))}
                     className={`flex-1 py-2 rounded-xl text-[10px] font-bold transition-all active:scale-95 ${
                       state.settings.clozeLevel === level 
-                        ? "bg-orange-500 text-white shadow-lg shadow-orange-500/20" 
-                        : "bg-[var(--surface)] text-[var(--theme-ui-subtext)] border border-[var(--surface-border)]"
+                        ? (isDawn ? "bg-white text-black shadow-lg shadow-white/20" : "bg-orange-500 text-white shadow-lg shadow-orange-500/20")
+                        : (isDawn ? "bg-white/10 text-white border border-white/20" : "bg-[var(--surface)] text-[var(--theme-ui-subtext)] border border-[var(--surface-border)]")
                     }`}
                   >
                     {level}%
@@ -440,8 +440,8 @@ export default function PracticePage() {
                   onClick={() => setState(p => ({ ...p, settings: { ...p.settings, clozeLevel: "mnemonic" } }))}
                   className={`flex-1 py-2 rounded-xl text-[10px] font-bold transition-all active:scale-95 uppercase tracking-widest ${
                     state.settings.clozeLevel === "mnemonic" 
-                      ? "bg-amber-500 text-black shadow-lg shadow-amber-500/20" 
-                      : "bg-[var(--surface)] text-[var(--theme-ui-subtext)] border border-[var(--surface-border)]"
+                      ? (isDawn ? "bg-[#FFCB1F] text-black shadow-lg shadow-[#FFCB1F]/20" : "bg-amber-500 text-black shadow-lg shadow-amber-500/20")
+                      : (isDawn ? "bg-white/10 text-white border border-white/20" : "bg-[var(--surface)] text-[var(--theme-ui-subtext)] border border-[var(--surface-border)]")
                   }`}
                 >
                   Abc
