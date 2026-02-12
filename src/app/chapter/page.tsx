@@ -24,6 +24,7 @@ export default function ChapterPage() {
   const touchStartPos = useRef<{ x: number, y: number } | null>(null);
   const isLongPressActive = useRef(false);
   const wordTouchStartTime = useRef<number>(0);
+  const isLongPressTriggered = useRef(false);
 
   const chapterId = state.selectedChapterId;
   const chapter = chapterId ? state.chapters[chapterId] : null;
@@ -72,10 +73,12 @@ export default function ChapterPage() {
     }
     
     isLongPressActive.current = false;
+    isLongPressTriggered.current = false;
 
     longPressTimer.current = setTimeout(() => {
       setActiveChunk(chunkId);
       isLongPressActive.current = true;
+      isLongPressTriggered.current = true;
       // Optional: trigger haptic feedback if available
       if (window.navigator && window.navigator.vibrate) {
         window.navigator.vibrate(50);
@@ -352,9 +355,24 @@ export default function ChapterPage() {
                                     }}
                                     onTouchEnd={(e) => {
                                       const duration = Date.now() - wordTouchStartTime.current;
-                                      if (duration < 500 && !isLongPressActive.current) {
+                                      // If the long press timer already fired, don't highlight
+                                      if (isLongPressTriggered.current) {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        isLongPressTriggered.current = false; // Reset for next touch
+                                        return;
+                                      }
+
+                                      if (duration < 500) {
                                         e.preventDefault(); // Prevent ghost click
                                         e.stopPropagation();
+                                        
+                                        // Also cancel the parent's long press timer since this was a tap
+                                        if (longPressTimer.current) {
+                                          clearTimeout(longPressTimer.current);
+                                          longPressTimer.current = null;
+                                        }
+                                        
                                         toggleWordHighlight(part);
                                       }
                                     }}
@@ -364,10 +382,8 @@ export default function ChapterPage() {
                                         isLongPressActive.current = false;
                                         return;
                                       }
-                                      // If touch events already handled it, this might still fire
-                                      // but toggleWordHighlight is idempotent in its effect (toggles back)
-                                      // so we only call it if it wasn't a touch interaction
-                                      if (e.detail !== 0) { // detail is 0 for synthetic clicks
+                                      // If touch events already handled it, e.detail will be 0 or handled
+                                      if (e.detail !== 0) {
                                         toggleWordHighlight(part);
                                       }
                                     }}
