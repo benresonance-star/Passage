@@ -116,7 +116,7 @@ export default function ReviewPage() {
                       Verse {chunk.verseRange}
                     </span>
                   </div>
-                  <div className={`text-sm mt-2 leading-relaxed transition-colors ${
+                  <div className={`mastery-text mt-2 leading-relaxed transition-colors ${
                     isMemorised ? "text-[var(--chunk-memorised)]" : "text-[var(--theme-text)]"
                   }`}>
                     {chunk.verses.map((v, idx) => (

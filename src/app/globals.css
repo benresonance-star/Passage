@@ -107,6 +107,15 @@
   html[data-dawn] .chunk-text-bold {
     font-size: 22.5px;
   }
+
+  .mastery-text {
+    font-size: 17px;
+    line-height: 1.625;
+  }
+
+  html[data-dawn] .mastery-text {
+    font-size: 19px;
+  }
 }
 
 /* ─── Dawn Theme — Breathing Gradient Background ─────────────────── */
