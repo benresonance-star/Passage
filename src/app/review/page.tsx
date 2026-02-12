@@ -116,7 +116,7 @@ export default function ReviewPage() {
                       Verse {chunk.verseRange}
                     </span>
                   </div>
-                  <p className={`text-sm mt-2 leading-relaxed line-clamp-2 transition-colors ${
+                  <p className={`text-sm mt-2 leading-relaxed transition-colors ${
                     isMemorised ? "text-[var(--chunk-memorised)]" : "text-[var(--theme-text)]"
                   }`}>
                     {chunk.text}
@@ -133,39 +133,18 @@ export default function ReviewPage() {
                   Practice
                 </button>
                 <button
-                  onClick={() => {
-                    setState(prev => ({
-                      ...prev,
-                      settings: {
-                        ...prev.settings,
-                        activeChunkId: {
-                          ...prev.settings.activeChunkId,
-                          [chapterId]: chunk.id
-                        }
-                      }
-                    }));
-                    router.push("/practice");
-                    // We'll let PracticePage handle the initial mode via state if needed,
-                    // but for now it defaults to read mode which has the Recite button.
-                  }}
-                  className="flex items-center justify-center gap-2 py-3 bg-[var(--surface-alt)] text-white text-sm font-bold rounded-xl active:scale-95 transition-transform border border-[var(--surface-border)]"
-                >
-                  <Mic size={16} />
-                  Recite
-                </button>
-                <button
                   onClick={(e) => {
                     e.stopPropagation();
                     handleToggleMemorised(chunk.id);
                   }}
-                  className={`col-span-2 flex items-center justify-center gap-2 py-3 text-sm font-bold rounded-xl border transition-all active:scale-95 ${
+                  className={`flex items-center justify-center gap-2 py-3 text-sm font-bold rounded-xl border transition-all active:scale-95 ${
                     isMemorised 
                       ? "bg-[var(--chunk-memorised)] text-white border-[var(--chunk-memorised)]" 
                       : "bg-[var(--surface-alt)] text-white border-[var(--surface-border)]"
                   }`}
                 >
                   <Award size={16} fill="none" />
-                  {isMemorised ? "Memorised" : "Mark Memorised"}
+                  {isMemorised ? "Memorised" : "Mark"}
                 </button>
               </div>
             </div>
