@@ -46,6 +46,13 @@ export function ThemeContent({ children }: { children: React.ReactNode }) {
     const body = document.body;
     const root = document.documentElement;
 
+    // Set data-theme for CSS selector targeting
+    if (theme.id) {
+      root.setAttribute("data-theme", theme.id);
+    } else {
+      root.removeAttribute("data-theme");
+    }
+
     // Dawn data-attribute for CSS-only rules (e.g. glass blur)
     if (isDawn) {
       root.setAttribute("data-dawn", "");

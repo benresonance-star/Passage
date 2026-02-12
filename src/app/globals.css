@@ -5,6 +5,44 @@
   --color-foreground: #f4f4f5;
 }
 
+:root {
+  /* Default / OLED / Midnight / Classic */
+  --surface: #18181b;
+  --surface-border: #27272a;
+  --theme-ui-bg: #09090b;
+  --theme-ui-border: #27272a;
+  --theme-ui-subtext: #71717a;
+  --theme-text: #f4f4f5;
+  
+  /* Flow specific */
+  --flow-read: #ffffff;
+  --flow-unread: rgba(255, 255, 255, 0.15);
+  --flow-glow: 0 0 20px rgba(255, 255, 255, 0.3);
+}
+
+[data-theme='sepia'] {
+  --surface: #fdf6e3;
+  --surface-border: #eee8d5;
+  --theme-ui-bg: #fdf6e3;
+  --theme-ui-border: #eee8d5;
+  --theme-ui-subtext: #93a1a1;
+  --theme-text: #433422;
+}
+
+[data-theme='dawn'] {
+  --surface: rgba(0, 0, 0, 0.3);
+  --surface-border: rgba(255, 255, 255, 0.1);
+  --theme-ui-bg: rgba(255, 255, 255, 0.05);
+  --theme-ui-border: rgba(255, 255, 255, 0.1);
+  --theme-ui-subtext: rgba(255, 255, 255, 0.6);
+  --theme-text: #ffffff;
+  
+  /* Practice Button overrides for Dawn */
+  --btn-surface: rgba(0, 0, 0, 0.3);
+  --btn-border: rgba(255, 255, 255, 0.4);
+  --btn-text: #ffffff;
+}
+
 @layer base {
   @supports (padding: env(safe-area-inset-top)) {
     .pt-safe {

@@ -387,33 +387,21 @@ export default function PracticePage() {
           <div className="flex gap-2">
             <button
               onClick={() => setIsFlowMode(true)}
-              className={`flex-1 py-4 font-bold rounded-2xl flex flex-col items-center justify-center gap-1 transition-all uppercase tracking-widest text-[10px] ${
-                isDawn 
-                  ? "bg-[var(--surface)] border border-white/40 text-white hover:text-orange-500" 
-                  : "bg-[var(--surface)] border border-[var(--surface-border)] text-[var(--theme-ui-subtext)] hover:text-orange-500"
-              }`}
+              className="flex-1 py-4 font-bold rounded-2xl flex flex-col items-center justify-center gap-1 transition-all uppercase tracking-widest text-[10px] bg-[var(--surface)] border border-[var(--surface-border)] text-[var(--theme-text)] hover:text-orange-500"
             >
               <Zap size={16} className="fill-current" />
               FLOW
             </button>
             <button
               onClick={() => setMode("recite")}
-              className={`flex-1 py-4 font-bold rounded-2xl flex flex-col items-center justify-center gap-1 transition-all uppercase tracking-widest text-[10px] ${
-                isDawn 
-                  ? "bg-[var(--surface)] border border-white/40 text-white hover:text-orange-500" 
-                  : "bg-[var(--surface)] border border-[var(--surface-border)] text-[var(--theme-ui-subtext)] hover:text-orange-500"
-              }`}
+              className="flex-1 py-4 font-bold rounded-2xl flex flex-col items-center justify-center gap-1 transition-all uppercase tracking-widest text-[10px] bg-[var(--surface)] border border-[var(--surface-border)] text-[var(--theme-text)] hover:text-orange-500"
             >
               <Mic size={16} />
               RECITE
             </button>
             <button
               onClick={handleNextMode}
-              className={`flex-1 py-4 font-bold rounded-2xl transition-all flex flex-col items-center justify-center gap-1 uppercase tracking-widest text-[10px] ${
-                isDawn 
-                  ? "bg-[var(--surface)] border border-white/40 text-white hover:text-orange-500" 
-                  : "bg-[var(--surface)] border border-[var(--surface-border)] text-[var(--theme-ui-subtext)] hover:text-orange-500"
-              }`}
+              className="flex-1 py-4 font-bold rounded-2xl transition-all flex flex-col items-center justify-center gap-1 uppercase tracking-widest text-[10px] bg-[var(--surface)] border border-[var(--surface-border)] text-[var(--theme-text)] hover:text-orange-500"
             >
               <EyeOff size={16} className="fill-current" />
               CLOZE
@@ -472,11 +460,7 @@ export default function PracticePage() {
                   if (!isGraded) await handleGrade(0.75);
                   router.push("/chapter");
                 } : handleNextMode}
-                className={`w-full py-4 font-bold rounded-2xl transition-all flex items-center justify-center gap-2 uppercase tracking-widest text-[10px] ${
-                  isDawn 
-                    ? "bg-[var(--surface)] border border-white/40 text-white hover:text-orange-500" 
-                    : "bg-[var(--surface)] border border-[var(--surface-border)] text-[var(--theme-ui-subtext)] hover:text-orange-500"
-                }`}
+                className="w-full py-4 font-bold rounded-2xl transition-all flex items-center justify-center gap-2 uppercase tracking-widest text-[10px] bg-[var(--surface)] border border-[var(--surface-border)] text-[var(--theme-text)] hover:text-orange-500"
               >
                 {mode === "cloze" ? "Type It" : mode === "recite" ? "Done" : "Submit"}
               </button>
@@ -485,11 +469,7 @@ export default function PracticePage() {
             {mode === "result" && (
               <button
                 onClick={() => router.push("/chapter")}
-                className={`w-full py-4 font-bold rounded-2xl transition-all uppercase tracking-widest text-[10px] ${
-                  isDawn
-                    ? "bg-[var(--surface)] border border-white/40 text-white hover:text-orange-500"
-                    : "bg-orange-500 text-white shadow-lg shadow-orange-500/20"
-                }`}
+                className="w-full py-4 font-bold rounded-2xl transition-all uppercase tracking-widest text-[10px] bg-[var(--surface)] border border-[var(--surface-border)] text-[var(--theme-text)] hover:text-orange-500"
               >
                 Continue
               </button>
