@@ -2,31 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BookOpen, Play, Mic, Droplets, RefreshCw, Smile } from "lucide-react";
+import { BookOpen, Play, Mic, Droplets, RefreshCw } from "lucide-react";
 import { useBCM } from "@/context/BCMContext";
-
-const BlissfulFace = ({ size = 24, className = "" }: { size?: number, className?: string }) => (
-  <svg 
-    width={size} 
-    height={size} 
-    viewBox="0 0 24 24" 
-    fill="none" 
-    stroke="currentColor" 
-    strokeWidth="2" 
-    strokeLinecap="round" 
-    strokeLinejoin="round" 
-    className={className}
-  >
-    <circle cx="12" cy="12" r="10" />
-    <path d="M8 11c.5-1 1.5-1.5 2.5-1.5s2 .5 2.5 1.5" />
-    <path d="M13 11c.5-1 1.5-1.5 2.5-1.5s2 .5 2.5 1.5" />
-    <path d="M8 15c1.5 2 4.5 2 8 0" />
-  </svg>
-);
 
 const NAV_ITEMS = [
   { label: "Chapter", href: "/chapter", icon: BookOpen },
-  { label: "Soak", href: "/soak", icon: BlissfulFace },
+  { label: "Soak", href: "/soak", icon: Droplets },
   { label: "Practice", href: "/practice", icon: Play },
   { label: "Review", href: "/review", icon: RefreshCw },
 ];
