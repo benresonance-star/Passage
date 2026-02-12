@@ -280,6 +280,13 @@ export default function PracticePage() {
               } ${isFlowMode ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
                 Read the text carefully.
               </p>
+              {isFlowMode && (
+                <p className={`text-center animate-in fade-in duration-1000 text-sm italic ${
+                  isDawn ? "text-white" : "text-zinc-500"
+                }`}>
+                  Read the text slowly and deeply.
+                </p>
+              )}
             </div>
           </div>
         )}
