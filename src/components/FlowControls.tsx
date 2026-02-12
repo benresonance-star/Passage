@@ -9,6 +9,7 @@ interface FlowControlsProps {
   wpm: number;
   onWpmChange: (val: number) => void;
   onSkip: (direction: 'forward' | 'backward') => void;
+  onReset?: () => void;
   onClose: () => void;
 }
 
@@ -18,6 +19,7 @@ export default function FlowControls({
   wpm, 
   onWpmChange, 
   onSkip, 
+  onReset,
   onClose 
 }: FlowControlsProps) {
   const holdTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -29,7 +31,7 @@ export default function FlowControls({
 
   const handleBackMouseDown = () => {
     holdTimerRef.current = setTimeout(() => {
-      onClose();
+      if (onReset) onReset();
     }, 1000);
   };
 

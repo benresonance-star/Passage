@@ -455,6 +455,10 @@ export default function PracticePage() {
                   wpm={wpm}
                   onWpmChange={setWpm}
                   onSkip={(dir) => setCurrentIndex(prev => dir === 'forward' ? Math.min(words.length - 1, prev + 1) : Math.max(-1, prev - 1))}
+                  onReset={() => {
+                    setIsPlaying(false);
+                    setCurrentIndex(-1);
+                  }}
                   onClose={() => {
                     setIsFlowMode(false);
                     setIsPlaying(false);
@@ -468,7 +472,7 @@ export default function PracticePage() {
               <button
                 onClick={mode === "recite" ? async () => {
                   if (!isGraded) await handleGrade(0.75);
-                  router.push("/chapter");
+                  setMode("read");
                 } : handleNextMode}
                 className={`w-full py-4 font-bold rounded-2xl transition-all flex items-center justify-center gap-2 uppercase tracking-widest bg-[var(--surface)] border border-[var(--surface-border)] text-[var(--theme-text)] hover:text-orange-500 ${
                   isDawn ? "text-[13px]" : "text-[11px]"
