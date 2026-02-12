@@ -475,7 +475,7 @@ export default function PracticePage() {
                 className={`w-full py-4 font-bold rounded-2xl transition-all flex items-center justify-center gap-2 uppercase tracking-widest text-[10px] ${
                   isDawn 
                     ? "bg-[var(--surface)] border border-white/40 text-white hover:text-orange-500" 
-                    : "bg-orange-500 text-white shadow-lg shadow-orange-500/20 active:scale-95"
+                    : "bg-[var(--surface)] border border-[var(--surface-border)] text-[var(--theme-ui-subtext)] hover:text-orange-500"
                 }`}
               >
                 {mode === "cloze" ? "Type It" : mode === "recite" ? "Done" : "Submit"}
