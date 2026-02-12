@@ -67,8 +67,8 @@ export default function ReviewPage() {
   const effectiveActiveChunkId = activeChunkId || chapter.chunks[0]?.id;
 
   return (
-    <div className="space-y-6 pb-[calc(64px+env(safe-area-inset-bottom)+2rem)] px-4">
-      <header className="pt-[env(safe-area-inset-top)] pb-4">
+    <div className="fixed inset-0 flex flex-col bg-inherit">
+      <header className="pt-[env(safe-area-inset-top)] pb-4 px-4 flex-shrink-0">
         <h1 className="text-2xl font-bold">Chapter Mastery</h1>
         <div className="flex items-center gap-2 mt-1">
           <div className="flex-1 h-1.5 bg-[var(--surface)] rounded-full overflow-hidden border border-[var(--surface-border)]">
@@ -83,7 +83,7 @@ export default function ReviewPage() {
         </div>
       </header>
 
-      <div className="space-y-4">
+      <div className="flex-1 overflow-y-auto px-4 pb-[calc(64px+env(safe-area-inset-bottom)+2rem)] space-y-4 scrollbar-hide stable-scroll-container">
         {allChunks.map(({ chunk, card }) => {
           const isMemorised = card?.isMemorised;
           const isActive = chunk.id === effectiveActiveChunkId;
