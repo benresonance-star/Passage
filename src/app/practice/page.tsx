@@ -380,28 +380,28 @@ export default function PracticePage() {
           <div className="flex gap-2">
             <button
               onClick={() => setIsFlowMode(true)}
-              className="flex-1 py-4 bg-[var(--surface)] border border-[var(--surface-border)] text-[var(--theme-ui-subtext)] font-bold rounded-2xl flex flex-col items-center justify-center gap-1 hover:text-orange-500 transition-all uppercase tracking-widest text-[9px]"
+              className="flex-1 py-4 bg-[var(--surface)] border border-[var(--surface-border)] text-[var(--theme-ui-subtext)] font-bold rounded-2xl flex flex-col items-center justify-center gap-1 hover:text-orange-500 transition-all uppercase tracking-widest text-[8px]"
             >
               <Zap size={16} className="fill-current" />
-              Flow
+              FLOW
             </button>
             <button
               onClick={() => setMode("recite")}
-              className="flex-1 py-4 bg-[var(--surface)] border border-[var(--surface-border)] text-[var(--theme-ui-subtext)] font-bold rounded-2xl flex flex-col items-center justify-center gap-1 hover:text-orange-500 transition-all uppercase tracking-widest text-[9px]"
+              className="flex-1 py-4 bg-[var(--surface)] border border-[var(--surface-border)] text-[var(--theme-ui-subtext)] font-bold rounded-2xl flex flex-col items-center justify-center gap-1 hover:text-orange-500 transition-all uppercase tracking-widest text-[8px]"
             >
               <Mic size={16} />
-              Recite
+              RECITE
             </button>
             <button
               onClick={handleNextMode}
               className={`flex-1 py-4 font-bold rounded-2xl transition-all flex flex-col items-center justify-center gap-1 ${
                 isDawn 
-                  ? "bg-[var(--surface)] border border-[var(--surface-border)] text-[var(--theme-ui-subtext)] hover:text-orange-500 uppercase tracking-widest text-[9px]" 
+                  ? "bg-[var(--surface)] border border-[var(--surface-border)] text-[var(--theme-ui-subtext)] hover:text-orange-500 uppercase tracking-widest text-[8px]" 
                   : "bg-orange-500 text-white shadow-lg shadow-orange-500/20 active:scale-95"
               }`}
             >
               <EyeOff size={16} className="fill-current" />
-              Cloze
+              CLOZE
             </button>
           </div>
         ) : (
