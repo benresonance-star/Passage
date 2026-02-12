@@ -45,7 +45,7 @@ export default function PracticePage() {
   // Flow State
   const [currentIndex, setCurrentIndex] = useState(-1);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [wpm, setWpm] = useState(150);
+  const [wpm, setWpm] = useState(100);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   useWakeLock();
@@ -454,7 +454,7 @@ export default function PracticePage() {
                   onTogglePlay={() => setIsPlaying(!isPlaying)}
                   wpm={wpm}
                   onWpmChange={setWpm}
-                  onSkip={(dir) => setCurrentIndex(prev => dir === 'forward' ? Math.min(words.length - 1, prev + 5) : Math.max(-1, prev - 5))}
+                  onSkip={(dir) => setCurrentIndex(prev => dir === 'forward' ? Math.min(words.length - 1, prev + 1) : Math.max(-1, prev - 1))}
                   onClose={() => {
                     setIsFlowMode(false);
                     setIsPlaying(false);

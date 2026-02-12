@@ -1,6 +1,7 @@
 "use client";
 
 import { Play, Pause, FastForward, Rewind, X, Plus, Minus } from "lucide-react";
+import { useRef } from "react";
 
 interface FlowControlsProps {
   isPlaying: boolean;
@@ -19,9 +20,24 @@ export default function FlowControls({
   onSkip, 
   onClose 
 }: FlowControlsProps) {
+  const holdTimerRef = useRef<NodeJS.Timeout | null>(null);
+
   const adjustWpm = (delta: number) => {
     const newWpm = Math.min(500, Math.max(50, wpm + delta));
     onWpmChange(newWpm);
+  };
+
+  const handleBackMouseDown = () => {
+    holdTimerRef.current = setTimeout(() => {
+      onClose();
+    }, 1000);
+  };
+
+  const handleBackMouseUp = () => {
+    if (holdTimerRef.current) {
+      clearTimeout(holdTimerRef.current);
+      holdTimerRef.current = null;
+    }
   };
 
   return (
@@ -38,6 +54,11 @@ export default function FlowControls({
       <div className="flex items-center gap-4">
         <button
           onClick={() => onSkip('backward')}
+          onMouseDown={handleBackMouseDown}
+          onMouseUp={handleBackMouseUp}
+          onMouseLeave={handleBackMouseUp}
+          onTouchStart={handleBackMouseDown}
+          onTouchEnd={handleBackMouseUp}
           className="p-2 text-white hover:text-orange-500 transition-colors"
         >
           <Rewind size={20} />
