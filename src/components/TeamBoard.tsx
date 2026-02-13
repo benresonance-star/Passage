@@ -18,6 +18,8 @@ interface MemberProgress {
 export function TeamBoard({ groupId, groupName, chapterTitle, totalChunks }: { groupId: string, groupName: string, chapterTitle: string, totalChunks: number }) {
   const { user } = useAuth();
   const { state } = useBCM();
+  const currentTheme = state.settings.theme || { bg: "#000000", text: "#f4f4f5" };
+  const isDawn = currentTheme.id === "dawn";
   const [members, setMembers] = useState<MemberProgress[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshCount, setRefreshCount] = useState(0);
@@ -119,7 +121,7 @@ export function TeamBoard({ groupId, groupName, chapterTitle, totalChunks }: { g
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center px-1">
-        <h3 className="text-sm font-medium text-zinc-500 uppercase tracking-wider flex items-center gap-2">
+        <h3 className={`text-sm font-medium ${isDawn ? "text-white/60" : "text-zinc-500"} uppercase tracking-wider flex items-center gap-2`}>
           <Users size={14} />
           {groupName}
         </h3>
@@ -130,18 +132,18 @@ export function TeamBoard({ groupId, groupName, chapterTitle, totalChunks }: { g
             <div key={member.user_id} className="p-4 space-y-3">
               <div className="flex justify-between items-center">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-[var(--surface-alt)] rounded-lg flex items-center justify-center text-xs font-bold text-zinc-400 border border-[var(--surface-border)]">
+                  <div className={`w-8 h-8 bg-[var(--surface-alt)] rounded-lg flex items-center justify-center text-xs font-bold ${isDawn ? "text-white/60" : "text-zinc-400"} border border-[var(--surface-border)]`}>
                     {member.display_name.charAt(0)}
                   </div>
                   <div>
                     <p className="font-bold text-sm text-white">{member.display_name}</p>
-                    <p className="text-[10px] text-zinc-500 uppercase tracking-widest font-bold">
+                    <p className={`text-[10px] ${isDawn ? "text-white/60" : "text-zinc-500"} uppercase tracking-widest font-bold`}>
                       {member.memorisedCount} / {totalChunks} Chunks
                     </p>
                   </div>
                 </div>
                 {member.last_active && (
-                  <span className="text-[10px] text-zinc-600 font-medium">
+                  <span className={`text-[10px] ${isDawn ? "text-white/40" : "text-zinc-600"} font-medium`}>
                     Active {new Date(member.last_active).toLocaleDateString()}
                   </span>
                 )}
