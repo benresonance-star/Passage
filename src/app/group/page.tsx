@@ -425,7 +425,7 @@ export default function GroupPage() {
   );
 
   return (
-    <div className="space-y-8 pt-safe pb-[calc(64px+env(safe-area-inset-bottom)+2rem)] px-4">
+    <div className="min-h-screen overflow-y-auto space-y-8 pt-safe pb-[calc(64px+env(safe-area-inset-bottom)+2rem)] px-4">
       <ConfirmDialog />
       <PromptDialog />
       <ToastContainer />
