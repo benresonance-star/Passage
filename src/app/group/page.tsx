@@ -330,6 +330,8 @@ export default function GroupPage() {
       window.history.replaceState({}, '', window.location.pathname);
     }
   }, [group]);
+
+  const handleRemoveMember = async (targetUserId: string, targetName: string) => {
     if (!user || !group || !supabase) return;
     const client = supabase;
     if (targetUserId === user.id) return; // Can't remove self from here
@@ -360,13 +362,6 @@ export default function GroupPage() {
     } finally {
       setLoading(false);
     }
-  };
-
-  const copyGroupId = () => {
-    if (!group) return;
-    navigator.clipboard.writeText(group.id);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
   };
 
   if (authLoading) return (
