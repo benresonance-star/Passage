@@ -12,7 +12,7 @@ interface BCMContextType {
   state: BCMState;
   setState: React.Dispatch<React.SetStateAction<BCMState>>;
   isHydrated: boolean;
-  userGroupId: string | null;
+  userGroupIds: string[];
   syncProgress: (chapterTitle: string, chunkId: string, card: any) => Promise<void>;
   syncAllMemorised: () => Promise<void>;
   pushChapter: (chapter: any) => Promise<void>;
@@ -25,7 +25,7 @@ const BCMContext = createContext<BCMContextType | undefined>(undefined);
 export function BCMProvider({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<BCMState>(INITIAL_STATE);
   const [isHydrated, setIsHydrated] = useState(false);
-  const [userGroupId, setUserGroupId] = useState<string | null>(null);
+  const [userGroupIds, setUserGroupIds] = useState<string[]>([]);
   const { user } = useAuth();
   const lastUpdateRef = React.useRef<Record<string, number>>({});
 
@@ -37,13 +37,15 @@ export function BCMProvider({ children }: { children: React.ReactNode }) {
     if (user && supabase) {
       const client = supabase; // Narrow for closures
       const initCloud = async () => {
-        // 1. Fetch Group ID
+        // 1. Fetch Group IDs
         const { data } = await client
           .from('group_members')
           .select('group_id')
-          .eq('user_id', user.id)
-          .maybeSingle();
-        if (data) setUserGroupId(data.group_id);
+          .eq('user_id', user.id);
+        
+        if (data) {
+          setUserGroupIds(data.map(m => m.group_id));
+        }
 
         // 2. Initial Pull
         await pullVault();
@@ -108,7 +110,7 @@ export function BCMProvider({ children }: { children: React.ReactNode }) {
       };
       initCloud();
     } else {
-      setUserGroupId(null);
+      setUserGroupIds([]);
     }
 
     return () => {
@@ -127,29 +129,31 @@ export function BCMProvider({ children }: { children: React.ReactNode }) {
     lastUpdateRef.current[`card_${chunkId}`] = Date.now();
 
     try {
-      // 1. Sync to Public Team Board
-      let gid = userGroupId;
-      if (!gid) {
+      // 1. Sync to Public Team Boards (All groups user belongs to)
+      let gids = userGroupIds;
+      if (gids.length === 0) {
         const { data } = await client
           .from('group_members')
           .select('group_id')
-          .eq('user_id', user.id)
-          .maybeSingle();
-        if (data) {
-          gid = data.group_id;
-          setUserGroupId(gid);
+          .eq('user_id', user.id);
+        if (data && data.length > 0) {
+          gids = data.map(m => m.group_id);
+          setUserGroupIds(gids);
         }
       }
 
-      if (gid) {
-        await client.from('shared_progress').upsert({
-          group_id: gid,
-          user_id: user.id,
-          chapter_title: chapterTitle,
-          chunk_id: chunkId,
-          is_memorised: card.isMemorised,
-          updated_at: new Date().toISOString()
-        }, { onConflict: 'group_id,user_id,chapter_title,chunk_id' });
+      if (gids.length > 0) {
+        const syncPromises = gids.map(gid => 
+          client.from('shared_progress').upsert({
+            group_id: gid,
+            user_id: user.id,
+            chapter_title: chapterTitle,
+            chunk_id: chunkId,
+            is_memorised: card.isMemorised,
+            updated_at: new Date().toISOString()
+          }, { onConflict: 'group_id,user_id,chapter_title,chunk_id' })
+        );
+        await Promise.all(syncPromises);
       }
 
       // 2. Sync to Personal Vault
@@ -320,15 +324,18 @@ export function BCMProvider({ children }: { children: React.ReactNode }) {
           client.from('user_stats').delete().eq('user_id', user.id).eq('chapter_id', chapterId),
         ]);
 
-        // Also clean shared_progress if in a group
-        const gid = userGroupId;
-        if (gid) {
+        // Also clean shared_progress if in groups
+        const gids = userGroupIds;
+        if (gids.length > 0) {
           const chapter = state.chapters[chapterId];
           if (chapter) {
-            await client.from('shared_progress').delete()
-              .eq('group_id', gid)
-              .eq('user_id', user.id)
-              .eq('chapter_title', chapter.title);
+            const deletePromises = gids.map(gid => 
+              client.from('shared_progress').delete()
+                .eq('group_id', gid)
+                .eq('user_id', user.id)
+                .eq('chapter_title', chapter.title)
+            );
+            await Promise.all(deletePromises);
           }
         }
       } catch (err) {
@@ -443,7 +450,7 @@ export function BCMProvider({ children }: { children: React.ReactNode }) {
   }, [state, isHydrated, user]);
 
   return (
-    <BCMContext.Provider value={{ state, setState, isHydrated, userGroupId, syncProgress, syncAllMemorised, pushChapter, pullVault, deleteChapter }}>
+    <BCMContext.Provider value={{ state, setState, isHydrated, userGroupIds, syncProgress, syncAllMemorised, pushChapter, pullVault, deleteChapter }}>
       {children}
     </BCMContext.Provider>
   );
