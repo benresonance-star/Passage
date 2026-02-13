@@ -59,12 +59,12 @@ export default function GroupPage() {
       .eq('user_id', user?.id);
     
     if (memberData && memberData.length > 0) {
-      const allGroups = memberData.map(m => m.groups);
+      const allGroups = memberData.map((m: any) => m.groups);
       setGroups(allGroups);
       
       // Set active group if not set or if current active group is no longer in the list
       const currentActiveId = activeGroupId || allGroups[0].id;
-      const isStillInActiveGroup = allGroups.some(g => g.id === currentActiveId);
+      const isStillInActiveGroup = allGroups.some((g: any) => g.id === currentActiveId);
       const finalActiveId = isStillInActiveGroup ? currentActiveId : allGroups[0].id;
       
       setActiveGroupId(finalActiveId);
