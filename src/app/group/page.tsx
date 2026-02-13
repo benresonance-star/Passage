@@ -230,12 +230,14 @@ export default function GroupPage() {
     const client = supabase;
 
     const is_admin = group.admin_id === user.id;
+    const isLastMember = members.length <= 1;
+
     const confirmed = await confirm({
-      title: is_admin ? "Delete Group" : "Leave Group",
-      message: is_admin 
-        ? "Are you sure? This will delete the group and remove all members. This action cannot be undone." 
+      title: "Leave Group",
+      message: isLastMember 
+        ? "You are the last member. Leaving will permanently delete this group. Proceed?" 
         : "Are you sure you want to leave this study group?",
-      confirmLabel: is_admin ? "Delete" : "Leave",
+      confirmLabel: "Leave",
       destructive: true,
     });
 
@@ -243,15 +245,36 @@ export default function GroupPage() {
 
     setLoading(true);
     try {
-      if (is_admin) {
-        // Delete group (cascade should handle members and shared_progress if set up, 
-        // but we'll be explicit if needed or just delete the group)
+      if (isLastMember) {
+        // Delete group entirely if this is the last person
         const { error } = await client
           .from('groups')
           .delete()
           .eq('id', group.id);
         if (error) throw error;
       } else {
+        // If admin is leaving but others remain, promote someone else to admin
+        if (is_admin) {
+          const nextAdmin = members.find(m => m.user_id !== user.id);
+          if (nextAdmin) {
+            // 1. Update group admin_id
+            const { error: groupUpdateError } = await client
+              .from('groups')
+              .update({ admin_id: nextAdmin.user_id })
+              .eq('id', group.id);
+            if (groupUpdateError) throw groupUpdateError;
+
+            // 2. Update new admin's role in group_members
+            const { error: memberUpdateError } = await client
+              .from('group_members')
+              .update({ role: 'admin' })
+              .eq('group_id', group.id)
+              .eq('user_id', nextAdmin.user_id);
+            if (memberUpdateError) throw memberUpdateError;
+          }
+        }
+
+        // Remove current user from group_members
         const { error } = await client
           .from('group_members')
           .delete()
@@ -263,7 +286,7 @@ export default function GroupPage() {
       setGroup(null);
       setMembers([]);
       setMemberProgress({});
-      toast(is_admin ? "Group deleted." : "You have left the group.");
+      toast(isLastMember ? "Group deleted." : "You have left the group.");
       fetchProfileAndGroup();
     } catch (err: any) {
       console.error("Leave group error:", err);
@@ -532,7 +555,7 @@ export default function GroupPage() {
                     <button 
                       onClick={handleLeaveGroup}
                       className={`p-2 ${isDawn ? "text-white/40 hover:text-red-500" : "text-zinc-600 hover:text-red-500"} transition-colors bg-[var(--surface-alt)] rounded-lg border border-[var(--surface-border)]`}
-                      title={group.admin_id === user.id ? "Delete Group" : "Leave Group"}
+                      title="Leave Group"
                     >
                       <LogOut size={16} />
                     </button>
