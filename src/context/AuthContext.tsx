@@ -28,9 +28,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     // Check active sessions and sets the user
     const getSession = async () => {
-      const { data: { session } } = await client.auth.getSession();
-      setUser(session?.user ?? null);
-      setLoading(false);
+      try {
+        const { data: { session } } = await client.auth.getSession();
+        setUser(session?.user ?? null);
+      } catch (err) {
+        console.error("Error fetching session:", err);
+      } finally {
+        setLoading(false);
+      }
     };
 
     getSession();
@@ -42,8 +47,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       // Clean the URL if we just signed in via a Magic Link
       if (event === "SIGNED_IN" || event === "INITIAL_SESSION") {
-        if (typeof window !== "undefined" && window.location.hash.includes("access_token")) {
-          window.history.replaceState(null, "", window.location.pathname);
+        if (typeof window !== "undefined") {
+          const url = new URL(window.location.href);
+          if (url.hash.includes("access_token") || url.searchParams.has("code")) {
+            window.history.replaceState(null, "", window.location.pathname);
+          }
         }
       }
     });
