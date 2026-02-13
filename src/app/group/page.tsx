@@ -24,6 +24,8 @@ export default function GroupPage() {
   const [memberProgress, setMemberProgress] = useState<Record<string, number>>({});
   const [copied, setCopied] = useState(false);
   const [joinGroupId, setJoinGroupId] = useState("");
+  const [previewGroup, setPreviewGroup] = useState<{ id: string, name: string, admin_name: string } | null>(null);
+  const [isPreviewLoading, setIsPreviewLoading] = useState(false);
   const [isEditingName, setIsEditingName] = useState(false);
   const [newName, setNewName] = useState("");
   const { confirm, ConfirmDialog } = useConfirm();
@@ -189,6 +191,17 @@ export default function GroupPage() {
     
     setLoading(true);
     try {
+      // 1. Check if user is already in a group
+      const { data: existingMember } = await client
+        .from('group_members')
+        .select('group_id')
+        .eq('user_id', user.id)
+        .maybeSingle();
+      
+      if (existingMember) {
+        throw new Error("You are already in a group. Please leave your current group before joining a new one.");
+      }
+
       const { error: joinError } = await client
         .from('group_members')
         .insert({
@@ -202,6 +215,7 @@ export default function GroupPage() {
       await fetchProfileAndGroup();
       await syncAllMemorised();
       setJoinGroupId("");
+      setPreviewGroup(null);
       toast("Joined group successfully!");
     } catch (err: any) {
       console.error("Join group error:", err);
@@ -211,7 +225,111 @@ export default function GroupPage() {
     }
   };
 
-  const handleRemoveMember = async (targetUserId: string, targetName: string) => {
+  const handleLeaveGroup = async () => {
+    if (!user || !group || !supabase) return;
+    const client = supabase;
+
+    const is_admin = group.admin_id === user.id;
+    const confirmed = await confirm({
+      title: is_admin ? "Delete Group" : "Leave Group",
+      message: is_admin 
+        ? "Are you sure? This will delete the group and remove all members. This action cannot be undone." 
+        : "Are you sure you want to leave this study group?",
+      confirmLabel: is_admin ? "Delete" : "Leave",
+      destructive: true,
+    });
+
+    if (!confirmed) return;
+
+    setLoading(true);
+    try {
+      if (is_admin) {
+        // Delete group (cascade should handle members and shared_progress if set up, 
+        // but we'll be explicit if needed or just delete the group)
+        const { error } = await client
+          .from('groups')
+          .delete()
+          .eq('id', group.id);
+        if (error) throw error;
+      } else {
+        const { error } = await client
+          .from('group_members')
+          .delete()
+          .eq('group_id', group.id)
+          .eq('user_id', user.id);
+        if (error) throw error;
+      }
+
+      setGroup(null);
+      setMembers([]);
+      setMemberProgress({});
+      toast(is_admin ? "Group deleted." : "You have left the group.");
+      fetchProfileAndGroup();
+    } catch (err: any) {
+      console.error("Leave group error:", err);
+      toast(err.message || "Failed to leave group", "error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const fetchPreview = async () => {
+      if (!joinGroupId || joinGroupId.length < 32 || !supabase) {
+        setPreviewGroup(null);
+        return;
+      }
+
+      setIsPreviewLoading(true);
+      try {
+        const { data, error } = await supabase
+          .from('groups')
+          .select(`
+            id,
+            name,
+            profiles:admin_id (display_name)
+          `)
+          .eq('id', joinGroupId.trim())
+          .maybeSingle();
+
+        if (data) {
+          setPreviewGroup({
+            id: data.id,
+            name: data.name,
+            admin_name: (data.profiles as any)?.display_name || "Unknown Admin"
+          });
+        } else {
+          setPreviewGroup(null);
+        }
+      } catch (e) {
+        setPreviewGroup(null);
+      } finally {
+        setIsPreviewLoading(false);
+      }
+    };
+
+    const timer = setTimeout(fetchPreview, 500);
+    return () => clearTimeout(timer);
+  }, [joinGroupId]);
+
+  const copyGroupId = () => {
+    if (!group) return;
+    const joinUrl = `${window.location.origin}${window.location.pathname}?join=${group.id}`;
+    navigator.clipboard.writeText(joinUrl);
+    setCopied(true);
+    toast("Invite link copied to clipboard!");
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const joinId = params.get('join');
+    if (joinId && !group) {
+      setJoinGroupId(joinId);
+      // Clean up URL
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+  }, [group]);
     if (!user || !group || !supabase) return;
     const client = supabase;
     if (targetUserId === user.id) return; // Can't remove self from here
@@ -416,17 +534,37 @@ export default function GroupPage() {
                         </p>
                       </div>
                     </div>
+                    <button 
+                      onClick={handleLeaveGroup}
+                      className={`p-2 ${isDawn ? "text-white/40 hover:text-red-500" : "text-zinc-600 hover:text-red-500"} transition-colors bg-[var(--surface-alt)] rounded-lg border border-[var(--surface-border)]`}
+                      title={group.admin_id === user.id ? "Delete Group" : "Leave Group"}
+                    >
+                      <LogOut size={16} />
+                    </button>
                   </div>
 
                   <div className="pt-4 border-t border-[var(--surface-border)] space-y-3">
-                    <p className={`text-[10px] font-bold ${isDawn ? "text-white/60" : "text-zinc-500"} uppercase tracking-widest ml-1`}>Invite Friends (Group ID)</p>
+                    <div className="flex items-center justify-between px-1">
+                      <p className={`text-[10px] font-bold ${isDawn ? "text-white/60" : "text-zinc-500"} uppercase tracking-widest`}>Invite Friends</p>
+                      <div className="group relative">
+                        <div className={`cursor-help text-[10px] font-bold ${isDawn ? "text-orange-500/80" : "text-orange-500"} uppercase tracking-widest flex items-center gap-1`}>
+                          How to Join?
+                        </div>
+                        <div className="absolute bottom-full right-0 mb-2 w-48 p-3 bg-zinc-900 border border-zinc-800 rounded-xl shadow-2xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50">
+                          <p className="text-[10px] text-zinc-400 leading-relaxed">
+                            Send the <span className="text-white">Invite Link</span> to friends. They can click it to join instantly, or paste the <span className="text-white">Group ID</span> into their Study Group tab.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
                     <div className="flex gap-2">
-                      <div className={`flex-1 bg-[var(--input-bg)] border border-[var(--surface-border)] rounded-xl px-4 py-3 ${isDawn ? "text-white/60" : "text-zinc-400"} font-mono text-xs overflow-hidden text-ellipsis whitespace-nowrap`}>
+                      <div className={`flex-1 bg-[var(--input-bg)] border border-[var(--surface-border)] rounded-xl px-4 py-3 ${isDawn ? "text-white/60" : "text-zinc-400"} font-mono text-xs overflow-hidden text-ellipsis whitespace-nowrap flex items-center`}>
                         {group.id}
                       </div>
                       <button 
                         onClick={copyGroupId}
                         className={`p-3 rounded-xl border transition-all ${copied ? "bg-green-500/10 border-green-500/20 text-green-500" : `bg-[var(--surface-alt)] border-[var(--surface-border)] ${isDawn ? "text-white/60" : "text-zinc-400"}`}`}
+                        title="Copy Invite Link"
                       >
                         {copied ? <Check size={18} /> : <Copy size={18} />}
                       </button>
@@ -508,20 +646,36 @@ export default function GroupPage() {
                   </button>
                 </div>
 
-                <div className="bg-[var(--surface)] glass border border-[var(--surface-border)] rounded-3xl p-6">
+                <div className="bg-[var(--surface)] glass border border-[var(--surface-border)] rounded-3xl p-6 space-y-4">
                   <form onSubmit={handleJoinGroup} className="space-y-4">
                     <div className="space-y-2">
                       <label className={`text-[10px] font-bold ${isDawn ? "text-white/60" : "text-zinc-500"} uppercase tracking-widest ml-1`}>Join with Group ID</label>
-                      <input 
-                        required
-                        value={joinGroupId}
-                        onChange={(e) => setJoinGroupId(e.target.value)}
-                        className="w-full bg-[var(--input-bg)] border border-[var(--surface-border)] rounded-2xl py-4 px-6 text-white text-sm font-mono focus:outline-none focus:ring-2 focus:ring-orange-500/50 transition-all"
-                        placeholder="Paste ID here..."
-                      />
+                      <div className="relative">
+                        <input 
+                          required
+                          value={joinGroupId}
+                          onChange={(e) => setJoinGroupId(e.target.value)}
+                          className="w-full bg-[var(--input-bg)] border border-[var(--surface-border)] rounded-2xl py-4 px-6 text-white text-sm font-mono focus:outline-none focus:ring-2 focus:ring-orange-500/50 transition-all"
+                          placeholder="Paste ID here..."
+                        />
+                        {isPreviewLoading && (
+                          <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                            <Loader2 className="animate-spin text-orange-500" size={18} />
+                          </div>
+                        )}
+                      </div>
                     </div>
+
+                    {previewGroup && (
+                      <div className="bg-orange-500/5 border border-orange-500/10 rounded-2xl p-4 animate-in zoom-in-95 duration-200">
+                        <p className="text-[10px] text-orange-500 uppercase font-bold tracking-widest mb-1">Group Found</p>
+                        <p className="text-sm font-bold text-white">{previewGroup.name}</p>
+                        <p className="text-[10px] text-zinc-500">Admin: {previewGroup.admin_name}</p>
+                      </div>
+                    )}
+
                     <button 
-                      disabled={loading || !joinGroupId}
+                      disabled={loading || !joinGroupId || isPreviewLoading}
                       className="w-full py-4 bg-orange-500 text-white font-bold rounded-2xl shadow-lg shadow-orange-500/20 active:scale-95 transition-transform disabled:opacity-50"
                     >
                       {loading ? "Joining..." : "Join Group"}
