@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useBCM } from "@/context/BCMContext";
 import { BottomNav } from "@/components/BottomNav";
 import { SplashScreen, wasSplashShown } from "@/components/SplashScreen";
+import { useScrollAwareBottomNav } from "@/hooks/useScrollAwareBottomNav";
 import { Cormorant_Garamond } from "next/font/google";
 
 const dawnFont = Cormorant_Garamond({
@@ -40,6 +41,8 @@ export function ThemeContent({ children }: { children: React.ReactNode }) {
 
   const isDawn = theme.id === "dawn";
   const isLight = !isDawn && getBrightness(theme.bg) > 128;
+
+  const { isCollapsed, setCollapsed } = useScrollAwareBottomNav();
 
   // Apply dynamic theme to <body> and CSS custom properties to :root
   useLayoutEffect(() => {
@@ -146,10 +149,19 @@ export function ThemeContent({ children }: { children: React.ReactNode }) {
           onComplete={() => setShowSplash(false)}
         />
       )}
-      <main className={`relative z-[1] min-h-screen pt-safe pb-24 max-w-md mx-auto px-4 ${isDawn ? dawnFont.className : ""}`}>
+      <main 
+        className={`relative z-[1] min-h-screen pt-safe max-w-md mx-auto px-4 transition-all duration-500 ${isDawn ? dawnFont.className : ""}`}
+        style={{ 
+          paddingBottom: `calc(${isCollapsed ? '3rem' : '4rem'} + 1rem + env(safe-area-inset-bottom))` 
+        }}
+      >
         {children}
       </main>
-      <BottomNav isDawn={isDawn} />
+      <BottomNav 
+        isDawn={isDawn} 
+        isCollapsed={isCollapsed} 
+        onExpand={() => setCollapsed(false)} 
+      />
     </>
   );
 }

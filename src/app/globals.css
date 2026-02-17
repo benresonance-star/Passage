@@ -18,6 +18,16 @@
   --flow-read: #ffffff;
   --flow-unread: rgba(255, 255, 255, 0.15);
   --flow-glow: 0 0 20px rgba(255, 255, 255, 0.3);
+  --bottom-nav-height: 4rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 [data-theme='sepia'] {
