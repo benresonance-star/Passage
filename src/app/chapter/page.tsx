@@ -169,6 +169,8 @@ export default function ChapterPage() {
   const isDawn = currentTheme.id === "dawn";
   const isSepia = currentTheme.bg === "#fdf6e3";
 
+  const scriptureVerses = chapter.verses.filter(v => v.type === "scripture");
+
   const isIPhone = typeof window !== "undefined" && /iPhone/.test(navigator.userAgent);
 
   return (
@@ -179,7 +181,7 @@ export default function ChapterPage() {
             <h1 className="text-2xl font-bold">{chapter.title}</h1>
             <div className={`flex gap-4 text-sm mt-1 ${isDawn ? "text-[var(--theme-ui-subtext)]" : "text-zinc-500"}`}>
               <span>{chapter.chunks.length} Chunks</span>
-              <span>{chapter.verses.length} Verses</span>
+              <span>{scriptureVerses.length} Verses</span>
             </div>
           </div>
           <div 
