@@ -150,7 +150,7 @@ export function ThemeContent({ children }: { children: React.ReactNode }) {
         />
       )}
       <main 
-        className={`relative z-[1] min-h-screen pt-safe max-w-md mx-auto px-4 transition-all duration-500 ${isDawn ? dawnFont.className : ""}`}
+        className={`relative z-[1] min-h-screen pt-safe max-w-2xl mx-auto px-6 md:px-12 transition-all duration-500 ${isDawn ? dawnFont.className : ""}`}
         style={{ 
           paddingBottom: `calc(${isCollapsed ? '3rem' : '4rem'} + 1rem + env(safe-area-inset-bottom))` 
         }}

@@ -303,7 +303,7 @@ export function SoakVerseTap({
     return (
       <div
         key={slotKey}
-        className="absolute inset-0 flex items-center justify-center px-8"
+        className="absolute inset-0 flex items-center justify-center px-8 md:px-24 lg:px-32"
         style={{
           pointerEvents:
             isTarget && state.phase === "idle" ? "auto" : "none",
