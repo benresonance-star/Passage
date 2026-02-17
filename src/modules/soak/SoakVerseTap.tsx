@@ -156,25 +156,17 @@ export function SoakVerseTap({
   });
 
   /* ── Phase transition effects ────────────────────────────────────── */
-  // Use requestAnimationFrame for the prepare phase to ensure the DOM is ready
   useEffect(() => {
-    if (state.phase === "preparing") {
-      const raf = requestAnimationFrame(() => {
-        const timer = setTimeout(() => {
-          dispatch({ type: "PHASE_COMPLETE" });
-        }, PREPARE_MS);
-        return () => clearTimeout(timer);
-      });
-      return () => cancelAnimationFrame(raf);
-    }
-  }, [state.phase]);
+    if (state.phase === "idle") return;
 
-  useEffect(() => {
-    if (state.phase !== "crossfading") return;
+    // Both phases use setTimeout for reliable cross-browser timing.
+    // "preparing" waits PREPARE_MS so the browser fully paints the new
+    // verse content at opacity 0 before the crossfade begins.
+    const ms = state.phase === "preparing" ? PREPARE_MS : CROSSFADE_MS;
 
     const timer = setTimeout(
       () => dispatch({ type: "PHASE_COMPLETE" }),
-      CROSSFADE_MS,
+      ms,
     );
     return () => clearTimeout(timer);
   }, [state.phase]);
@@ -450,7 +442,7 @@ export function SoakVerseTap({
         >
           <X
             size={22}
-            style={{ color: "rgba(255, 252, 240, 0.85)" }}
+            style={{ color: "#ffffff" }}
           />
         </button>
       </div>

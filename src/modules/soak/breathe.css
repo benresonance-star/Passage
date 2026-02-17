@@ -101,19 +101,21 @@
 
 /* ─── Text breathing — gentle opacity pulse ──────────────────────── */
 
-/* Breathing via opacity so it's cheap for the compositor */
+/* Breathing via brightness so opacity stays free for verse transitions */
 @keyframes soak-text-breathe {
   0%,
   100% {
-    opacity: 1;
+    filter: brightness(1);
   }
   50% {
-    opacity: 0.7;
+    filter: brightness(0.8);
   }
 }
 
 /* ─── Verse Fade Layer ─────────────────────────────────────────────
  * Opacity is driven by inline style from JS.
+ * MUST NOT carry any CSS animation — iOS Safari can't hardware-accelerate
+ * a CSS transition and a CSS animation on the same composited layer.
  * ──────────────────────────────────────────────────────────────────── */
 
 .soak-verse {
@@ -125,11 +127,12 @@
 
 /* ─── Breathing Wrapper ────────────────────────────────────────────
  * Lives on a PARENT element that wraps .soak-verse.
- * Keeps the breathing animation on a separate layer.
+ * Keeps the filter animation on a separate composited layer so it
+ * never fights the opacity transition on the child.
  * ──────────────────────────────────────────────────────────────────── */
 
 .soak-breathe-text {
-  /* 11 cycles/min = 60/11 ≈ 5.45s per cycle */
+  /* 11 cycles/min = 60/11 ≈ 5.45s per cycle, brightness 100% → 80% */
   animation: soak-text-breathe 5.45s ease-in-out infinite;
   -webkit-transform: translate3d(0, 0, 0);
   transform: translate3d(0, 0, 0);

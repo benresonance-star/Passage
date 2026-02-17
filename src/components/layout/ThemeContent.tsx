@@ -143,46 +143,32 @@ export function ThemeContent({ children }: { children: React.ReactNode }) {
   return (
     <>
       {/* Dawn breathing gradient — persistent, isolated layer (hidden in Soaking mode to avoid double-draw) */}
-      {isDawn && !isSoaking && (
-        <div 
-          className="fixed inset-0 pointer-events-none" 
-          style={{ zIndex: 0, isolation: 'isolate' }}
-        >
-          <div className="dawn-bg" />
-        </div>
-      )}
+      {isDawn && !isSoaking && <div className="dawn-bg" />}
 
       {showSplash && (
-        <div className="fixed inset-0" style={{ zIndex: 9999, isolation: 'isolate' }}>
-          <SplashScreen
-            onFadeStart={() => router.push("/chapter")}
-            onComplete={() => setShowSplash(false)}
-          />
-        </div>
+        <SplashScreen
+          onFadeStart={() => router.push("/chapter")}
+          onComplete={() => setShowSplash(false)}
+        />
       )}
       <main 
         className={`relative z-[1] min-h-screen pt-safe max-w-2xl mx-auto px-6 md:px-12 transition-all duration-500 ${isDawn ? dawnFont.className : ""}`}
         style={{ 
-          paddingBottom: isSoaking ? '0' : `calc(${isCollapsed ? '3rem' : '4rem'} + 1rem + env(safe-area-inset-bottom))`,
-          isolation: 'isolate'
+          paddingBottom: isSoaking ? '0' : `calc(${isCollapsed ? '3rem' : '4rem'} + 1rem + env(safe-area-inset-bottom))`
         }}
       >
         {children}
       </main>
       
       {!isSoaking && (
-        <div className="fixed bottom-0 left-0 right-0 pointer-events-none" style={{ zIndex: 2, isolation: 'isolate' }}>
-          <div className="pointer-events-auto">
-            <BottomNav 
-              isDawn={isDawn} 
-              isCollapsed={isCollapsed} 
-              onExpand={() => {
-                setCollapsed(false);
-                resetCollapseTimer();
-              }} 
-            />
-          </div>
-        </div>
+        <BottomNav 
+          isDawn={isDawn} 
+          isCollapsed={isCollapsed} 
+          onExpand={() => {
+            setCollapsed(false);
+            resetCollapseTimer();
+          }} 
+        />
       )}
     </>
   );
