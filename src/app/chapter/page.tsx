@@ -180,7 +180,7 @@ export default function ChapterPage() {
           <div>
             <h1 className="text-2xl font-bold">{chapter.title}</h1>
             <div className={`flex gap-4 text-sm mt-1 ${isDawn ? "text-[var(--theme-ui-subtext)]" : "text-zinc-500"}`}>
-              <span>{chapter.chunks.length} Chunks</span>
+              <span>{chapter.chunks.length} Parts</span>
               <span>{scriptureVerses.length} Verses</span>
             </div>
           </div>
