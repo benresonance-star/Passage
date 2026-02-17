@@ -41,6 +41,7 @@ export function ThemeContent({ children }: { children: React.ReactNode }) {
 
   const isDawn = theme.id === "dawn";
   const isLight = !isDawn && getBrightness(theme.bg) > 128;
+  const isSoaking = pathname === "/soak";
 
   const { isCollapsed, setCollapsed, resetCollapseTimer } = useScrollAwareBottomNav();
 
@@ -140,8 +141,8 @@ export function ThemeContent({ children }: { children: React.ReactNode }) {
 
   return (
     <>
-      {/* Dawn breathing gradient — persistent, isolated layer */}
-      {isDawn && (
+      {/* Dawn breathing gradient — persistent, isolated layer (hidden in Soaking mode to avoid double-draw) */}
+      {isDawn && !isSoaking && (
         <div 
           className="fixed inset-0 pointer-events-none" 
           style={{ zIndex: 0, isolation: 'isolate' }}
@@ -161,24 +162,27 @@ export function ThemeContent({ children }: { children: React.ReactNode }) {
       <main 
         className={`relative z-[1] min-h-screen pt-safe max-w-2xl mx-auto px-6 md:px-12 transition-all duration-500 ${isDawn ? dawnFont.className : ""}`}
         style={{ 
-          paddingBottom: `calc(${isCollapsed ? '3rem' : '4rem'} + 1rem + env(safe-area-inset-bottom))`,
+          paddingBottom: isSoaking ? '0' : `calc(${isCollapsed ? '3rem' : '4rem'} + 1rem + env(safe-area-inset-bottom))`,
           isolation: 'isolate'
         }}
       >
         {children}
       </main>
-      <div className="fixed bottom-0 left-0 right-0 pointer-events-none" style={{ zIndex: 2, isolation: 'isolate' }}>
-        <div className="pointer-events-auto">
-          <BottomNav 
-            isDawn={isDawn} 
-            isCollapsed={isCollapsed} 
-            onExpand={() => {
-              setCollapsed(false);
-              resetCollapseTimer();
-            }} 
-          />
+      
+      {!isSoaking && (
+        <div className="fixed bottom-0 left-0 right-0 pointer-events-none" style={{ zIndex: 2, isolation: 'isolate' }}>
+          <div className="pointer-events-auto">
+            <BottomNav 
+              isDawn={isDawn} 
+              isCollapsed={isCollapsed} 
+              onExpand={() => {
+                setCollapsed(false);
+                resetCollapseTimer();
+              }} 
+            />
+          </div>
         </div>
-      </div>
+      )}
     </>
   );
 }

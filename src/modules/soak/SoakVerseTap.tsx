@@ -156,17 +156,25 @@ export function SoakVerseTap({
   });
 
   /* ── Phase transition effects ────────────────────────────────────── */
+  // Use requestAnimationFrame for the prepare phase to ensure the DOM is ready
   useEffect(() => {
-    if (state.phase === "idle") return;
+    if (state.phase === "preparing") {
+      const raf = requestAnimationFrame(() => {
+        const timer = setTimeout(() => {
+          dispatch({ type: "PHASE_COMPLETE" });
+        }, PREPARE_MS);
+        return () => clearTimeout(timer);
+      });
+      return () => cancelAnimationFrame(raf);
+    }
+  }, [state.phase]);
 
-    // Both phases use setTimeout for reliable cross-browser timing.
-    // "preparing" waits PREPARE_MS so the browser fully paints the new
-    // verse content at opacity 0 before the crossfade begins.
-    const ms = state.phase === "preparing" ? PREPARE_MS : CROSSFADE_MS;
+  useEffect(() => {
+    if (state.phase !== "crossfading") return;
 
     const timer = setTimeout(
       () => dispatch({ type: "PHASE_COMPLETE" }),
-      ms,
+      CROSSFADE_MS,
     );
     return () => clearTimeout(timer);
   }, [state.phase]);
