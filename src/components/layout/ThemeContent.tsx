@@ -29,11 +29,11 @@ export function ThemeContent({ children }: { children: React.ReactNode }) {
   const [showSplash, setShowSplash] = useState(false);
 
   useEffect(() => {
-    // Only check sessionStorage after hydration (client-side)
-    if (isHydrated && !wasSplashShown()) {
+    // Check sessionStorage immediately on mount
+    if (!wasSplashShown()) {
       setShowSplash(true);
     }
-  }, [isHydrated]);
+  }, []);
 
   const theme = isHydrated && state.settings.theme
     ? state.settings.theme
