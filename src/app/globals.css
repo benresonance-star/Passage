@@ -267,8 +267,11 @@ html[data-dawn] .glass {
   opacity: 0;
   transform: translateY(-0.5px);
   will-change: opacity, transform;
-  animation: splash-subtitle-in 6s ease-out 1.5s both;
-  -webkit-animation: splash-subtitle-in 6s ease-out 1.5s both;
+}
+
+.splash-subtitle.is-animating {
+  animation: splash-subtitle-in 6s ease-out forwards;
+  -webkit-animation: splash-subtitle-in 6s ease-out forwards;
 }
 
 @keyframes splash-title-in {

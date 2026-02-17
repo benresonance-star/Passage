@@ -27,12 +27,17 @@ interface SplashScreenProps {
 
 export function SplashScreen({ onFadeStart, onComplete }: SplashScreenProps) {
   const [phase, setPhase] = useState<"hold" | "fade-out" | "done">("hold");
+  const [startSubtitle, setStartSubtitle] = useState(false);
   const fadeStartFired = useRef(false);
 
   // After HOLD_MS, begin fade-out
   useEffect(() => {
     const holdTimer = setTimeout(() => setPhase("fade-out"), HOLD_MS);
-    return () => clearTimeout(holdTimer);
+    const subtitleTimer = setTimeout(() => setStartSubtitle(true), 1500);
+    return () => {
+      clearTimeout(holdTimer);
+      clearTimeout(subtitleTimer);
+    };
   }, []);
 
   // Fire onFadeStart exactly once when fade-out begins
@@ -94,7 +99,7 @@ export function SplashScreen({ onFadeStart, onComplete }: SplashScreenProps) {
 
           {/* Subtle tagline that fades in after the title */}
           <p
-            className="splash-subtitle mt-3 text-[13px] tracking-[0.25em] uppercase font-light"
+            className={`splash-subtitle mt-3 text-[13px] tracking-[0.25em] uppercase font-light ${startSubtitle ? "is-animating" : ""}`}
             style={{
               color: "rgba(255, 252, 240, 0.92)",
             }}
