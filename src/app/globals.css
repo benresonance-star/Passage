@@ -335,8 +335,8 @@ html[data-dawn] .glass {
 }
 
 .nav-full-clip {
-  clip-path: inset(0% 0% 0% 0% round 9999px);
-  -webkit-clip-path: inset(0% 0% 0% 0% round 9999px);
+  clip-path: inset(0% 0% 0% 0% round 32px);
+  -webkit-clip-path: inset(0% 0% 0% 0% round 32px);
 }
 
 /* ─── Top Actions Liquid Transition — Anchored Right ─────────────── */

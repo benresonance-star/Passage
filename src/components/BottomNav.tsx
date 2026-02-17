@@ -30,7 +30,7 @@ export function BottomNav({
     <nav 
       onClick={() => isCollapsed && onExpand?.()}
       data-state={isCollapsed ? "collapsed" : "expanded"}
-      className={`fixed bottom-0 left-1/2 -translate-x-1/2 z-[2] transition-all duration-500 ease-in-out mb-4 shadow-lg border border-white/10 will-change-[clip-path,opacity] h-16 w-[calc(100%-2rem)] max-w-md ${
+      className={`fixed bottom-0 left-1/2 -translate-x-1/2 z-[2] transition-all duration-500 ease-in-out mb-4 shadow-lg border border-white/10 will-change-[clip-path,opacity] h-16 w-[calc(100%-2rem)] max-w-md rounded-[32px] ${
         isCollapsed ? "nav-pill-clip" : "nav-full-clip"
       } ${
         isCollapsed
