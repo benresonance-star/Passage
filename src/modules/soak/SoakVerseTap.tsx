@@ -360,14 +360,16 @@ export function SoakVerseTap({
       className="fixed inset-0 overflow-hidden"
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
+      style={{ transform: 'translateZ(0)' }}
     >
       {/* Background layer — handles over-bleed and breathing animation */}
-      <div className="soak-breathe" data-testid="soak-breathe-bg" />
+      <div className="soak-breathe" data-testid="soak-breathe-bg" style={{ transform: 'translateZ(0)' }} />
 
       {/* Click zones — desktop mouse navigation only */}
       <div
         className="fixed inset-0 z-[51] flex"
         data-testid="soak-click-zones"
+        style={{ transform: 'translateZ(0)' }}
       >
         <div
           className="w-[30%] h-full cursor-default"

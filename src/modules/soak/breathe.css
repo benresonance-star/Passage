@@ -5,7 +5,6 @@
 
 .soak-breathe {
   position: fixed;
-  /* Use negative inset to force over-bleed past home indicator */
   top: -10dvh;
   left: -10vw;
   right: -10vw;
@@ -14,128 +13,63 @@
   width: 120vw;
   z-index: 50;
   min-height: -webkit-fill-available;
-  /* Force hardware acceleration */
-  transform: translate3d(0,0,0);
+  /* Force hardware acceleration and independent layer */
+  transform: translate3d(0,0,0) translateZ(0);
   backface-visibility: hidden;
   perspective: 1000;
-
-  /* Prevent iOS Safari from hijacking horizontal swipes for back/forward
-     navigation or elastic scrolling. All touch handling is done in JS. */
-  touch-action: none;
-  -webkit-touch-callout: none;
-  -webkit-user-select: none;
-  user-select: none;
-
-  /* Sky → horizon → water gradient, oversized for animation travel */
-  background:
-    linear-gradient(
-      180deg,
-      #1e1b3a 0%,
-      #3d3566 12%,
-      #7b6b96 24%,
-      #b09aaf 36%,
-      #c9ac9a 46%,
-      #dabb8e 54%,
-      #c9a87a 62%,
-      #8eaab0 76%,
-      #5a8090 88%,
-      #3a5f6d 100%
-    );
-  background-size: 100% 220%;
-  animation: soak-sky 25s ease-in-out infinite;
+  pointer-events: none;
+  background: #1e1b3a; /* Base dark color */
 }
 
-/* Sun-glow layer — warm radial that pulses independently */
+/* Layer 1: Sky Gradient (Static) */
 .soak-breathe::before {
   content: "";
   position: absolute;
   inset: 0;
-  background: radial-gradient(
-    ellipse 70% 45% at 50% 56%,
-    rgba(255, 210, 150, 0.22) 0%,
-    rgba(240, 180, 120, 0.08) 40%,
-    transparent 68%
-  );
-  animation: soak-glow 10s ease-in-out infinite;
-  pointer-events: none;
+  background: linear-gradient(180deg, #1e1b3a 0%, #3d3566 35%, #7b6b96 70%, #b09aaf 100%);
+  opacity: 1;
+  animation: soak-bg-pulse 15s ease-in-out infinite alternate;
+  will-change: opacity;
 }
 
-/* Soft vignette for depth */
+/* Layer 2: Horizon/Water Glow (Static) */
 .soak-breathe::after {
   content: "";
   position: absolute;
   inset: 0;
-  background: radial-gradient(
-    ellipse 80% 80% at 50% 50%,
-    transparent 50%,
-    rgba(15, 12, 30, 0.35) 100%
-  );
-  pointer-events: none;
+  background: radial-gradient(ellipse 80% 50% at 50% 60%, rgba(255, 210, 150, 0.25) 0%, rgba(240, 180, 120, 0.1) 45%, transparent 80%);
+  opacity: 0.4;
+  animation: soak-glow-pulse 10s ease-in-out infinite alternate;
+  will-change: opacity;
 }
 
-/* ─── Keyframes ───────────────────────────────────────────────────── */
-
-/* Slow vertical drift of the gradient — feels like the sky is breathing */
-@keyframes soak-sky {
-  0%,
-  100% {
-    background-position: 50% 0%;
-  }
-  50% {
-    background-position: 50% 35%;
-  }
+@keyframes soak-bg-pulse {
+  0% { opacity: 0.6; }
+  100% { opacity: 1; }
 }
 
-/* Independent glow pulse — different cycle length avoids repetition */
-@keyframes soak-glow {
-  0%,
-  100% {
-    opacity: 0.4;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.85;
-    transform: scale(1.12);
-  }
+@keyframes soak-glow-pulse {
+  0% { opacity: 0.3; transform: scale(0.95) translateZ(0); }
+  100% { opacity: 0.8; transform: scale(1.05) translateZ(0); }
 }
 
-/* ─── Text breathing — gentle opacity pulse ──────────────────────── */
+/* ─── Text breathing — gentle opacity pulse (Compositor-friendly) ─── */
 
-/* Breathing via brightness so opacity stays free for verse transitions */
 @keyframes soak-text-breathe {
-  0%,
-  100% {
-    filter: brightness(1);
-  }
-  50% {
-    filter: brightness(0.8);
-  }
+  0%, 100% { opacity: 1; transform: translate3d(0,0,0) translateZ(0); }
+  50% { opacity: 0.65; transform: translate3d(0,0,0) translateZ(0); }
 }
-
-/* ─── Verse Fade Layer ─────────────────────────────────────────────
- * Opacity is driven by inline style from JS.
- * MUST NOT carry any CSS animation — iOS Safari can't hardware-accelerate
- * a CSS transition and a CSS animation on the same composited layer.
- * ──────────────────────────────────────────────────────────────────── */
 
 .soak-verse {
   transition: opacity 800ms ease-in-out;
   will-change: opacity;
-  -webkit-transform: translate3d(0, 0, 0);
-  transform: translate3d(0, 0, 0);
+  transform: translate3d(0, 0, 0) translateZ(0);
 }
 
-/* ─── Breathing Wrapper ────────────────────────────────────────────
- * Lives on a PARENT element that wraps .soak-verse.
- * Keeps the filter animation on a separate composited layer so it
- * never fights the opacity transition on the child.
- * ──────────────────────────────────────────────────────────────────── */
-
 .soak-breathe-text {
-  /* 11 cycles/min = 60/11 ≈ 5.45s per cycle, brightness 100% → 80% */
-  animation: soak-text-breathe 5.45s ease-in-out infinite;
-  -webkit-transform: translate3d(0, 0, 0);
-  transform: translate3d(0, 0, 0);
+  animation: soak-text-breathe 6s ease-in-out infinite;
+  transform: translate3d(0, 0, 0) translateZ(0);
+  will-change: opacity;
 }
 
 /* ─── Text Style (no animation — purely visual) ───────────────────── */
