@@ -231,9 +231,9 @@ export default function PracticePage() {
         )}
       </header>
 
-      <div className={`flex-1 overflow-y-auto scrollbar-hide flex flex-col ${mode === "type" ? "justify-start pt-12" : "justify-center"}`}>
+      <div className={`flex-1 overflow-y-auto scrollbar-hide flex flex-col ${mode === "type" ? "justify-start pt-12" : ""}`}>
         {mode === "read" && activeChunk && (
-          <div className="animate-in fade-in duration-500 px-4">
+          <div className="animate-in fade-in duration-500 px-4 my-auto">
             <div className="space-y-6">
               <div className="chunk-text-bold text-center leading-relaxed px-4">
                 {(() => {
@@ -294,7 +294,7 @@ export default function PracticePage() {
         )}
 
         {mode === "recite" && (
-          <div className="space-y-4 py-8 px-4 animate-in fade-in duration-500">
+          <div className="space-y-4 py-8 px-4 animate-in fade-in duration-500 my-auto">
             <div className="text-center mb-8">
               <h2 className="text-xl font-bold">Recite out loud.</h2>
               <p className={`text-sm ${isDawn ? "text-white/60" : "text-zinc-500"}`}>Tap lines to reveal.</p>
@@ -318,7 +318,7 @@ export default function PracticePage() {
         )}
 
         {mode === "cloze" && activeChunk && (
-          <div className="animate-in fade-in duration-500 px-4">
+          <div className="animate-in fade-in duration-500 px-4 my-auto">
             <div className="chunk-text-bold text-center leading-relaxed px-4">
               {state.settings.clozeLevel === "mnemonic" 
                 ? generateMnemonic(activeChunk.text)
@@ -342,7 +342,7 @@ export default function PracticePage() {
         )}
 
         {mode === "result" && diffResults && (
-          <div className="space-y-8 animate-in zoom-in-95 duration-300 px-4">
+          <div className="space-y-8 animate-in zoom-in-95 duration-300 px-4 my-auto">
             <div className="bg-[var(--theme-ui-bg)] border border-[var(--theme-ui-border)] rounded-3xl p-6 space-y-6">
               <div className="flex justify-between items-center">
                 <div className="flex items-center gap-2">
