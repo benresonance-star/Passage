@@ -102,6 +102,7 @@ export function SplashScreen({ onFadeStart, onComplete }: SplashScreenProps) {
             className={`splash-subtitle mt-3 text-[13px] tracking-[0.25em] uppercase font-light ${startSubtitle ? "is-animating" : ""}`}
             style={{
               color: "rgba(255, 252, 240, 0.92)",
+              opacity: startSubtitle ? undefined : 0,
             }}
           >
             Dwell in the Word
