@@ -177,10 +177,12 @@
     );
   background-size: 100% 220%;
   animation: dawn-sky 25s ease-in-out infinite;
-  /* Force hardware acceleration */
+  /* Force hardware acceleration and isolation for iOS */
   transform: translate3d(0,0,0);
+  transform-style: preserve-3d;
   backface-visibility: hidden;
   perspective: 1000;
+  isolation: isolate;
 }
 
 .dawn-bg::before {
@@ -261,6 +263,8 @@ html[data-dawn] .glass {
   will-change: opacity, transform;
   animation: splash-title-in 1.8s ease-out both;
   -webkit-animation: splash-title-in 1.8s ease-out both;
+  /* Force independent layer on iOS */
+  isolation: isolate;
 }
 
 .splash-subtitle {

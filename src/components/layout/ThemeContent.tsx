@@ -140,31 +140,45 @@ export function ThemeContent({ children }: { children: React.ReactNode }) {
 
   return (
     <>
-      {/* Dawn breathing gradient — persistent, behind everything */}
-      {isDawn && <div className="dawn-bg" />}
+      {/* Dawn breathing gradient — persistent, isolated layer */}
+      {isDawn && (
+        <div 
+          className="fixed inset-0 pointer-events-none" 
+          style={{ zIndex: 0, isolation: 'isolate' }}
+        >
+          <div className="dawn-bg" />
+        </div>
+      )}
 
       {showSplash && (
-        <SplashScreen
-          onFadeStart={() => router.push("/chapter")}
-          onComplete={() => setShowSplash(false)}
-        />
+        <div className="fixed inset-0" style={{ zIndex: 9999, isolation: 'isolate' }}>
+          <SplashScreen
+            onFadeStart={() => router.push("/chapter")}
+            onComplete={() => setShowSplash(false)}
+          />
+        </div>
       )}
       <main 
         className={`relative z-[1] min-h-screen pt-safe max-w-2xl mx-auto px-6 md:px-12 transition-all duration-500 ${isDawn ? dawnFont.className : ""}`}
         style={{ 
-          paddingBottom: `calc(${isCollapsed ? '3rem' : '4rem'} + 1rem + env(safe-area-inset-bottom))` 
+          paddingBottom: `calc(${isCollapsed ? '3rem' : '4rem'} + 1rem + env(safe-area-inset-bottom))`,
+          isolation: 'isolate'
         }}
       >
         {children}
       </main>
-      <BottomNav 
-        isDawn={isDawn} 
-        isCollapsed={isCollapsed} 
-        onExpand={() => {
-          setCollapsed(false);
-          resetCollapseTimer();
-        }} 
-      />
+      <div className="fixed bottom-0 left-0 right-0 pointer-events-none" style={{ zIndex: 2, isolation: 'isolate' }}>
+        <div className="pointer-events-auto">
+          <BottomNav 
+            isDawn={isDawn} 
+            isCollapsed={isCollapsed} 
+            onExpand={() => {
+              setCollapsed(false);
+              resetCollapseTimer();
+            }} 
+          />
+        </div>
+      </div>
     </>
   );
 }
