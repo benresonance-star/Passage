@@ -267,13 +267,11 @@ html[data-dawn] .glass {
   opacity: 0;
   transform: translateY(-0.5px);
   will-change: opacity, transform;
-  visibility: hidden;
 }
 
 .splash-subtitle.is-animating {
-  visibility: visible !important;
-  animation: splash-subtitle-in 6s ease-out forwards;
-  -webkit-animation: splash-subtitle-in 6s ease-out forwards;
+  animation: splash-subtitle-in 3.5s ease-out forwards;
+  -webkit-animation: splash-subtitle-in 3.5s ease-out forwards;
 }
 
 @keyframes splash-title-in {
