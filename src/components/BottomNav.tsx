@@ -33,11 +33,13 @@ export function BottomNav({
       className={`fixed bottom-0 left-1/2 -translate-x-1/2 z-[2] transition-all duration-500 ease-in-out mb-4 shadow-lg border border-white/10 will-change-[clip-path,opacity] h-16 w-[calc(100%-2rem)] max-w-md ${
         isCollapsed ? "nav-pill-clip" : "nav-full-clip"
       } ${
-        isDawn 
-          ? "bg-black/30 backdrop-blur-md border-white/10" 
-          : isSepia
-            ? "bg-white border-zinc-200"
-            : "bg-[var(--surface)] border-[var(--surface-border)]"
+        isCollapsed
+          ? "bg-[var(--theme-ui-bg)]"
+          : isDawn 
+            ? "bg-black/30 backdrop-blur-md border-white/10" 
+            : isSepia
+              ? "bg-white border-zinc-200"
+              : "bg-[var(--surface)] border-[var(--surface-border)]"
       }`}
     >
       <div className="relative w-full h-full overflow-hidden">
