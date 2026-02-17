@@ -52,6 +52,7 @@ export interface BCMState {
   settings: {
     clozeLevel: 0 | 20 | 40 | 60 | 80 | "mnemonic";
     showHeadings: boolean;
+    visibilityMode?: 0 | 1 | 2; // 0: All, 1: No Headings, 2: Hide All (Headings + Verse Numbers)
     showMemorised: boolean;
     activeChunkId: Record<string, string | null>; // Keyed by chapterId
     theme?: {

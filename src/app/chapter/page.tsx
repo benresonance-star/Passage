@@ -127,14 +127,21 @@ export default function ChapterPage() {
     });
   };
 
-  const toggleHeadings = () => {
-    setState(prev => ({
-      ...prev,
-      settings: {
-        ...prev.settings,
-        showHeadings: !prev.settings.showHeadings
-      }
-    }));
+  const toggleVisibilityMode = () => {
+    setState(prev => {
+      const currentMode = prev.settings.visibilityMode || 0;
+      const nextMode = ((currentMode + 1) % 3) as 0 | 1 | 2;
+      
+      return {
+        ...prev,
+        settings: {
+          ...prev.settings,
+          visibilityMode: nextMode,
+          // Sync legacy showHeadings for backward compatibility if needed
+          showHeadings: nextMode === 0
+        }
+      };
+    });
   };
 
   const toggleMemorised = () => {
@@ -197,12 +204,12 @@ export default function ChapterPage() {
               >
                 <Palette size={20} />
               </button>
-              <button 
-                onClick={(e) => { e.stopPropagation(); toggleHeadings(); resetTopTimer(); }}
-                className={`p-2 rounded-xl transition-colors ${state.settings.showHeadings ? "text-orange-500" : "text-zinc-500"}`}
-              >
-                {state.settings.showHeadings ? <Eye size={20} /> : <EyeOff size={20} />}
-              </button>
+            <button 
+              onClick={(e) => { e.stopPropagation(); toggleVisibilityMode(); resetTopTimer(); }}
+              className={`p-2 rounded-xl transition-colors ${state.settings.visibilityMode === 1 ? "text-orange-500" : state.settings.visibilityMode === 2 ? "text-red-500" : "text-zinc-500"}`}
+            >
+              {state.settings.visibilityMode === 0 || !state.settings.visibilityMode ? <Eye size={20} /> : <EyeOff size={20} />}
+            </button>
               <button 
                 onClick={(e) => { e.stopPropagation(); toggleMemorised(); resetTopTimer(); }}
                 className={`p-2 rounded-xl transition-colors ${state.settings.showMemorised ? "text-amber-400" : "text-zinc-500"}`}
@@ -309,6 +316,7 @@ export default function ChapterPage() {
             const isActive = activeChunkId === chunk.id;
             const isMemorised = state.cards[chapterId]?.[chunk.id]?.isMemorised;
             const showAsMemorised = isMemorised && state.settings.showMemorised;
+            const visibilityMode = state.settings.visibilityMode || 0;
 
             return (
               <div
@@ -340,7 +348,7 @@ export default function ChapterPage() {
                   {chunk.verses.map((v, idx) => (
                     <div key={idx} className={v.type === "heading" ? "w-full text-center" : "inline"}>
                       {v.type === "heading" ? (
-                        state.settings.showHeadings && (
+                        visibilityMode === 0 && (
                           <h3 className="text-[11px] font-bold uppercase tracking-[0.2em] my-4 block w-full"
                             style={{ color: showAsMemorised ? "var(--chunk-memorised-sub)" : "var(--theme-ui-subtext)" }}
                           >
@@ -349,11 +357,13 @@ export default function ChapterPage() {
                         )
                       ) : (
                         <span className="inline-block mr-2">
-                          <span className="text-[12px] align-top opacity-50 mr-1 italic font-normal"
-                            style={showAsMemorised ? { color: "var(--chunk-memorised-sub)" } : undefined}
-                          >
-                            {v.number}
-                          </span>
+                          {visibilityMode !== 2 && (
+                            <span className="text-[12px] align-top opacity-50 mr-1 italic font-normal"
+                              style={showAsMemorised ? { color: "var(--chunk-memorised-sub)" } : undefined}
+                            >
+                              {v.number}
+                            </span>
+                          )}
                           {v.text.split("[LINEBREAK]").map((line, i) => (
                             <span key={i}>
                               {i > 0 && <br />}
