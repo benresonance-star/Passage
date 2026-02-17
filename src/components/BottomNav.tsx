@@ -34,7 +34,7 @@ export function BottomNav({
         isCollapsed ? "nav-pill-clip" : "nav-full-clip"
       } ${
         isCollapsed
-          ? "bg-[var(--theme-ui-bg)]"
+          ? "bg-[color-mix(in_srgb,var(--theme-ui-bg),transparent_20%)] backdrop-blur-md"
           : isDawn 
             ? "bg-black/30 backdrop-blur-md border-white/10" 
             : isSepia
