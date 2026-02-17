@@ -21,6 +21,8 @@ export default function ChapterPage() {
   const { state, setState, isHydrated } = useBCM();
   const router = useRouter();
   const [showThemeModal, setShowThemeModal] = useState(false);
+  const [showMeta, setShowMeta] = useState(false);
+  const metaTimerRef = useRef<NodeJS.Timeout | null>(null);
   const { isCollapsed: topCollapsed, setCollapsed: setTopCollapsed, resetCollapseTimer: resetTopTimer } = useScrollAwareTopActions();
   const longPressTimer = useRef<NodeJS.Timeout | null>(null);
   const touchStartPos = useRef<{ x: number, y: number } | null>(null);
@@ -30,6 +32,20 @@ export default function ChapterPage() {
 
   const chapterId = state.selectedChapterId;
   const chapter = chapterId ? state.chapters[chapterId] : null;
+
+  const handleTitleClick = () => {
+    setShowMeta(true);
+    if (metaTimerRef.current) clearTimeout(metaTimerRef.current);
+    metaTimerRef.current = setTimeout(() => {
+      setShowMeta(false);
+    }, 3000);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (metaTimerRef.current) clearTimeout(metaTimerRef.current);
+    };
+  }, []);
 
   if (!isHydrated) return null;
   if (!chapter || !chapterId) return <EmptyState />;
@@ -177,11 +193,12 @@ export default function ChapterPage() {
     <div className="fixed inset-0 flex flex-col bg-inherit pt-safe">
       <header className={`sticky top-0 backdrop-blur-md pb-2 z-10 ${isDawn ? "bg-transparent border-b border-transparent" : "bg-inherit border-b border-white/10"}`}>
         <div className="px-6 md:px-12 flex justify-between items-start max-w-2xl mx-auto">
-          <div>
+          <div onClick={handleTitleClick} className="cursor-pointer">
             <h1 className="text-2xl font-bold">{chapter.title}</h1>
-            <div className={`flex gap-4 text-sm mt-1 ${isDawn ? "text-[var(--theme-ui-subtext)]" : "text-zinc-500"}`}>
-              <span>{chapter.chunks.length} Parts</span>
+            <div className={`flex gap-4 text-sm mt-1 transition-all duration-500 ${isDawn ? "text-[var(--theme-ui-subtext)]" : "text-zinc-500"} ${showMeta ? "opacity-100 h-auto" : "opacity-0 h-0 overflow-hidden"}`}>
+              <span>{state.versions[chapter.versionId]?.abbreviation || "NIV"} Version</span>
               <span>{scriptureVerses.length} Verses</span>
+              <span>{chapter.chunks.length} Parts</span>
             </div>
           </div>
           <div 
