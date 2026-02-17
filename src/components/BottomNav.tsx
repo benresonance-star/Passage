@@ -30,10 +30,10 @@ export function BottomNav({
     <nav 
       onClick={() => isCollapsed && onExpand?.()}
       data-state={isCollapsed ? "collapsed" : "expanded"}
-      className={`fixed bottom-0 left-1/2 -translate-x-1/2 z-[2] transition-all duration-500 ease-in-out pb-[env(safe-area-inset-bottom)] ${
+      className={`fixed bottom-0 left-1/2 -translate-x-1/2 z-[2] transition-all duration-500 ease-in-out pb-[env(safe-area-inset-bottom)] mb-4 rounded-full shadow-lg border border-white/10 ${
         isCollapsed 
-          ? "h-10 w-24 mb-4 rounded-full shadow-lg border border-white/10" 
-          : "h-16 w-full border-t"
+          ? "h-10 w-24" 
+          : "h-16 w-[calc(100%-2rem)] max-w-md"
       } ${
         isDawn 
           ? "bg-black/30 backdrop-blur-md border-white/10" 
