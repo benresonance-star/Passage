@@ -43,7 +43,13 @@ export function useScrollAwareBottomNav(options: NavOptions = {}) {
   useEffect(() => {
     if (expandOnRouteChange) {
       setCollapsed(false);
-      resetCollapseTimer();
+      // Immediately collapse after a very short delay to allow the user to see the change
+      // or just collapse immediately if that's the desired behavior.
+      // The user said "minimises immediately again" upon changing section.
+      const timer = setTimeout(() => {
+        setCollapsed(true);
+      }, 500); // Small delay so it's not a jarring jump, but feels "immediate"
+      return () => clearTimeout(timer);
     }
   }, [pathname, expandOnRouteChange]);
 

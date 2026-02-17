@@ -45,7 +45,7 @@ export function BottomNav({
       <div className="flex items-center justify-around h-full px-4 transition-all duration-500">
         {isCollapsed ? (
           <div className="flex items-center justify-center w-full">
-            <BookOpen size={20} className={pathname === "/chapter" ? "text-orange-500" : isDawn ? "text-white/50" : "text-zinc-500"} />
+            <BookOpen size={20} className="text-white" />
           </div>
         ) : (
           NAV_ITEMS.map(({ label, href, icon: Icon }) => {
