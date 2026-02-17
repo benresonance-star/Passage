@@ -72,6 +72,11 @@ export function BottomNav({
                 key={href}
                 href={href}
                 onClick={(e) => {
+                  if (isCollapsed) {
+                    e.preventDefault();
+                    onExpand?.();
+                    return;
+                  }
                   if (pathname === href) {
                     if (href === "/practice") {
                       window.dispatchEvent(new CustomEvent("bcm-reset-practice"));
