@@ -1,7 +1,7 @@
 "use client";
 
 import { useLayoutEffect, useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useBCM } from "@/context/BCMContext";
 import { BottomNav } from "@/components/BottomNav";
 import { SplashScreen, wasSplashShown } from "@/components/SplashScreen";
@@ -24,6 +24,7 @@ function getBrightness(hex: string) {
 export function ThemeContent({ children }: { children: React.ReactNode }) {
   const { state, isHydrated } = useBCM();
   const router = useRouter();
+  const pathname = usePathname();
 
   // Splash: shown once per browser session
   const [showSplash, setShowSplash] = useState(false);
