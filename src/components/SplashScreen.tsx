@@ -92,6 +92,7 @@ export function SplashScreen({ onFadeStart, onComplete }: SplashScreenProps) {
               textShadow:
                 "0 0 30px rgba(255, 210, 150, 0.25), 0 0 60px rgba(255, 195, 120, 0.1)",
               animation: "splash-title-in 1.8s ease-out both",
+              WebkitAnimation: "splash-title-in 1.8s ease-out both",
             }}
           >
             Passage
@@ -103,6 +104,7 @@ export function SplashScreen({ onFadeStart, onComplete }: SplashScreenProps) {
             style={{
               color: "rgba(255, 252, 240, 0.92)",
               animation: "splash-subtitle-in 2s ease-out 1.5s both",
+              WebkitAnimation: "splash-subtitle-in 2s ease-out 1.5s both",
             }}
           >
             Dwell in the Word
@@ -115,11 +117,27 @@ export function SplashScreen({ onFadeStart, onComplete }: SplashScreenProps) {
         @keyframes splash-title-in {
           0% {
             opacity: 0;
+            -webkit-transform: translateY(-9px) scale(0.97);
             transform: translateY(-9px) scale(0.97);
             letter-spacing: 0.14em;
           }
           100% {
             opacity: 1;
+            -webkit-transform: translateY(-21px) scale(1);
+            transform: translateY(-21px) scale(1);
+            letter-spacing: 0.08em;
+          }
+        }
+        @-webkit-keyframes splash-title-in {
+          0% {
+            opacity: 0;
+            -webkit-transform: translateY(-9px) scale(0.97);
+            transform: translateY(-9px) scale(0.97);
+            letter-spacing: 0.14em;
+          }
+          100% {
+            opacity: 1;
+            -webkit-transform: translateY(-21px) scale(1);
             transform: translateY(-21px) scale(1);
             letter-spacing: 0.08em;
           }
@@ -127,10 +145,24 @@ export function SplashScreen({ onFadeStart, onComplete }: SplashScreenProps) {
         @keyframes splash-subtitle-in {
           0% {
             opacity: 0;
+            -webkit-transform: translateY(-0.5px);
             transform: translateY(-0.5px);
           }
           100% {
             opacity: 1;
+            -webkit-transform: translateY(-6.5px);
+            transform: translateY(-6.5px);
+          }
+        }
+        @-webkit-keyframes splash-subtitle-in {
+          0% {
+            opacity: 0;
+            -webkit-transform: translateY(-0.5px);
+            transform: translateY(-0.5px);
+          }
+          100% {
+            opacity: 1;
+            -webkit-transform: translateY(-6.5px);
             transform: translateY(-6.5px);
           }
         }
