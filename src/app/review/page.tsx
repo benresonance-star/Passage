@@ -68,7 +68,7 @@ export default function ReviewPage() {
 
   return (
     <div className="fixed inset-0 flex flex-col bg-inherit pt-safe">
-      <header className="pb-4 px-4 flex-shrink-0">
+      <header className="pb-4 px-4 flex-shrink-0 z-[10] bg-inherit">
         <h1 className="text-2xl font-bold">Chapter Mastery</h1>
         <div className="flex items-center gap-2 mt-1">
           <div className="flex-1 h-1.5 bg-[var(--surface)] rounded-full overflow-hidden border border-[var(--surface-border)]">
