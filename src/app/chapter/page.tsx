@@ -335,11 +335,13 @@ export default function ChapterPage() {
                 }`}
               >
                 <div className="flex justify-between items-center">
-                  <span className={`text-[10px] font-bold uppercase tracking-[0.2em] ${
-                    isActive ? "text-[var(--chunk-active)]" : showAsMemorised ? "text-[var(--chunk-memorised)]" : "text-[var(--theme-ui-subtext)]"
-                  }`}>
-                    Verse {chunk.verseRange}
-                  </span>
+                  {visibilityMode !== 2 && (
+                    <span className={`text-[10px] font-bold uppercase tracking-[0.2em] ${
+                      isActive ? "text-[var(--chunk-active)]" : showAsMemorised ? "text-[var(--chunk-memorised)]" : "text-[var(--theme-ui-subtext)]"
+                    }`}>
+                      Verse {chunk.verseRange}
+                    </span>
+                  )}
                 </div>
                 
                 <div className={`chunk-text ${isActive ? "chunk-text-bold" : showAsMemorised ? "opacity-80" : "opacity-90"}`}
