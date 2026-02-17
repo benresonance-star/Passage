@@ -86,13 +86,11 @@ export function SplashScreen({ onFadeStart, onComplete }: SplashScreenProps) {
       >
         <div className="text-center">
           <h1
-            className="text-[42px] tracking-[0.08em] font-light"
+            className="splash-title text-[42px] tracking-[0.08em] font-light"
             style={{
               color: "rgba(255, 252, 240, 0.92)",
               textShadow:
                 "0 0 30px rgba(255, 210, 150, 0.25), 0 0 60px rgba(255, 195, 120, 0.1)",
-              animation: "splash-title-in 1.8s ease-out both",
-              WebkitAnimation: "splash-title-in 1.8s ease-out both",
             }}
           >
             Passage
@@ -100,73 +98,15 @@ export function SplashScreen({ onFadeStart, onComplete }: SplashScreenProps) {
 
           {/* Subtle tagline that fades in after the title */}
           <p
-            className="mt-3 text-[13px] tracking-[0.25em] uppercase font-light"
+            className="splash-subtitle mt-3 text-[13px] tracking-[0.25em] uppercase font-light"
             style={{
               color: "rgba(255, 252, 240, 0.92)",
-              animation: "splash-subtitle-in 2s ease-out 1.5s both",
-              WebkitAnimation: "splash-subtitle-in 2s ease-out 1.5s both",
             }}
           >
             Dwell in the Word
           </p>
         </div>
       </div>
-
-      {/* Inline keyframes for the title entrance — scoped to splash lifetime */}
-      <style>{`
-        @keyframes splash-title-in {
-          0% {
-            opacity: 0;
-            -webkit-transform: translateY(-9px) scale(0.97);
-            transform: translateY(-9px) scale(0.97);
-            letter-spacing: 0.14em;
-          }
-          100% {
-            opacity: 1;
-            -webkit-transform: translateY(-21px) scale(1);
-            transform: translateY(-21px) scale(1);
-            letter-spacing: 0.08em;
-          }
-        }
-        @-webkit-keyframes splash-title-in {
-          0% {
-            opacity: 0;
-            -webkit-transform: translateY(-9px) scale(0.97);
-            transform: translateY(-9px) scale(0.97);
-            letter-spacing: 0.14em;
-          }
-          100% {
-            opacity: 1;
-            -webkit-transform: translateY(-21px) scale(1);
-            transform: translateY(-21px) scale(1);
-            letter-spacing: 0.08em;
-          }
-        }
-        @keyframes splash-subtitle-in {
-          0% {
-            opacity: 0;
-            -webkit-transform: translateY(-0.5px);
-            transform: translateY(-0.5px);
-          }
-          100% {
-            opacity: 1;
-            -webkit-transform: translateY(-6.5px);
-            transform: translateY(-6.5px);
-          }
-        }
-        @-webkit-keyframes splash-subtitle-in {
-          0% {
-            opacity: 0;
-            -webkit-transform: translateY(-0.5px);
-            transform: translateY(-0.5px);
-          }
-          100% {
-            opacity: 1;
-            -webkit-transform: translateY(-6.5px);
-            transform: translateY(-6.5px);
-          }
-        }
-      `}</style>
     </div>
   );
 }
