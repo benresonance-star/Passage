@@ -42,7 +42,7 @@ export function ThemeContent({ children }: { children: React.ReactNode }) {
   const isDawn = theme.id === "dawn";
   const isLight = !isDawn && getBrightness(theme.bg) > 128;
 
-  const { isCollapsed, setCollapsed } = useScrollAwareBottomNav();
+  const { isCollapsed, setCollapsed, resetCollapseTimer } = useScrollAwareBottomNav();
 
   // Apply dynamic theme to <body> and CSS custom properties to :root
   useLayoutEffect(() => {
@@ -160,7 +160,10 @@ export function ThemeContent({ children }: { children: React.ReactNode }) {
       <BottomNav 
         isDawn={isDawn} 
         isCollapsed={isCollapsed} 
-        onExpand={() => setCollapsed(false)} 
+        onExpand={() => {
+          setCollapsed(false);
+          resetCollapseTimer();
+        }} 
       />
     </>
   );

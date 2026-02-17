@@ -88,7 +88,7 @@ export function BottomNav({
                 }`}
               >
                 <Icon size={24} className="transition-all duration-500" />
-                <span className="text-[10px] font-medium uppercase tracking-wider transition-all duration-500">
+                <span className={`text-[10px] font-medium uppercase tracking-wider transition-all duration-500`}>
                   {label}
                 </span>
               </Link>
