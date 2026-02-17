@@ -30,7 +30,7 @@ export function BottomNav({
     <nav 
       onClick={() => isCollapsed && onExpand?.()}
       data-state={isCollapsed ? "collapsed" : "expanded"}
-      className={`fixed bottom-0 left-1/2 -translate-x-1/2 z-[2] transition-all duration-500 ease-in-out mb-4 rounded-full shadow-lg border border-white/10 ${
+      className={`fixed bottom-0 left-1/2 -translate-x-1/2 z-[2] transition-all duration-500 ease-in-out mb-4 rounded-full shadow-lg border border-white/10 will-change-[transform,width,height,opacity] ${
         isCollapsed 
           ? "h-10 w-24" 
           : "h-16 w-[calc(100%-2rem)] max-w-md"
@@ -42,13 +42,23 @@ export function BottomNav({
             : "bg-[var(--surface)] border-[var(--surface-border)]"
       }`}
     >
-      <div className="flex items-center justify-around h-full px-4 transition-all duration-500">
-        {isCollapsed ? (
-          <div className="flex items-center justify-center w-full">
-            <BookOpen size={20} className="text-white" />
-          </div>
-        ) : (
-          NAV_ITEMS.map(({ label, href, icon: Icon }) => {
+      <div className="relative w-full h-full overflow-hidden rounded-full">
+        {/* Minimized State Content (Pill with Book Icon) */}
+        <div 
+          className={`absolute inset-0 flex items-center justify-center transition-opacity duration-300 pointer-events-none ${
+            isCollapsed ? "opacity-100" : "opacity-0"
+          }`}
+        >
+          <BookOpen size={20} className="text-white" />
+        </div>
+
+        {/* Expanded State Content (Full Navigation Grid) */}
+        <div 
+          className={`absolute inset-0 flex items-center justify-around px-4 transition-all duration-500 ${
+            isCollapsed ? "opacity-0 pointer-events-none scale-95" : "opacity-100 scale-100"
+          }`}
+        >
+          {NAV_ITEMS.map(({ label, href, icon: Icon }) => {
             const isActive = pathname === href;
             const isPracticeItem = href !== "/chapter" && href !== "/";
             const isDisabled = isPracticeItem && !hasChapter;
@@ -59,7 +69,7 @@ export function BottomNav({
                   key={href}
                   className="flex flex-col items-center justify-center gap-1 opacity-20 cursor-not-allowed pointer-events-none"
                 >
-                  <Icon size={24} className="text-zinc-500 transition-all duration-500" />
+                  <Icon size={24} className="text-zinc-500" />
                   <span className="text-[10px] font-medium uppercase tracking-wider text-zinc-500">
                     {label}
                   </span>
@@ -86,22 +96,21 @@ export function BottomNav({
                     }
                   }
                 }}
-                className={`flex flex-col items-center justify-center transition-all duration-500 gap-1 ${
+                className={`flex flex-col items-center justify-center gap-1 transition-colors duration-300 ${
                   isActive 
                     ? "text-orange-500" 
                     : isDawn ? "text-white/50" : "text-zinc-500"
                 }`}
               >
-                <Icon size={24} className="transition-all duration-500" />
-                <span className={`text-[10px] font-medium uppercase tracking-wider transition-all duration-500`}>
+                <Icon size={24} />
+                <span className="text-[10px] font-medium uppercase tracking-wider">
                   {label}
                 </span>
               </Link>
             );
-          })
-        )}
+          })}
+        </div>
       </div>
     </nav>
   );
 }
-
