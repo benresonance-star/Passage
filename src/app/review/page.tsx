@@ -83,7 +83,7 @@ export default function ReviewPage() {
         </div>
       </header>
 
-      <div className="flex-1 overflow-y-auto px-4 pb-[calc(64px+env(safe-area-inset-bottom)+2rem)] space-y-4 scrollbar-hide stable-scroll-container">
+      <div className="flex-1 overflow-y-auto px-4 pt-2 pb-[calc(64px+env(safe-area-inset-bottom)+2rem)] space-y-4 scrollbar-hide stable-scroll-container">
         {allChunks.map(({ chunk, card }) => {
           const isMemorised = card?.isMemorised;
           const isActive = chunk.id === effectiveActiveChunkId;
