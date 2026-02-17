@@ -1,6 +1,6 @@
 "use client";
 
-import { Play, Pause, FastForward, Rewind, X, Plus, Minus } from "lucide-react";
+import { Play, Pause, FastForward, Rewind, X, Plus, Minus, Eye, EyeOff } from "lucide-react";
 import { useRef } from "react";
 
 interface FlowControlsProps {
