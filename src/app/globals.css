@@ -339,3 +339,15 @@ html[data-dawn] .glass {
   -webkit-clip-path: inset(0% 0% 0% 0% round 9999px);
 }
 
+/* ─── Top Actions Liquid Transition — Anchored Right ─────────────── */
+
+.top-pill-clip {
+  clip-path: inset(0% 0% 0% calc(100% - 44px) round 9999px);
+  -webkit-clip-path: inset(0% 0% 0% calc(100% - 44px) round 9999px);
+}
+
+.top-full-clip {
+  clip-path: inset(0% 0% 0% 0% round 9999px);
+  -webkit-clip-path: inset(0% 0% 0% 0% round 9999px);
+}
+

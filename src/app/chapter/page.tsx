@@ -4,8 +4,9 @@ import { useBCM } from "@/context/BCMContext";
 import { useRouter } from "next/navigation";
 import { Play, Mic, ChevronRight, Eye, EyeOff, Award, Palette, Settings, X, Eraser } from "lucide-react";
 import Link from "next/link";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { EmptyState } from "@/components/EmptyState";
+import { useScrollAwareTopActions } from "@/hooks/useScrollAwareTopActions";
 
 const THEME_PRESETS = [
   { name: "OLED", bg: "#000000", text: "#f4f4f5" },
@@ -20,6 +21,7 @@ export default function ChapterPage() {
   const { state, setState, isHydrated } = useBCM();
   const router = useRouter();
   const [showThemeModal, setShowThemeModal] = useState(false);
+  const { isCollapsed: topCollapsed, setCollapsed: setTopCollapsed, resetCollapseTimer: resetTopTimer } = useScrollAwareTopActions();
   const longPressTimer = useRef<NodeJS.Timeout | null>(null);
   const touchStartPos = useRef<{ x: number, y: number } | null>(null);
   const isLongPressActive = useRef(false);
@@ -173,37 +175,52 @@ export default function ChapterPage() {
               <span>{chapter.verses.length} Verses</span>
             </div>
           </div>
-          <div className="flex gap-2">
-            {state.settings.highlightedWords && state.settings.highlightedWords.length > 0 && (
+          <div 
+            className={`flex gap-1 p-1 transition-all duration-500 ease-in-out shadow-lg rounded-full will-change-[clip-path,opacity] ${
+              topCollapsed ? "top-pill-clip bg-transparent" : "top-full-clip bg-[var(--theme-ui-bg)] border border-white/10"
+            }`}
+            onClick={() => topCollapsed && (setTopCollapsed(false), resetTopTimer())}
+          >
+            <div className={`flex gap-1 transition-all duration-500 ${topCollapsed ? "opacity-0 scale-95 pointer-events-none" : "opacity-100 scale-100"}`}>
+              {state.settings.highlightedWords && state.settings.highlightedWords.length > 0 && (
+                <button 
+                  onClick={(e) => { e.stopPropagation(); clearHighlights(); resetTopTimer(); }}
+                  className="p-2 rounded-xl transition-colors text-zinc-500"
+                  title="Clear highlights"
+                >
+                  <Eraser size={20} />
+                </button>
+              )}
               <button 
-                onClick={clearHighlights}
-                className="p-2 rounded-xl transition-colors text-zinc-500 bg-[var(--theme-ui-bg)]"
-                title="Clear highlights"
+                onClick={(e) => { e.stopPropagation(); setShowThemeModal(true); resetTopTimer(); }}
+                className="p-2 rounded-xl transition-colors text-zinc-500"
               >
-                <Eraser size={20} />
+                <Palette size={20} />
               </button>
-            )}
-            <button 
-              onClick={() => setShowThemeModal(true)}
-              className="p-2 rounded-xl transition-colors text-zinc-500 bg-[var(--theme-ui-bg)]"
-            >
-              <Palette size={20} />
-            </button>
-            <button 
-              onClick={toggleHeadings}
-              className={`p-2 rounded-xl transition-colors ${state.settings.showHeadings ? "text-orange-500 bg-orange-500/10" : "text-zinc-500 bg-[var(--theme-ui-bg)]"}`}
-            >
-              {state.settings.showHeadings ? <Eye size={20} /> : <EyeOff size={20} />}
-            </button>
-            <button 
-              onClick={toggleMemorised}
-              className={`p-2 rounded-xl transition-colors ${state.settings.showMemorised ? "text-amber-400 bg-amber-400/10" : "text-zinc-500 bg-[var(--theme-ui-bg)]"}`}
-            >
-              <Award size={20} />
-            </button>
+              <button 
+                onClick={(e) => { e.stopPropagation(); toggleHeadings(); resetTopTimer(); }}
+                className={`p-2 rounded-xl transition-colors ${state.settings.showHeadings ? "text-orange-500" : "text-zinc-500"}`}
+              >
+                {state.settings.showHeadings ? <Eye size={20} /> : <EyeOff size={20} />}
+              </button>
+              <button 
+                onClick={(e) => { e.stopPropagation(); toggleMemorised(); resetTopTimer(); }}
+                className={`p-2 rounded-xl transition-colors ${state.settings.showMemorised ? "text-amber-400" : "text-zinc-500"}`}
+              >
+                <Award size={20} />
+              </button>
+            </div>
             <Link
               href="/"
-              className="p-2 rounded-xl transition-colors text-zinc-500 bg-[var(--theme-ui-bg)]"
+              onClick={(e) => {
+                if (topCollapsed) {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setTopCollapsed(false);
+                  resetTopTimer();
+                }
+              }}
+              className={`p-2 rounded-xl transition-colors text-zinc-500 ${topCollapsed ? "bg-[var(--theme-ui-bg)] border border-white/10 shadow-md" : ""}`}
             >
               <Settings size={20} />
             </Link>
