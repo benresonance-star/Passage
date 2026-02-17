@@ -30,7 +30,7 @@ export function BottomNav({
     <nav 
       onClick={() => isCollapsed && onExpand?.()}
       data-state={isCollapsed ? "collapsed" : "expanded"}
-      className={`fixed bottom-0 left-1/2 -translate-x-1/2 z-[2] transition-all duration-500 ease-in-out pb-[env(safe-area-inset-bottom)] mb-4 rounded-full shadow-lg border border-white/10 ${
+      className={`fixed bottom-0 left-1/2 -translate-x-1/2 z-[2] transition-all duration-500 ease-in-out mb-4 rounded-full shadow-lg border border-white/10 ${
         isCollapsed 
           ? "h-10 w-24" 
           : "h-16 w-[calc(100%-2rem)] max-w-md"
@@ -42,7 +42,7 @@ export function BottomNav({
             : "bg-[var(--surface)] border-[var(--surface-border)]"
       }`}
     >
-      <div className={`flex items-center justify-around h-full px-4 transition-all duration-500`}>
+      <div className="flex items-center justify-around h-full px-4 transition-all duration-500">
         {isCollapsed ? (
           <div className="flex items-center justify-center w-full">
             <BookOpen size={20} className={pathname === "/chapter" ? "text-orange-500" : isDawn ? "text-white/50" : "text-zinc-500"} />
