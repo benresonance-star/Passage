@@ -310,11 +310,9 @@ export function SoakVerseTap({
         }}
       >
         <p
-          className="soak-verse soak-text max-w-lg"
+          className={`soak-verse soak-text max-w-lg ${opacity === 1 ? "soak-verse-in" : ""}`}
           style={{
             opacity,
-            transition: FADE_TRANSITION,
-            WebkitTransition: FADE_TRANSITION,
             WebkitTransform: "translate3d(0,0,0)",
           }}
           data-testid={isTarget ? "soak-verse" : undefined}

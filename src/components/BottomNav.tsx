@@ -30,10 +30,8 @@ export function BottomNav({
     <nav 
       onClick={() => isCollapsed && onExpand?.()}
       data-state={isCollapsed ? "collapsed" : "expanded"}
-      className={`fixed bottom-0 left-1/2 -translate-x-1/2 z-[2] transition-all duration-500 ease-in-out mb-4 rounded-full shadow-lg border border-white/10 will-change-[transform,width,height,opacity] ${
-        isCollapsed 
-          ? "h-10 w-24" 
-          : "h-16 w-[calc(100%-2rem)] max-w-md"
+      className={`fixed bottom-0 left-1/2 -translate-x-1/2 z-[2] transition-all duration-500 ease-in-out mb-4 shadow-lg border border-white/10 will-change-[clip-path,opacity] h-16 w-[calc(100%-2rem)] max-w-md ${
+        isCollapsed ? "nav-pill-clip" : "nav-full-clip"
       } ${
         isDawn 
           ? "bg-black/30 backdrop-blur-md border-white/10" 
@@ -42,7 +40,7 @@ export function BottomNav({
             : "bg-[var(--surface)] border-[var(--surface-border)]"
       }`}
     >
-      <div className="relative w-full h-full overflow-hidden rounded-full">
+      <div className="relative w-full h-full overflow-hidden">
         {/* Minimized State Content (Pill with Book Icon) */}
         <div 
           className={`absolute inset-0 flex items-center justify-center transition-opacity duration-300 pointer-events-none ${

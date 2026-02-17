@@ -308,14 +308,34 @@ html[data-dawn] .glass {
   }
 }
 
-@-webkit-keyframes splash-subtitle-in {
-  0% {
-    opacity: 0;
-    -webkit-transform: translateY(-0.5px);
-  }
-  100% {
-    opacity: 1;
-    -webkit-transform: translateY(-6.5px);
-  }
+/* ─── Soaking Verse Fade — Static for iOS Stability ──────────────── */
+
+.soak-verse-in {
+  opacity: 0;
+  animation: soak-verse-fade-in 1000ms ease-in-out forwards;
+  -webkit-animation: soak-verse-fade-in 1000ms ease-in-out forwards;
+  will-change: opacity;
+}
+
+@keyframes soak-verse-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@-webkit-keyframes soak-verse-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* ─── Bottom Nav Liquid Transition — Clip Path for iOS Stability ─── */
+
+.nav-pill-clip {
+  clip-path: inset(calc(50% - 20px) calc(50% - 48px) calc(50% - 20px) calc(50% - 48px) round 9999px);
+  -webkit-clip-path: inset(calc(50% - 20px) calc(50% - 48px) calc(50% - 20px) calc(50% - 48px) round 9999px);
+}
+
+.nav-full-clip {
+  clip-path: inset(0% 0% 0% 0% round 9999px);
+  -webkit-clip-path: inset(0% 0% 0% 0% round 9999px);
 }
 
