@@ -22,6 +22,7 @@ export default function PracticePage() {
   const router = useRouter();
   const [mode, setMode] = useState<PracticeMode>("read");
   const [isFlowMode, setIsFlowMode] = useState(false);
+  const [isFocusMode, setIsFocusMode] = useState(true);
   const [typedText, setTypedText] = useState("");
   const [diffResults, setDiffResults] = useState<{ results: DiffResult[]; accuracy: number } | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -252,12 +253,15 @@ export default function PracticePage() {
                             const wi = globalWordIdx++;
                             const isRead = isFlowMode && wi <= currentIndex;
                             const isUnread = isFlowMode && wi > currentIndex;
+                            const isHidden = isUnread && isFocusMode;
+                            
                             return (
                               <span
                                 key={wi}
                                 className="inline"
                                 style={{
-                                  transition: "color 0.8s ease-out, text-shadow 0.8s ease-out",
+                                  transition: "color 0.8s ease-out, text-shadow 0.8s ease-out, opacity 0.8s ease-out",
+                                  opacity: isHidden ? 0 : 1,
                                   ...(isRead
                                     ? { color: "var(--flow-read)", textShadow: "var(--flow-glow, none)" }
                                     : isUnread
@@ -466,6 +470,8 @@ export default function PracticePage() {
                     setIsPlaying(false);
                     setCurrentIndex(-1);
                   }}
+                  isFocusMode={isFocusMode}
+                  onToggleFocus={() => setIsFocusMode(!isFocusMode)}
                 />
               </div>
             )}

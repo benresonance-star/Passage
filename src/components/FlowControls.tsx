@@ -11,6 +11,8 @@ interface FlowControlsProps {
   onSkip: (direction: 'forward' | 'backward') => void;
   onReset?: () => void;
   onClose: () => void;
+  isFocusMode: boolean;
+  onToggleFocus: () => void;
 }
 
 export default function FlowControls({ 
@@ -20,7 +22,9 @@ export default function FlowControls({
   onWpmChange, 
   onSkip, 
   onReset,
-  onClose 
+  onClose,
+  isFocusMode,
+  onToggleFocus
 }: FlowControlsProps) {
   const holdTimerRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -44,13 +48,23 @@ export default function FlowControls({
 
   return (
     <div className="flex items-center justify-between bg-[var(--surface)] backdrop-blur-xl px-6 py-2 rounded-2xl border border-[var(--surface-border)] shadow-2xl w-full mx-auto pointer-events-auto transition-all animate-in slide-in-from-bottom-4">
-      {/* Exit Button */}
-      <button
-        onClick={onClose}
-        className="p-2 text-white hover:text-orange-500 transition-colors"
-      >
-        <X size={20} />
-      </button>
+      {/* Left Group: Exit & Focus */}
+      <div className="flex items-center gap-2">
+        <button
+          onClick={onClose}
+          className="p-2 text-white hover:text-orange-500 transition-colors"
+        >
+          <X size={20} />
+        </button>
+
+        <button
+          onClick={onToggleFocus}
+          className={`p-2 transition-colors ${isFocusMode ? 'text-orange-500' : 'text-white hover:text-orange-500'}`}
+          title={isFocusMode ? "Show all text" : "Hide unread text"}
+        >
+          {isFocusMode ? <Eye size={20} /> : <EyeOff size={20} />}
+        </button>
+      </div>
 
       {/* Playback Controls */}
       <div className="flex items-center gap-4">
