@@ -47,7 +47,7 @@ export function BottomNav({
             isCollapsed ? "opacity-100" : "opacity-0"
           }`}
         >
-          <BookOpen size={20} className="text-white" />
+          <BookOpen size={20} className="text-zinc-500" />
         </div>
 
         {/* Expanded State Content (Full Navigation Grid) */}
