@@ -43,12 +43,10 @@ export function useScrollAwareBottomNav(options: NavOptions = {}) {
   useEffect(() => {
     if (expandOnRouteChange) {
       setCollapsed(false);
-      // Immediately collapse after a very short delay to allow the user to see the change
-      // or just collapse immediately if that's the desired behavior.
-      // The user said "minimises immediately again" upon changing section.
+      // Stagger the auto-collapse to allow page entry animations to finish
       const timer = setTimeout(() => {
         setCollapsed(true);
-      }, 500); // Small delay so it's not a jarring jump, but feels "immediate"
+      }, 2500); // 2.5s delay gives breathing room for splash/entry animations
       return () => clearTimeout(timer);
     }
   }, [pathname, expandOnRouteChange]);

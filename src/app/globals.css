@@ -257,7 +257,7 @@ html[data-dawn] .glass {
 
 .splash-title {
   opacity: 0;
-  transform: translateY(-9px) scale(0.97);
+  transform: translate3d(0, -9px, 0) scale(0.97);
   will-change: opacity, transform;
   animation: splash-title-in 1.8s ease-out both;
   -webkit-animation: splash-title-in 1.8s ease-out both;
