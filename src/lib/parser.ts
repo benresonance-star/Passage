@@ -24,8 +24,8 @@ export function parseChapter(text: string, stripRefs: boolean = true): { title: 
     
     // Split the text into segments: either a verse block or a heading block
     // A verse block starts with <n>
-    // A heading block is anything else between verse blocks
-    const segments = remainingText.split(/(?=<(?:\d+)>)/);
+    // A heading block starts with <heading>
+    const segments = remainingText.split(/(?=<(?:\d+|heading)>)/);
     
     let currentParagraph = false;
     
@@ -34,6 +34,7 @@ export function parseChapter(text: string, stripRefs: boolean = true): { title: 
       if (!trimmedSegment) continue;
 
       const verseMatch = trimmedSegment.match(/^<(\d+)>([\s\S]*)/);
+      const explicitHeadingMatch = trimmedSegment.match(/^<heading>([\s\S]*?)(?:<\/heading>|$)([\s\S]*)/);
       
       if (verseMatch) {
         const num = parseInt(verseMatch[1]);
@@ -48,8 +49,25 @@ export function parseChapter(text: string, stripRefs: boolean = true): { title: 
           type: "scripture",
         });
         currentParagraph = false;
+      } else if (explicitHeadingMatch) {
+        const headingText = explicitHeadingMatch[1].trim();
+        const remainingAfterHeading = explicitHeadingMatch[2].trim();
+        
+        verses.push({
+          text: headingText.replace(/\n/g, " "),
+          type: "heading",
+        });
+
+        // If there's text after the closing tag that isn't a new tag, treat it as a continuation
+        if (remainingAfterHeading && !remainingAfterHeading.startsWith("<")) {
+          const lastVerse = verses.length > 0 ? verses[verses.length - 1] : null;
+          if (lastVerse?.type === "scripture") {
+            lastVerse.text += "[LINEBREAK]" + remainingAfterHeading.replace(/\n/g, "[LINEBREAK]");
+          }
+        }
+        currentParagraph = false;
       } else {
-        // This is a segment that doesn't start with a verse tag.
+        // This is a segment that doesn't start with a verse tag or explicit heading tag.
         // It could be a heading, OR it could be orphaned text (like a quote) belonging to the previous verse.
         
         const lastVerse = verses.length > 0 ? verses[verses.length - 1] : null;
@@ -59,9 +77,7 @@ export function parseChapter(text: string, stripRefs: boolean = true): { title: 
         const looksLikeContinuation = lastVerse?.type === "scripture" && 
           (trimmedSegment.startsWith("“") || trimmedSegment.startsWith("\"") || trimmedSegment.startsWith("'") || trimmedSegment.match(/^[a-z]/));
 
-        const isKnownHeading = ["Present Suffering and Future Glory", "More Than Conquerors"].includes(trimmedSegment);
-
-        if (looksLikeContinuation && lastVerse && !isKnownHeading) {
+        if (looksLikeContinuation && lastVerse) {
           // Append to previous verse
           const continuationText = trimmedSegment.replace(/\n/g, "[LINEBREAK]");
           lastVerse.text += "[LINEBREAK]" + continuationText;
