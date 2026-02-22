@@ -20,6 +20,8 @@
   pointer-events: none;
   background: #1e1b3a; /* Base dark color */
   will-change: transform;
+  -webkit-transform: translate3d(0,0,0);
+  -webkit-backface-visibility: hidden;
 }
 
 /* Layer 1: Sky Gradient (Static) */
@@ -32,6 +34,7 @@
   animation: soak-bg-pulse 15s ease-in-out infinite alternate;
   will-change: opacity;
   transform: translate3d(0,0,0);
+  -webkit-transform: translate3d(0,0,0);
 }
 
 /* Layer 2: Horizon/Water Glow (Static) */
@@ -44,6 +47,7 @@
   animation: soak-glow-pulse 10s ease-in-out infinite alternate;
   will-change: opacity, transform;
   transform: translate3d(0,0,0);
+  -webkit-transform: translate3d(0,0,0);
 }
 
 @keyframes soak-bg-pulse {

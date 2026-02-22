@@ -27,16 +27,13 @@ interface SplashScreenProps {
 
 export function SplashScreen({ onFadeStart, onComplete }: SplashScreenProps) {
   const [phase, setPhase] = useState<"hold" | "fade-out" | "done">("hold");
-  const [startSubtitle, setStartSubtitle] = useState(false);
   const fadeStartFired = useRef(false);
 
   // After HOLD_MS, begin fade-out
   useEffect(() => {
     const holdTimer = setTimeout(() => setPhase("fade-out"), HOLD_MS);
-    const subtitleTimer = setTimeout(() => setStartSubtitle(true), 1500);
     return () => {
       clearTimeout(holdTimer);
-      clearTimeout(subtitleTimer);
     };
   }, []);
 
@@ -79,35 +76,49 @@ export function SplashScreen({ onFadeStart, onComplete }: SplashScreenProps) {
         opacity,
         pointerEvents: phase === "done" ? "none" : "auto",
         transform: "translate3d(0,0,0)",
+        WebkitTransform: "translate3d(0,0,0)",
         willChange: "opacity",
       }}
     >
       {/* Centered title */}
-      <div
-        className="text-center"
-      >
-          <h1
-            className="splash-title text-[42px] tracking-[0.08em] font-light"
-            style={{
-              color: "rgba(255, 252, 240, 0.92)",
-              textShadow:
-                "0 0 30px rgba(255, 210, 150, 0.25), 0 0 60px rgba(255, 195, 120, 0.1)",
-            }}
-          >
-            Passage
-          </h1>
+      <div className="text-center relative z-[10000]">
+        <h1
+          className="splash-title text-[42px] tracking-[0.08em] font-light"
+          style={{
+            color: "rgba(255, 252, 240, 0.92)",
+            textShadow: "0 0 30px rgba(255, 210, 150, 0.25), 0 0 60px rgba(255, 195, 120, 0.1)",
+            animation: "splash-title-fade 2000ms ease-out forwards",
+            WebkitAnimation: "splash-title-fade 2000ms ease-out forwards",
+          }}
+        >
+          Passage
+        </h1>
 
-          {/* Subtle tagline that fades in after the title */}
-          <p
-            className={`splash-subtitle mt-3 text-[13px] tracking-[0.25em] uppercase font-light ${startSubtitle ? "is-animating" : ""}`}
-            style={{
-              color: "rgba(255, 252, 240, 0.92)",
-            }}
-          >
-            Dwell in the Word
-          </p>
-        </div>
+        {/* Subtle tagline that fades in after the title */}
+        <p
+          className="splash-subtitle mt-3 text-[13px] tracking-[0.25em] uppercase font-light"
+          style={{
+            color: "rgba(255, 252, 240, 0.92)",
+            opacity: 0,
+            animation: "splash-subtitle-fade 2000ms ease-out 1500ms forwards",
+            WebkitAnimation: "splash-subtitle-fade 2000ms ease-out 1500ms forwards",
+          }}
+        >
+          Dwell in the Word
+        </p>
       </div>
+
+      <style jsx global>{`
+        @keyframes splash-title-fade {
+          from { opacity: 0; transform: translate3d(0, 10px, 0); }
+          to { opacity: 1; transform: translate3d(0, 0, 0); }
+        }
+        @keyframes splash-subtitle-fade {
+          from { opacity: 0; transform: translate3d(0, 5px, 0); }
+          to { opacity: 1; transform: translate3d(0, 0, 0); }
+        }
+      `}</style>
+    </div>
   );
 }
 
@@ -122,4 +133,3 @@ export function wasSplashShown(): boolean {
     return false;
   }
 }
-
