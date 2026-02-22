@@ -36,6 +36,18 @@ export function ThemeContent({ children }: { children: React.ReactNode }) {
     return false;
   });
   const [showMeditation, setShowMeditation] = useState(false);
+  const [isNavigating, setIsNavigating] = useState(false);
+
+  // Reset navigation guard when pathname changes (route change complete)
+  useEffect(() => {
+    if (isNavigating) {
+      const timer = setTimeout(() => {
+        setIsNavigating(false);
+        setShowMeditation(false);
+      }, 150); // Small buffer to ensure page is painted
+      return () => clearTimeout(timer);
+    }
+  }, [pathname, isNavigating]);
 
   useEffect(() => {
     // No longer need to check wasSplashShown here as it's done in initializer
@@ -163,15 +175,17 @@ export function ThemeContent({ children }: { children: React.ReactNode }) {
       {showMeditation && (
         <MeditationScreen 
           onComplete={() => {
-            setShowMeditation(false);
             if (pathname === "/") {
+              setIsNavigating(true);
               router.push("/chapter");
+            } else {
+              setShowMeditation(false);
             }
           }} 
         />
       )}
       <main 
-        className={`relative z-[1] min-h-screen pt-safe max-w-2xl mx-auto px-6 md:px-12 transition-all duration-500 ${isDawn ? dawnFont.className : ""} ${(showSplash || showMeditation) ? "opacity-0 pointer-events-none" : "opacity-100"}`}
+        className={`relative z-[1] min-h-screen pt-safe max-w-2xl mx-auto px-6 md:px-12 transition-all duration-700 ${isDawn ? dawnFont.className : ""} ${(showSplash || showMeditation || isNavigating) ? "opacity-0 pointer-events-none" : "opacity-100"}`}
         style={{ 
           paddingBottom: isSoaking ? '0' : `calc(${isCollapsed ? '3rem' : '4rem'} + 1rem + env(safe-area-inset-bottom))`
         }}
@@ -179,7 +193,7 @@ export function ThemeContent({ children }: { children: React.ReactNode }) {
         {children}
       </main>
       
-      {!isSoaking && !showSplash && !showMeditation && (
+      {!isSoaking && !showSplash && !showMeditation && !isNavigating && (
         <BottomNav 
           isDawn={isDawn} 
           isCollapsed={isCollapsed} 

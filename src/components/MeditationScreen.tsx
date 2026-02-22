@@ -27,8 +27,9 @@ export function MeditationScreen({ onComplete }: MeditationScreenProps) {
   const handleTouch = () => {
     if (isFading) return;
     setIsFading(true);
-    // Wait for fade-out animation before completing
-    setTimeout(onComplete, 1200);
+    // Start navigation slightly before the fade-out is complete (at 1000ms of 1200ms)
+    // to give the router time to prepare the next page while the screen is still black.
+    setTimeout(onComplete, 1000);
   };
 
   return (
