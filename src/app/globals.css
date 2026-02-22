@@ -22,10 +22,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  * {
-    transition-duration: 0.01ms !important;
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
+  *, *::before, *::after {
     scroll-behavior: auto !important;
   }
 }
@@ -323,6 +320,28 @@ html[data-dawn] .glass {
   100% {
     opacity: 1;
     -webkit-transform: translateY(-6.5px);
+  }
+}
+
+@keyframes splash-title-in-reduced {
+  0%   { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+@keyframes splash-subtitle-in-reduced {
+  0%   { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .splash-title {
+    transform: none;
+    animation: splash-title-in-reduced 1.8s ease-out both;
+    -webkit-animation: splash-title-in-reduced 1.8s ease-out both;
+  }
+  .splash-subtitle.is-animating {
+    animation: splash-subtitle-in-reduced 3.5s ease-out forwards;
+    -webkit-animation: splash-subtitle-in-reduced 3.5s ease-out forwards;
   }
 }
 

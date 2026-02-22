@@ -123,6 +123,11 @@
     opacity: 0.6;
   }
 
+  .soak-breathe::after {
+    animation: none;
+    opacity: 0.6;
+  }
+
   .soak-word {
     transition: none;
   }
