@@ -175,7 +175,7 @@ export default function ChapterPage() {
           </div>
           <div 
             className={`flex gap-1 p-1 transition-all duration-500 ease-in-out shadow-lg rounded-full will-change-[clip-path,opacity] ${
-              topCollapsed ? "top-pill-clip bg-transparent" : "top-full-clip bg-[var(--theme-ui-bg)] border border-white/10"
+              topCollapsed ? "top-pill-clip bg-transparent border-transparent" : "top-full-clip bg-[var(--theme-ui-bg)] border border-white/10"
             }`}
             onClick={() => topCollapsed && (setTopCollapsed(false), resetTopTimer())}
           >

@@ -381,11 +381,13 @@ html[data-dawn] .glass {
 .nav-pill-clip {
   clip-path: inset(calc(50% - 20px) calc(50% - 48px) calc(50% - 20px) calc(50% - 48px) round 9999px);
   -webkit-clip-path: inset(calc(50% - 20px) calc(50% - 48px) calc(50% - 20px) calc(50% - 48px) round 9999px);
+  will-change: clip-path;
 }
 
 .nav-full-clip {
   clip-path: inset(0% 0% 0% 0% round 32px);
   -webkit-clip-path: inset(0% 0% 0% 0% round 32px);
+  will-change: clip-path;
 }
 
 /* ─── Top Actions Liquid Transition — Anchored Right ─────────────── */
@@ -393,10 +395,12 @@ html[data-dawn] .glass {
 .top-pill-clip {
   clip-path: inset(0% 0% 0% calc(100% - 44px) round 9999px);
   -webkit-clip-path: inset(0% 0% 0% calc(100% - 44px) round 9999px);
+  will-change: clip-path;
 }
 
 .top-full-clip {
   clip-path: inset(0% 0% 0% 0% round 9999px);
   -webkit-clip-path: inset(0% 0% 0% 0% round 9999px);
+  will-change: clip-path;
 }
 
