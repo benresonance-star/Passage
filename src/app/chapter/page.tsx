@@ -174,58 +174,62 @@ export default function ChapterPage() {
             </div>
           </div>
           <div 
-            className={`flex gap-1 p-1 transition-all duration-500 ease-in-out shadow-lg rounded-full will-change-[clip-path,opacity] ${
-              topCollapsed ? "top-pill-clip bg-transparent border-transparent" : "top-full-clip bg-[var(--theme-ui-bg)] border border-white/10"
-            }`}
+            className="relative h-10 will-change-[clip-path,opacity]"
             onClick={() => topCollapsed && (setTopCollapsed(false), resetTopTimer())}
           >
-            <div className={`flex gap-1 transition-all duration-500 ${topCollapsed ? "opacity-0 scale-95 pointer-events-none" : "opacity-100 scale-100"}`}>
-              {state.settings.highlightedWords && state.settings.highlightedWords.length > 0 && (
+            <div 
+              className={`flex gap-1 p-1 transition-all duration-500 ease-in-out shadow-lg rounded-full overflow-hidden ${
+                topCollapsed ? "top-pill-clip bg-transparent border-transparent" : "top-full-clip bg-[var(--theme-ui-bg)] border border-white/10"
+              }`}
+            >
+              <div className={`flex gap-1 transition-all duration-500 ${topCollapsed ? "opacity-0 scale-95 pointer-events-none" : "opacity-100 scale-100"}`}>
+                {state.settings.highlightedWords && state.settings.highlightedWords.length > 0 && (
+                  <button 
+                    onClick={(e) => { e.stopPropagation(); clearHighlights(); resetTopTimer(); }}
+                    className="p-2 rounded-xl transition-colors text-zinc-500"
+                    title="Clear highlights"
+                  >
+                    <Eraser size={20} />
+                  </button>
+                )}
                 <button 
-                  onClick={(e) => { e.stopPropagation(); clearHighlights(); resetTopTimer(); }}
+                  onClick={(e) => { e.stopPropagation(); setShowThemeModal(true); resetTopTimer(); }}
                   className="p-2 rounded-xl transition-colors text-zinc-500"
-                  title="Clear highlights"
+                  aria-label="Change theme"
                 >
-                  <Eraser size={20} />
+                  <Palette size={20} />
                 </button>
-              )}
-              <button 
-                onClick={(e) => { e.stopPropagation(); setShowThemeModal(true); resetTopTimer(); }}
-                className="p-2 rounded-xl transition-colors text-zinc-500"
-                aria-label="Change theme"
+                <button 
+                  onClick={(e) => { e.stopPropagation(); toggleVisibilityMode(); resetTopTimer(); }}
+                  className={`p-2 rounded-xl transition-colors ${state.settings.visibilityMode === 1 ? "text-orange-500" : state.settings.visibilityMode === 2 ? "text-red-500" : "text-zinc-500"}`}
+                  aria-label="Toggle visibility mode"
+                >
+                  {state.settings.visibilityMode === 0 || !state.settings.visibilityMode ? <Eye size={20} /> : <EyeOff size={20} />}
+                </button>
+                <button 
+                  onClick={(e) => { e.stopPropagation(); toggleMemorised(); resetTopTimer(); }}
+                  className={`p-2 rounded-xl transition-colors ${state.settings.showMemorised ? "text-amber-400" : "text-zinc-500"}`}
+                  aria-label="Toggle memorised highlights"
+                >
+                  <Award size={20} />
+                </button>
+              </div>
+              <Link
+                href="/"
+                onClick={(e) => {
+                  if (topCollapsed) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setTopCollapsed(false);
+                    resetTopTimer();
+                  }
+                }}
+                className={`p-2 rounded-xl transition-colors text-zinc-500 ${topCollapsed ? "bg-[var(--theme-ui-bg)] border border-white/10 shadow-md" : ""}`}
+                aria-label="Settings"
               >
-                <Palette size={20} />
-              </button>
-            <button 
-              onClick={(e) => { e.stopPropagation(); toggleVisibilityMode(); resetTopTimer(); }}
-              className={`p-2 rounded-xl transition-colors ${state.settings.visibilityMode === 1 ? "text-orange-500" : state.settings.visibilityMode === 2 ? "text-red-500" : "text-zinc-500"}`}
-              aria-label="Toggle visibility mode"
-            >
-              {state.settings.visibilityMode === 0 || !state.settings.visibilityMode ? <Eye size={20} /> : <EyeOff size={20} />}
-            </button>
-              <button 
-                onClick={(e) => { e.stopPropagation(); toggleMemorised(); resetTopTimer(); }}
-                className={`p-2 rounded-xl transition-colors ${state.settings.showMemorised ? "text-amber-400" : "text-zinc-500"}`}
-                aria-label="Toggle memorised highlights"
-              >
-                <Award size={20} />
-              </button>
+                <Settings size={20} />
+              </Link>
             </div>
-            <Link
-              href="/"
-              onClick={(e) => {
-                if (topCollapsed) {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  setTopCollapsed(false);
-                  resetTopTimer();
-                }
-              }}
-              className={`p-2 rounded-xl transition-colors text-zinc-500 ${topCollapsed ? "bg-[var(--theme-ui-bg)] border border-white/10 shadow-md" : ""}`}
-              aria-label="Settings"
-            >
-              <Settings size={20} />
-            </Link>
           </div>
         </div>
       </header>

@@ -31,85 +31,89 @@ export function BottomNav({
       aria-label="Main navigation"
       onClick={() => isCollapsed && onExpand?.()}
       data-state={isCollapsed ? "collapsed" : "expanded"}
-      className={`fixed bottom-0 left-1/2 -translate-x-1/2 z-[2] transition-all duration-500 ease-in-out mb-4 shadow-lg border h-16 w-[calc(100%-2rem)] max-w-md rounded-[32px] ${
-        isCollapsed ? "nav-pill-clip border-white/5" : "nav-full-clip border-white/10"
-      } ${
-        isCollapsed
-          ? "bg-[color-mix(in_srgb,var(--theme-ui-bg),transparent_20%)] backdrop-blur-md"
-          : isDawn 
-            ? "bg-black/30 backdrop-blur-md border-white/10" 
-            : isSepia
-              ? "bg-white border-zinc-200"
-              : "bg-[var(--surface)] border-[var(--surface-border)]"
-      }`}
+      className="fixed bottom-0 left-1/2 -translate-x-1/2 z-[2] mb-4 h-16 w-[calc(100%-2rem)] max-w-md"
     >
-      <div className="relative w-full h-full overflow-hidden">
-        {/* Minimized State Content (Pill with Book Icon) */}
-        <div 
-          className={`absolute inset-0 flex items-center justify-center transition-opacity duration-300 pointer-events-none ${
-            isCollapsed ? "opacity-100" : "opacity-0"
-          }`}
-        >
-          <BookOpen size={20} className="text-zinc-500" />
-        </div>
+      <div 
+        className={`absolute inset-0 transition-all duration-500 ease-in-out shadow-lg border rounded-[32px] overflow-hidden ${
+          isCollapsed ? "nav-pill-clip border-white/5" : "nav-full-clip border-white/10"
+        } ${
+          isCollapsed
+            ? "bg-[color-mix(in_srgb,var(--theme-ui-bg),transparent_20%)] backdrop-blur-md"
+            : isDawn 
+              ? "bg-black/30 backdrop-blur-md border-white/10" 
+              : isSepia
+                ? "bg-white border-zinc-200"
+                : "bg-[var(--surface)] border-[var(--surface-border)]"
+        }`}
+      >
+        <div className="relative w-full h-full">
+          {/* Minimized State Content (Pill with Book Icon) */}
+          <div 
+            className={`absolute inset-0 flex items-center justify-center transition-opacity duration-300 pointer-events-none ${
+              isCollapsed ? "opacity-100" : "opacity-0"
+            }`}
+          >
+            <BookOpen size={20} className="text-zinc-500" />
+          </div>
 
-        {/* Expanded State Content (Full Navigation Grid) */}
-        <div 
-          className={`absolute inset-0 flex items-center justify-around px-4 transition-all duration-500 ${
-            isCollapsed ? "opacity-0 pointer-events-none scale-95" : "opacity-100 scale-100"
-          }`}
-        >
-          {NAV_ITEMS.map(({ label, href, icon: Icon }) => {
-            const isActive = pathname === href;
-            const isPracticeItem = href !== "/chapter" && href !== "/";
-            const isDisabled = isPracticeItem && !hasChapter;
+          {/* Expanded State Content (Full Navigation Grid) */}
+          <div 
+            className={`absolute inset-0 flex items-center justify-around px-4 transition-all duration-500 ${
+              isCollapsed ? "opacity-0 pointer-events-none scale-95" : "opacity-100 scale-100"
+            }`}
+          >
+            {NAV_ITEMS.map(({ label, href, icon: Icon }) => {
+              const isActive = pathname === href;
+              const isPracticeItem = href !== "/chapter" && href !== "/";
+              const isDisabled = isPracticeItem && !hasChapter;
 
-            if (isDisabled) {
+              if (isDisabled) {
+                return (
+                  <div
+                    key={href}
+                    className="flex flex-col items-center justify-center gap-1 opacity-20 cursor-not-allowed pointer-events-none"
+                  >
+                    <Icon size={24} className="text-zinc-500" />
+                    <span className="text-[10px] font-medium uppercase tracking-wider text-zinc-500">
+                      {label}
+                    </span>
+                  </div>
+                );
+              }
+
               return (
-                <div
+                <Link
                   key={href}
-                  className="flex flex-col items-center justify-center gap-1 opacity-20 cursor-not-allowed pointer-events-none"
+                  href={href}
+                  onClick={(e) => {
+                    if (isCollapsed) {
+                      e.preventDefault();
+                      onExpand?.();
+                      return;
+                    }
+                    if (pathname === href) {
+                      if (href === "/practice") {
+                        window.dispatchEvent(new CustomEvent("bcm-reset-practice"));
+                      }
+                      if (href === "/recite") {
+                        window.dispatchEvent(new CustomEvent("bcm-reset-recite"));
+                      }
+                    }
+                  }}
+                  className={`flex flex-col items-center justify-center gap-1 transition-colors duration-300 ${
+                    isActive 
+                      ? "text-orange-500" 
+                      : isDawn ? "text-white/50" : "text-zinc-500"
+                  }`}
                 >
-                  <Icon size={24} className="text-zinc-500" />
-                  <span className="text-[10px] font-medium uppercase tracking-wider text-zinc-500">
+                  <Icon size={24} />
+                  <span className="text-[10px] font-medium uppercase tracking-wider">
                     {label}
                   </span>
-                </div>
+                </Link>
               );
-            }
-
-            return (
-              <Link
-                key={href}
-                href={href}
-                onClick={(e) => {
-                  if (isCollapsed) {
-                    e.preventDefault();
-                    onExpand?.();
-                    return;
-                  }
-                  if (pathname === href) {
-                    if (href === "/practice") {
-                      window.dispatchEvent(new CustomEvent("bcm-reset-practice"));
-                    }
-                    if (href === "/recite") {
-                      window.dispatchEvent(new CustomEvent("bcm-reset-recite"));
-                    }
-                  }
-                }}
-                className={`flex flex-col items-center justify-center gap-1 transition-colors duration-300 ${
-                  isActive 
-                    ? "text-orange-500" 
-                    : isDawn ? "text-white/50" : "text-zinc-500"
-                }`}
-              >
-                <Icon size={24} />
-                <span className="text-[10px] font-medium uppercase tracking-wider">
-                  {label}
-                </span>
-              </Link>
-            );
-          })}
+            })}
+          </div>
         </div>
       </div>
     </nav>
