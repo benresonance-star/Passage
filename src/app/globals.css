@@ -181,7 +181,7 @@
   transform: translate3d(0,0,0);
   transform-style: preserve-3d;
   backface-visibility: hidden;
-  perspective: 1000;
+  perspective: 1000px;
   isolation: isolate;
 }
 
@@ -312,6 +312,17 @@ html[data-dawn] .glass {
   100% {
     opacity: 1;
     transform: translateY(-6.5px);
+  }
+}
+
+@-webkit-keyframes splash-subtitle-in {
+  0% {
+    opacity: 0;
+    -webkit-transform: translateY(-0.5px);
+  }
+  100% {
+    opacity: 1;
+    -webkit-transform: translateY(-6.5px);
   }
 }
 
