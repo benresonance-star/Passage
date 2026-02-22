@@ -33,13 +33,21 @@ export function MeditationScreen({ onComplete }: MeditationScreenProps) {
 
   return (
     <div
-      className={`fixed inset-0 z-[9998] flex items-center justify-center cursor-pointer transition-opacity duration-[1200ms] ease-in-out ${meditationFont.className}`}
+      className={`fixed inset-0 z-[9998] flex items-center justify-center cursor-pointer ${meditationFont.className}`}
       style={{ 
         opacity: isFading ? 0 : isVisible ? 1 : 0,
+        transition: "opacity 1200ms cubic-bezier(0.4, 0, 0.2, 1)",
+        transform: "translate3d(0,0,0)",
+        willChange: "opacity",
       }}
       onClick={handleTouch}
     >
-      <div className="relative z-[9999] text-center px-10 max-w-xl animate-in fade-in zoom-in-95 duration-1000">
+      <div className="relative z-[9999] text-center px-10 max-w-xl"
+           style={{
+             animation: isVisible ? "meditation-fade-in 1200ms cubic-bezier(0.4, 0, 0.2, 1) forwards" : "none",
+             opacity: 0,
+             transform: "translate3d(0, 5px, 0)",
+           }}>
         <blockquote className="text-[26px] md:text-[32px] leading-[1.6] font-light text-[rgba(255,252,240,0.92)] italic">
           "You keep him in perfect peace<br />
           <span className="pl-6 md:pl-8">whose mind is stayed on you,</span><br />
@@ -54,6 +62,12 @@ export function MeditationScreen({ onComplete }: MeditationScreenProps) {
           Touch to continue
         </p>
       </div>
+      <style jsx global>{`
+        @keyframes meditation-fade-in {
+          from { opacity: 0; transform: translate3d(0, 10px, 0); }
+          to { opacity: 1; transform: translate3d(0, 0, 0); }
+        }
+      `}</style>
     </div>
   );
 }

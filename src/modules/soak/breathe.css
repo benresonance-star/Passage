@@ -14,11 +14,12 @@
   z-index: 50;
   min-height: -webkit-fill-available;
   /* Force hardware acceleration and independent layer */
-  transform: translate3d(0,0,0) translateZ(0);
+  transform: translate3d(0,0,0);
   backface-visibility: hidden;
   perspective: 1000;
   pointer-events: none;
   background: #1e1b3a; /* Base dark color */
+  will-change: transform;
 }
 
 /* Layer 1: Sky Gradient (Static) */
@@ -30,6 +31,7 @@
   opacity: 1;
   animation: soak-bg-pulse 15s ease-in-out infinite alternate;
   will-change: opacity;
+  transform: translate3d(0,0,0);
 }
 
 /* Layer 2: Horizon/Water Glow (Static) */
@@ -40,7 +42,8 @@
   background: radial-gradient(ellipse 80% 50% at 50% 60%, rgba(255, 210, 150, 0.25) 0%, rgba(240, 180, 120, 0.1) 45%, transparent 80%);
   opacity: 0.4;
   animation: soak-glow-pulse 10s ease-in-out infinite alternate;
-  will-change: opacity;
+  will-change: opacity, transform;
+  transform: translate3d(0,0,0);
 }
 
 @keyframes soak-bg-pulse {
@@ -49,8 +52,8 @@
 }
 
 @keyframes soak-glow-pulse {
-  0% { opacity: 0.3; transform: scale(0.95) translateZ(0); }
-  100% { opacity: 0.8; transform: scale(1.05) translateZ(0); }
+  0% { opacity: 0.3; transform: scale(0.95) translate3d(0,0,0); }
+  100% { opacity: 0.8; transform: scale(1.05) translate3d(0,0,0); }
 }
 
 /* ─── Text breathing — gentle opacity pulse (Compositor-friendly) ─── */

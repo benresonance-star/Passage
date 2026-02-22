@@ -75,9 +75,11 @@ export function SplashScreen({ onFadeStart, onComplete }: SplashScreenProps) {
     <div
       className={`fixed inset-0 z-[9999] flex items-center justify-center pb-safe ${splashFont.className}`}
       style={{
-        transition: `opacity ${FADE_OUT_MS}ms ease-in-out`,
+        transition: `opacity ${FADE_OUT_MS}ms cubic-bezier(0.4, 0, 0.2, 1)`,
         opacity,
         pointerEvents: phase === "done" ? "none" : "auto",
+        transform: "translate3d(0,0,0)",
+        willChange: "opacity",
       }}
     >
       {/* Centered title */}
