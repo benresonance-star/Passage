@@ -73,19 +73,17 @@ export function SplashScreen({ onFadeStart, onComplete }: SplashScreenProps) {
 
   return (
     <div
-      className="soak-breathe fixed w-full h-full"
+      className={`fixed inset-0 z-[9999] flex items-center justify-center pb-safe ${splashFont.className}`}
       style={{
-        zIndex: 9999,
         transition: `opacity ${FADE_OUT_MS}ms ease-in-out`,
         opacity,
+        pointerEvents: phase === "done" ? "none" : "auto",
       }}
-      aria-hidden={phase === "done"}
     >
       {/* Centered title */}
       <div
-        className={`fixed inset-0 z-[10000] flex items-center justify-center pb-safe ${splashFont.className}`}
+        className="text-center"
       >
-        <div className="text-center">
           <h1
             className="splash-title text-[42px] tracking-[0.08em] font-light"
             style={{
@@ -108,7 +106,6 @@ export function SplashScreen({ onFadeStart, onComplete }: SplashScreenProps) {
           </p>
         </div>
       </div>
-    </div>
   );
 }
 

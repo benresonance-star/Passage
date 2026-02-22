@@ -28,14 +28,17 @@ export function ThemeContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
   // Splash: shown once per browser session
-  const [showSplash, setShowSplash] = useState(false);
+  // Initialize synchronously to avoid initial flash
+  const [showSplash, setShowSplash] = useState(() => {
+    if (typeof window !== "undefined") {
+      return !wasSplashShown();
+    }
+    return false;
+  });
   const [showMeditation, setShowMeditation] = useState(false);
 
   useEffect(() => {
-    // Check sessionStorage immediately on mount
-    if (!wasSplashShown()) {
-      setShowSplash(true);
-    }
+    // No longer need to check wasSplashShown here as it's done in initializer
   }, []);
 
   const theme = isHydrated && state.settings.theme
@@ -147,6 +150,9 @@ export function ThemeContent({ children }: { children: React.ReactNode }) {
       {/* Dawn breathing gradient — persistent, isolated layer (hidden in Soaking mode to avoid double-draw) */}
       {isDawn && !isSoaking && <div className="dawn-bg" />}
 
+      {/* Persistent background for Splash and Meditation continuity */}
+      {(showSplash || showMeditation) && <div className="soak-breathe fixed inset-0 z-[9997]" />}
+
       {showSplash && (
         <SplashScreen
           onFadeStart={() => setShowMeditation(true)}
@@ -165,7 +171,7 @@ export function ThemeContent({ children }: { children: React.ReactNode }) {
         />
       )}
       <main 
-        className={`relative z-[1] min-h-screen pt-safe max-w-2xl mx-auto px-6 md:px-12 transition-all duration-500 ${isDawn ? dawnFont.className : ""}`}
+        className={`relative z-[1] min-h-screen pt-safe max-w-2xl mx-auto px-6 md:px-12 transition-all duration-500 ${isDawn ? dawnFont.className : ""} ${(showSplash || showMeditation) ? "opacity-0 pointer-events-none" : "opacity-100"}`}
         style={{ 
           paddingBottom: isSoaking ? '0' : `calc(${isCollapsed ? '3rem' : '4rem'} + 1rem + env(safe-area-inset-bottom))`
         }}
@@ -173,7 +179,7 @@ export function ThemeContent({ children }: { children: React.ReactNode }) {
         {children}
       </main>
       
-      {!isSoaking && (
+      {!isSoaking && !showSplash && !showMeditation && (
         <BottomNav 
           isDawn={isDawn} 
           isCollapsed={isCollapsed} 

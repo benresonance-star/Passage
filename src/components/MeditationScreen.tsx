@@ -36,13 +36,9 @@ export function MeditationScreen({ onComplete }: MeditationScreenProps) {
       className={`fixed inset-0 z-[9998] flex items-center justify-center cursor-pointer transition-opacity duration-[1200ms] ease-in-out ${meditationFont.className}`}
       style={{ 
         opacity: isFading ? 0 : isVisible ? 1 : 0,
-        backgroundColor: "#1e1b3a" // Match base color of soak-breathe
       }}
       onClick={handleTouch}
     >
-      {/* Same background as splash for continuity */}
-      <div className="soak-breathe absolute inset-0" />
-      
       <div className="relative z-[9999] text-center px-10 max-w-xl animate-in fade-in zoom-in-95 duration-1000">
         <blockquote className="text-[26px] md:text-[32px] leading-[1.6] font-light text-[rgba(255,252,240,0.92)] italic">
           "You keep him in perfect peace<br />
