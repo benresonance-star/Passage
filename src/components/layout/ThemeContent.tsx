@@ -2,6 +2,7 @@
 
 import { useLayoutEffect, useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useBCM } from "@/context/BCMContext";
 import { BottomNav } from "@/components/BottomNav";
 import { SplashScreen, wasSplashShown } from "@/components/SplashScreen";
@@ -26,6 +27,7 @@ export function ThemeContent({ children }: { children: React.ReactNode }) {
   const { state, isHydrated } = useBCM();
   const router = useRouter();
   const pathname = usePathname();
+  const prefersReducedMotion = useReducedMotion();
 
   // Splash: shown once per browser session
   // Initialize synchronously to avoid initial flash
@@ -44,10 +46,14 @@ export function ThemeContent({ children }: { children: React.ReactNode }) {
       const timer = setTimeout(() => {
         setIsNavigating(false);
         setShowMeditation(false);
-      }, 150); // Small buffer to ensure page is painted
+      }, 150);
       return () => clearTimeout(timer);
     }
   }, [pathname, isNavigating]);
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
 
 
   const theme = isHydrated && state.settings.theme
@@ -193,7 +199,17 @@ export function ThemeContent({ children }: { children: React.ReactNode }) {
           paddingBottom: isSoaking ? '0' : `calc(${isCollapsed ? '3rem' : '4rem'} + 1rem + env(safe-area-inset-bottom))`
         }}
       >
-        {children}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={pathname}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: prefersReducedMotion ? 0 : 0.25, ease: "easeInOut" }}
+          >
+            {children}
+          </motion.div>
+        </AnimatePresence>
       </main>
       
       {!isSoaking && !showSplash && !showMeditation && !isNavigating && (
