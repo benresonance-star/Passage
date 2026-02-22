@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useBCM } from "@/context/BCMContext";
-import { Users, Mail, ArrowLeft, LogOut, CheckCircle2, Loader2, Plus, Copy, Check, X } from "lucide-react";
+import { Users, Mail, ArrowLeft, LogOut, CheckCircle2, Loader2, Plus, Copy, Check, X, BookOpen } from "lucide-react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import { useConfirm, usePrompt, useToast } from "@/components/AppModal";
@@ -32,9 +32,14 @@ export default function GroupPage() {
   const [isPreviewLoading, setIsPreviewLoading] = useState(false);
   const [isEditingName, setIsEditingName] = useState(false);
   const [newName, setNewName] = useState("");
+  const [missingChapters, setMissingChapters] = useState<string[]>([]);
+  const joinIdFromUrlRef = useRef<string | null>(null);
+  const autoJoinTriggeredRef = useRef(false);
   const { confirm, ConfirmDialog } = useConfirm();
   const { prompt, PromptDialog } = usePrompt();
   const { toast, ToastContainer } = useToast();
+
+  const namePromptShownRef = useRef(false);
 
   useEffect(() => {
     if (user && state.selectedChapterId) {
@@ -114,6 +119,17 @@ export default function GroupPage() {
           }
         }
       }
+
+      const { data: allProgress } = await client
+        .from('shared_progress')
+        .select('chapter_title')
+        .eq('group_id', groupId);
+
+      if (allProgress) {
+        const groupTitles = [...new Set(allProgress.map(p => p.chapter_title))];
+        const userTitles = Object.values(state.chapters).map(c => c.title);
+        setMissingChapters(groupTitles.filter(t => !userTitles.includes(t)));
+      }
     }
   };
 
@@ -122,6 +138,28 @@ export default function GroupPage() {
       fetchGroupMembers(activeGroupId);
     }
   }, [activeGroupId, state.selectedChapterId]);
+
+  useEffect(() => {
+    if (user && profile && !profile.display_name && !namePromptShownRef.current) {
+      namePromptShownRef.current = true;
+      (async () => {
+        const name = await prompt({
+          title: "What should we call you?",
+          placeholder: "Enter your name...",
+          submitLabel: "Save",
+        });
+        if (name && supabase) {
+          await supabase
+            .from('profiles')
+            .update({ display_name: name })
+            .eq('id', user.id);
+          setProfile(prev => prev ? { ...prev, display_name: name } : prev);
+          setNewName(name);
+          toast("Name saved!");
+        }
+      })();
+    }
+  }, [user, profile]);
 
   const handleUpdateName = async () => {
     if (!user || !newName.trim() || !supabase) return;
@@ -210,14 +248,12 @@ export default function GroupPage() {
     }
   };
 
-  const handleJoinGroup = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!user || !joinGroupId.trim() || !supabase) return;
+  const performJoinGroup = async (): Promise<boolean> => {
+    if (!user || !joinGroupId.trim() || !supabase) return false;
     const client = supabase;
     
     setLoading(true);
     try {
-      // 1. Check if user is already in this specific group
       const { data: existingMember } = await client
         .from('group_members')
         .select('group_id')
@@ -244,12 +280,19 @@ export default function GroupPage() {
       setJoinGroupId("");
       setPreviewGroup(null);
       toast("Joined group successfully!");
+      return true;
     } catch (err) {
       console.error("Join group error:", err);
       toast(err instanceof Error ? err.message : "Invalid Group ID", "error");
+      return false;
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleJoinGroup = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await performJoinGroup();
   };
 
   const handleLeaveGroup = async () => {
@@ -376,14 +419,36 @@ export default function GroupPage() {
     const params = new URLSearchParams(window.location.search);
     const joinId = params.get('join');
     if (joinId) {
+      joinIdFromUrlRef.current = joinId;
       const alreadyIn = groups.some(g => g.id === joinId);
       if (!alreadyIn) {
         setJoinGroupId(joinId);
       }
-      // Clean up URL
       window.history.replaceState({}, '', window.location.pathname);
     }
   }, [groups]);
+
+  useEffect(() => {
+    if (
+      user &&
+      joinGroupId &&
+      previewGroup &&
+      joinIdFromUrlRef.current &&
+      !autoJoinTriggeredRef.current
+    ) {
+      autoJoinTriggeredRef.current = true;
+      (async () => {
+        const confirmed = await confirm({
+          title: "Join Group",
+          message: `Join "${previewGroup.name}" led by ${previewGroup.admin_name}?`,
+          confirmLabel: "Join",
+        });
+        if (confirmed) {
+          await performJoinGroup();
+        }
+      })();
+    }
+  }, [user, joinGroupId, previewGroup]);
 
   const handleRemoveMember = async (targetUserId: string, targetName: string) => {
     if (!user || !activeGroupId || !supabase) return;
@@ -653,6 +718,35 @@ export default function GroupPage() {
                       memberProgress={memberProgress}
                       onRemoveMember={handleRemoveMember}
                     />
+
+                    {missingChapters.length > 0 && (
+                      <div className="bg-orange-500/5 border border-orange-500/20 rounded-3xl p-6 space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                        <div className="flex items-start gap-3">
+                          <div className="w-10 h-10 bg-orange-500/10 rounded-xl flex items-center justify-center text-orange-500 border border-orange-500/20 shrink-0">
+                            <BookOpen size={20} />
+                          </div>
+                          <div className="space-y-1">
+                            <p className="text-sm font-bold">Your group is studying</p>
+                            <div className="flex flex-wrap gap-1.5">
+                              {missingChapters.map(title => (
+                                <span key={title} className="text-xs font-bold text-orange-500 bg-orange-500/10 px-2.5 py-1 rounded-lg border border-orange-500/20">
+                                  {title}
+                                </span>
+                              ))}
+                            </div>
+                            <p className="text-[var(--muted)] text-xs pt-1">
+                              Import {missingChapters.length === 1 ? "this chapter" : "these chapters"} to track your progress with the group.
+                            </p>
+                          </div>
+                        </div>
+                        <Link
+                          href="/import"
+                          className="block w-full py-3.5 bg-orange-500 text-white font-bold rounded-2xl text-center text-sm shadow-lg shadow-orange-500/20 active:scale-95 transition-transform"
+                        >
+                          Import Chapter
+                        </Link>
+                      </div>
+                    )}
                   </div>
                 )}
 

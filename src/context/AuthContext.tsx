@@ -53,7 +53,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (typeof window !== "undefined") {
           const url = new URL(window.location.href);
           if (url.hash.includes("access_token") || url.searchParams.has("code")) {
-            window.history.replaceState(null, "", window.location.pathname);
+            url.hash = "";
+            url.searchParams.delete("code");
+            window.history.replaceState(null, "", url.pathname + url.search);
           }
         }
       }
@@ -67,7 +69,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return await supabase.auth.signInWithOtp({
       email,
       options: {
-        emailRedirectTo: typeof window !== 'undefined' ? window.location.origin : '',
+        emailRedirectTo: typeof window !== 'undefined' ? window.location.href : '',
       },
     });
   };
