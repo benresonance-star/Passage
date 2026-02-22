@@ -285,7 +285,7 @@ export default function ChapterPage() {
                     <div key={idx} className={v.type === "heading" ? "w-full text-center" : "inline"}>
                       {v.type === "heading" ? (
                         visibilityMode === 0 && (
-                          <h3 className="text-[11px] font-bold uppercase tracking-[0.2em] my-4 block w-full"
+                          <h3 className="text-[11px] font-bold uppercase tracking-[0.2em] my-4 block w-full leading-relaxed"
                             style={{ color: showAsMemorised ? "var(--chunk-memorised-sub)" : "var(--theme-ui-subtext)" }}
                           >
                             {v.text}

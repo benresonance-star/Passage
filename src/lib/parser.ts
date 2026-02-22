@@ -59,7 +59,9 @@ export function parseChapter(text: string, stripRefs: boolean = true): { title: 
         const looksLikeContinuation = lastVerse?.type === "scripture" && 
           (trimmedSegment.startsWith("“") || trimmedSegment.startsWith("\"") || trimmedSegment.startsWith("'") || trimmedSegment.match(/^[a-z]/));
 
-        if (looksLikeContinuation && lastVerse) {
+        const isKnownHeading = ["Present Suffering and Future Glory", "More Than Conquerors"].includes(trimmedSegment);
+
+        if (looksLikeContinuation && lastVerse && !isKnownHeading) {
           // Append to previous verse
           const continuationText = trimmedSegment.replace(/\n/g, "[LINEBREAK]");
           lastVerse.text += "[LINEBREAK]" + continuationText;
