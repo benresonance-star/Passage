@@ -5,6 +5,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { useBCM } from "@/context/BCMContext";
 import { BottomNav } from "@/components/BottomNav";
 import { SplashScreen, wasSplashShown } from "@/components/SplashScreen";
+import { MeditationScreen } from "@/components/MeditationScreen";
 import { useScrollAwareBottomNav } from "@/hooks/useScrollAwareBottomNav";
 import { Cormorant_Garamond } from "next/font/google";
 
@@ -28,6 +29,7 @@ export function ThemeContent({ children }: { children: React.ReactNode }) {
 
   // Splash: shown once per browser session
   const [showSplash, setShowSplash] = useState(false);
+  const [showMeditation, setShowMeditation] = useState(false);
 
   useEffect(() => {
     // Check sessionStorage immediately on mount
@@ -147,8 +149,19 @@ export function ThemeContent({ children }: { children: React.ReactNode }) {
 
       {showSplash && (
         <SplashScreen
-          onFadeStart={() => router.push("/chapter")}
+          onFadeStart={() => setShowMeditation(true)}
           onComplete={() => setShowSplash(false)}
+        />
+      )}
+
+      {showMeditation && (
+        <MeditationScreen 
+          onComplete={() => {
+            setShowMeditation(false);
+            if (pathname === "/") {
+              router.push("/chapter");
+            }
+          }} 
         />
       )}
       <main 
