@@ -50,9 +50,9 @@ export function MeditationScreen({ onComplete }: MeditationScreenProps) {
              transform: "translate3d(0, 5px, 0)",
            }}>
         <blockquote className="text-[26px] md:text-[32px] leading-[1.6] font-light text-[rgba(255,252,240,0.92)] italic">
-          "You keep him in perfect peace<br />
+          You keep him in perfect peace<br />
           <span className="pl-6 md:pl-8">whose mind is stayed on you,</span><br />
-          <span className="pl-2 md:pl-4">because he trusts in you."</span>
+          <span className="pl-2 md:pl-4">because he trusts in you.</span>
         </blockquote>
         
         <cite className="block mt-10 text-[13px] tracking-[0.25em] uppercase font-light text-[rgba(255,252,240,0.6)] not-italic">
