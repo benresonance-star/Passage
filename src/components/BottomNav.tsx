@@ -28,6 +28,7 @@ export function BottomNav({
 
   return (
     <nav 
+      aria-label="Main navigation"
       onClick={() => isCollapsed && onExpand?.()}
       data-state={isCollapsed ? "collapsed" : "expanded"}
       className={`fixed bottom-0 left-1/2 -translate-x-1/2 z-[2] transition-all duration-500 ease-in-out mb-4 shadow-lg border border-white/10 h-16 w-[calc(100%-2rem)] max-w-md rounded-[32px] ${

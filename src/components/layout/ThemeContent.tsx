@@ -49,9 +49,6 @@ export function ThemeContent({ children }: { children: React.ReactNode }) {
     }
   }, [pathname, isNavigating]);
 
-  useEffect(() => {
-    // No longer need to check wasSplashShown here as it's done in initializer
-  }, []);
 
   const theme = isHydrated && state.settings.theme
     ? state.settings.theme
@@ -96,6 +93,9 @@ export function ThemeContent({ children }: { children: React.ReactNode }) {
       root.style.setProperty("--theme-ui-bg", "rgba(255,255,255,0.08)");
       root.style.setProperty("--theme-ui-border", "rgba(255,255,255,0.12)");
       root.style.setProperty("--theme-ui-subtext", "rgba(255,252,240,0.5)");
+      root.style.setProperty("--muted", "rgba(255,255,255,0.6)");
+      root.style.setProperty("--muted-strong", "rgba(255,255,255,0.4)");
+      root.style.setProperty("--label", "rgba(255,255,255,0.6)");
 
       // Surface tokens — translucent glass for Dawn (raised opacity for clarity)
       root.style.setProperty("--surface", "rgba(255,255,255,0.12)");
@@ -127,6 +127,9 @@ export function ThemeContent({ children }: { children: React.ReactNode }) {
       root.style.setProperty("--theme-ui-bg", isLight ? "rgba(0,0,0,0.05)" : "rgba(255,255,255,0.05)");
       root.style.setProperty("--theme-ui-border", isLight ? "rgba(0,0,0,0.1)" : "rgba(255,255,255,0.1)");
       root.style.setProperty("--theme-ui-subtext", isLight ? "rgba(0,0,0,0.5)" : "rgba(255,255,255,0.5)");
+      root.style.setProperty("--muted", isLight ? "#71717a" : "#71717a");
+      root.style.setProperty("--muted-strong", isLight ? "#52525b" : "#52525b");
+      root.style.setProperty("--label", isLight ? "#a1a1aa" : "#a1a1aa");
 
       // Surface tokens — opaque for standard themes
       if (isLight) {

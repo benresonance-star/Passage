@@ -13,6 +13,9 @@
   --theme-ui-border: #27272a;
   --theme-ui-subtext: #71717a;
   --theme-text: #f4f4f5;
+  --muted: #71717a;
+  --muted-strong: #52525b;
+  --label: #a1a1aa;
   
   /* Flow specific */
   --flow-read: #ffffff;
@@ -34,6 +37,9 @@
   --theme-ui-border: #eee8d5;
   --theme-ui-subtext: #93a1a1;
   --theme-text: #433422;
+  --muted: #93a1a1;
+  --muted-strong: #657b83;
+  --label: #93a1a1;
 }
 
 [data-theme='night-dusk'] {
@@ -43,6 +49,9 @@
   --theme-ui-border: #2d2a26;
   --theme-ui-subtext: #8c7e6e;
   --theme-text: #f2e8d5;
+  --muted: #8c7e6e;
+  --muted-strong: #6a5f52;
+  --label: #8c7e6e;
   
   /* Flow specific */
   --flow-read: #f2e8d5;
@@ -62,6 +71,9 @@
   --theme-ui-border: rgba(255, 255, 255, 0.1);
   --theme-ui-subtext: rgba(255, 255, 255, 0.6);
   --theme-text: #ffffff;
+  --muted: rgba(255, 255, 255, 0.6);
+  --muted-strong: rgba(255, 255, 255, 0.4);
+  --label: rgba(255, 255, 255, 0.6);
   
   /* Practice Button overrides for Dawn */
   --btn-surface: rgba(0, 0, 0, 0.3);

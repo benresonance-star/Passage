@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { X, AlertTriangle, CheckCircle2 } from "lucide-react";
 
 // --- Modal Component ---
@@ -13,16 +13,47 @@ interface ModalProps {
 }
 
 export function Modal({ open, onClose, title, children }: ModalProps) {
+  const dialogRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") { onClose(); return; }
+      if (e.key !== "Tab" || !dialogRef.current) return;
+      const focusable = dialogRef.current.querySelectorAll<HTMLElement>(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      );
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    const prev = document.activeElement as HTMLElement | null;
+    dialogRef.current?.querySelector<HTMLElement>("button, input")?.focus();
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      prev?.focus();
+    };
+  }, [open, onClose]);
+
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
-      <div className="absolute inset-0 bg-[var(--overlay)] backdrop-blur-sm" onClick={onClose} />
-      <div className="relative w-full max-w-md bg-[var(--overlay-surface)] glass border border-[var(--surface-border)] rounded-[32px] p-8 shadow-2xl animate-in zoom-in-95 duration-300">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-in fade-in duration-200" role="presentation">
+      <div className="absolute inset-0 bg-[var(--overlay)] backdrop-blur-sm" onClick={onClose} role="presentation" />
+      <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label={title || "Dialog"}
+        className="relative w-full max-w-md bg-[var(--overlay-surface)] glass border border-[var(--surface-border)] rounded-[32px] p-8 shadow-2xl animate-in zoom-in-95 duration-300"
+      >
         {title && (
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-lg font-bold text-white">{title}</h2>
-            <button onClick={onClose} className="p-1 text-zinc-500">
+            <button onClick={onClose} className="p-1 text-zinc-500" aria-label="Close">
               <X size={20} />
             </button>
           </div>
@@ -53,7 +84,7 @@ export function Toast({ message, type = "success", open, onClose }: ToastProps) 
   if (!open) return null;
 
   return (
-    <div className="fixed top-12 inset-x-0 z-50 flex justify-center animate-in slide-in-from-top duration-300 pointer-events-none">
+    <div className="fixed top-12 inset-x-0 z-50 flex justify-center animate-in slide-in-from-top duration-300 pointer-events-none" role="status" aria-live="polite">
       <div className={`flex items-center gap-2 px-5 py-3 rounded-2xl shadow-xl border pointer-events-auto ${
         type === "success"
           ? "bg-green-500/10 border-green-500/20 text-green-400"

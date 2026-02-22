@@ -3,10 +3,13 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useBCM } from "@/context/BCMContext";
-import { Users, Mail, ArrowLeft, LogOut, CheckCircle2, Loader2, Trophy, Plus, Copy, Check, X } from "lucide-react";
+import { Users, Mail, ArrowLeft, LogOut, CheckCircle2, Loader2, Plus, Copy, Check, X } from "lucide-react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import { useConfirm, usePrompt, useToast } from "@/components/AppModal";
+import { JoinGroupForm } from "@/components/group/JoinGroupForm";
+import { MemberList } from "@/components/group/MemberList";
+import type { DbGroup, DbProfile, GroupMemberWithProfile } from "@/types";
 
 export default function GroupPage() {
   const { user, signIn, verifyOtp, signOut, loading: authLoading } = useAuth();
@@ -18,10 +21,10 @@ export default function GroupPage() {
   const [step, setStep] = useState<"email" | "otp">("email");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [profile, setProfile] = useState<any>(null);
-  const [groups, setGroups] = useState<any[]>([]);
+  const [profile, setProfile] = useState<DbProfile | null>(null);
+  const [groups, setGroups] = useState<DbGroup[]>([]);
   const [activeGroupId, setActiveGroupId] = useState<string | null>(null);
-  const [members, setMembers] = useState<any[]>([]);
+  const [members, setMembers] = useState<GroupMemberWithProfile[]>([]);
   const [memberProgress, setMemberProgress] = useState<Record<string, number>>({});
   const [copied, setCopied] = useState(false);
   const [joinGroupId, setJoinGroupId] = useState("");
@@ -59,12 +62,11 @@ export default function GroupPage() {
       .eq('user_id', user?.id);
     
     if (memberData && memberData.length > 0) {
-      const allGroups = memberData.map((m: any) => m.groups);
+      const allGroups = memberData.map((m) => m.groups as unknown as DbGroup);
       setGroups(allGroups);
       
-      // Set active group if not set or if current active group is no longer in the list
       const currentActiveId = activeGroupId || allGroups[0].id;
-      const isStillInActiveGroup = allGroups.some((g: any) => g.id === currentActiveId);
+      const isStillInActiveGroup = allGroups.some((g) => g.id === currentActiveId);
       const finalActiveId = isStillInActiveGroup ? currentActiveId : allGroups[0].id;
       
       setActiveGroupId(finalActiveId);
@@ -91,9 +93,8 @@ export default function GroupPage() {
       .eq('group_id', groupId);
     
     if (groupMembers) {
-      setMembers(groupMembers);
+      setMembers(groupMembers as unknown as GroupMemberWithProfile[]);
 
-      // Fetch progress for all members if a chapter is selected
       if (state.selectedChapterId) {
         const chapter = state.chapters[state.selectedChapterId];
         if (chapter) {
@@ -106,7 +107,7 @@ export default function GroupPage() {
           
           if (progress) {
             const counts: Record<string, number> = {};
-            progress.forEach((p: any) => {
+            progress.forEach((p) => {
               counts[p.user_id] = (counts[p.user_id] || 0) + 1;
             });
             setMemberProgress(counts);
@@ -131,7 +132,7 @@ export default function GroupPage() {
       .update({ display_name: newName.trim() })
       .eq('id', user.id);
     
-    if (!error) {
+    if (!error && profile) {
       setProfile({ ...profile, display_name: newName.trim() });
       setIsEditingName(false);
       fetchProfileAndGroup();
@@ -201,9 +202,9 @@ export default function GroupPage() {
         await syncAllMemorised();
         toast("Group created successfully!");
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error("Group creation error:", err);
-      toast(err.message || "Failed to create group", "error");
+      toast(err instanceof Error ? err.message : "Failed to create group", "error");
     } finally {
       setLoading(false);
     }
@@ -243,9 +244,9 @@ export default function GroupPage() {
       setJoinGroupId("");
       setPreviewGroup(null);
       toast("Joined group successfully!");
-    } catch (err: any) {
+    } catch (err) {
       console.error("Join group error:", err);
-      toast(err.message || "Invalid Group ID", "error");
+      toast(err instanceof Error ? err.message : "Invalid Group ID", "error");
     } finally {
       setLoading(false);
     }
@@ -314,9 +315,9 @@ export default function GroupPage() {
       setActiveGroupId(null);
       toast(isLastMember ? "Group deleted." : "You have left the group.");
       fetchProfileAndGroup();
-    } catch (err: any) {
+    } catch (err) {
       console.error("Leave group error:", err);
-      toast(err.message || "Failed to leave group", "error");
+      toast(err instanceof Error ? err.message : "Failed to leave group", "error");
     } finally {
       setLoading(false);
     }
@@ -342,10 +343,11 @@ export default function GroupPage() {
           .maybeSingle();
 
         if (data) {
+          const adminProfile = data.profiles as unknown as { display_name?: string } | null;
           setPreviewGroup({
             id: data.id,
             name: data.name,
-            admin_name: (data.profiles as any)?.display_name || "Unknown Admin"
+            admin_name: adminProfile?.display_name || "Unknown Admin"
           });
         } else {
           setPreviewGroup(null);
@@ -408,9 +410,9 @@ export default function GroupPage() {
 
       await fetchGroupMembers(activeGroupId);
       toast("Member removed successfully.");
-    } catch (err: any) {
+    } catch (err) {
       console.error("Remove member error:", err);
-      toast(err.message || "Failed to remove member", "error");
+      toast(err instanceof Error ? err.message : "Failed to remove member", "error");
     } finally {
       setLoading(false);
     }
@@ -430,7 +432,7 @@ export default function GroupPage() {
       <PromptDialog />
       <ToastContainer />
       <header className="flex items-center gap-4 py-4">
-        <Link href="/chapter" className="p-2 text-zinc-500 bg-[var(--surface)] rounded-full border border-[var(--surface-border)]">
+        <Link href="/chapter" className="p-2 text-zinc-500 bg-[var(--surface)] rounded-full border border-[var(--surface-border)]" aria-label="Back to chapter">
           <ArrowLeft size={20} />
         </Link>
         <h1 className="text-2xl font-bold">Study Group</h1>
@@ -453,9 +455,9 @@ export default function GroupPage() {
           {step === "email" ? (
             <form onSubmit={handleSignIn} className="space-y-4">
               <div className="space-y-2">
-                <label className={`text-xs font-bold uppercase tracking-widest ${isDawn ? "text-white/60" : "text-zinc-500"} ml-1`}>Email Address</label>
+                <label className={`text-xs font-bold uppercase tracking-widest text-[var(--muted)] ml-1`}>Email Address</label>
                 <div className="relative">
-                  <Mail className={`absolute left-4 top-1/2 -translate-y-1/2 ${isDawn ? "text-white/60" : "text-zinc-500"}`} size={18} />
+                  <Mail className={`absolute left-4 top-1/2 -translate-y-1/2 text-[var(--muted)]`} size={18} />
                   <input 
                     type="email"
                     required
@@ -490,7 +492,7 @@ export default function GroupPage() {
 
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <label className={`text-xs font-bold uppercase tracking-widest ${isDawn ? "text-white/60" : "text-zinc-500"} ml-1 text-center block`}>Verification Code</label>
+                  <label className={`text-xs font-bold uppercase tracking-widest text-[var(--muted)] ml-1 text-center block`}>Verification Code</label>
                   <input 
                     type="text"
                     required
@@ -511,7 +513,7 @@ export default function GroupPage() {
                 <button 
                   type="button"
                   onClick={() => setStep("email")}
-                  className={`w-full ${isDawn ? "text-white/60" : "text-zinc-500"} text-xs font-bold uppercase tracking-widest`}
+                  className={`w-full text-[var(--muted)] text-xs font-bold uppercase tracking-widest`}
                 >
                   Back to Email
                 </button>
@@ -549,15 +551,16 @@ export default function GroupPage() {
                       <h2 className="font-bold text-lg group-hover:text-orange-500 transition-colors">
                         {profile?.display_name || "Set Name..."}
                       </h2>
-                      <Plus size={14} className={`${isDawn ? "text-white/40" : "text-zinc-600"} group-hover:text-orange-500`} />
+                      <Plus size={14} className={`text-[var(--muted-strong)] group-hover:text-orange-500`} />
                     </div>
-                    <p className={`${isDawn ? "text-white/60" : "text-zinc-500"} text-xs`}>{user.email}</p>
+                    <p className={`text-[var(--muted)] text-xs`}>{user.email}</p>
                   </div>
                 )}
               </div>
               <button 
                 onClick={() => signOut()}
-                className={`p-2 ${isDawn ? "text-white/60" : "text-zinc-500"} bg-[var(--surface-alt)] rounded-xl border border-[var(--surface-border)]`}
+                className={`p-2 text-[var(--muted)] bg-[var(--surface-alt)] rounded-xl border border-[var(--surface-border)]`}
+                aria-label="Sign out"
               >
                 <LogOut size={18} />
               </button>
@@ -566,7 +569,7 @@ export default function GroupPage() {
 
           {/* Group Section */}
           <div className="space-y-4">
-            <h3 className={`text-sm font-medium ${isDawn ? "text-white/60" : "text-zinc-500"} uppercase tracking-wider px-1`}>My Study Groups</h3>
+            <h3 className={`text-sm font-medium text-[var(--muted)] uppercase tracking-wider px-1`}>My Study Groups</h3>
             
             {groups.length > 0 ? (
               <div className="space-y-6">
@@ -579,7 +582,7 @@ export default function GroupPage() {
                       className={`px-4 py-2 rounded-xl border whitespace-nowrap transition-all text-sm font-bold ${
                         activeGroupId === g.id
                           ? "bg-orange-500 border-orange-600 text-white shadow-lg shadow-orange-500/20"
-                          : `bg-[var(--surface)] border-[var(--surface-border)] ${isDawn ? "text-white/60" : "text-zinc-500"}`
+                          : `bg-[var(--surface)] border-[var(--surface-border)] text-[var(--muted)]`
                       }`}
                     >
                       {g.name}
@@ -597,7 +600,7 @@ export default function GroupPage() {
                           </div>
                           <div>
                             <h4 className="font-bold text-white">{activeGroup.name}</h4>
-                            <p className={`text-[10px] ${isDawn ? "text-white/60" : "text-zinc-500"} uppercase tracking-widest font-bold`}>
+                            <p className={`text-[10px] text-[var(--muted)] uppercase tracking-widest font-bold`}>
                               {activeGroup.admin_id === user.id ? "Admin" : "Member"}
                             </p>
                           </div>
@@ -613,7 +616,7 @@ export default function GroupPage() {
 
                       <div className="pt-4 border-t border-[var(--surface-border)] space-y-3">
                         <div className="flex items-center justify-between px-1">
-                          <p className={`text-[10px] font-bold ${isDawn ? "text-white/60" : "text-zinc-500"} uppercase tracking-widest`}>Invite Friends</p>
+                          <p className={`text-[10px] font-bold text-[var(--muted)] uppercase tracking-widest`}>Invite Friends</p>
                           <div className="group relative">
                             <div className={`cursor-help text-[10px] font-bold ${isDawn ? "text-orange-500/80" : "text-orange-500"} uppercase tracking-widest flex items-center gap-1`}>
                               How to Join?
@@ -640,65 +643,22 @@ export default function GroupPage() {
                       </div>
                     </div>
 
-                    {/* Member List */}
-                    <div className="bg-[var(--surface)] glass border border-[var(--surface-border)] rounded-3xl overflow-hidden shadow-xl">
-                      <div className="p-4 border-b border-[var(--surface-border)] bg-[var(--surface-alt)]">
-                        <p className={`text-[10px] font-bold ${isDawn ? "text-white/60" : "text-zinc-500"} uppercase tracking-widest`}>Group Members ({members.length})</p>
-                      </div>
-                      <div className="divide-y divide-[var(--surface-border)]">
-                        {members.map((m: any) => (
-                          <div key={m.user_id} className="p-4 flex justify-between items-center">
-                            <div className="flex items-center gap-3">
-                              <div className={`w-8 h-8 rounded-lg bg-[var(--surface-alt)] border border-[var(--surface-border)] flex items-center justify-center text-xs font-bold ${isDawn ? "text-white/60" : "text-zinc-500"}`}>
-                                {m.profiles.display_name?.charAt(0).toUpperCase() || "S"}
-                              </div>
-                              <div>
-                                <p className="text-sm font-bold text-white">
-                                  {m.profiles.display_name || "Student"}
-                                  {m.user_id === user.id && <span className="text-orange-500 ml-2 text-[10px] uppercase font-bold">(You)</span>}
-                                </p>
-                                <div className="flex items-center gap-2">
-                                  <p className={`text-[10px] ${isDawn ? "text-white/60" : "text-zinc-500"}`}>{m.profiles.email}</p>
-                                  {state.selectedChapterId && (
-                                    <>
-                                      <span className={`${isDawn ? "text-white/20" : "text-zinc-700"} text-[10px]`}>•</span>
-                                      <p className="text-[10px] text-orange-500/80 font-bold uppercase tracking-tight">
-                                        {(user && m.user_id === user.id) 
-                                          ? Object.values(state.cards[state.selectedChapterId] || {}).filter(c => c.isMemorised).length 
-                                          : (memberProgress[m.user_id] || 0)
-                                        } / {state.chapters[state.selectedChapterId]?.chunks.length ?? 0} Chunks
-                                      </p>
-                                    </>
-                                  )}
-                                </div>
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              {m.role === 'admin' ? (
-                                <span className={`text-[9px] font-bold uppercase tracking-tighter px-2 py-0.5 bg-[var(--surface-alt)] ${isDawn ? "text-white/60" : "text-zinc-400"} rounded-full border border-[var(--surface-border)]`}>
-                                  Admin
-                                </span>
-                              ) : (
-                                activeGroup.admin_id === user.id && (
-                                  <button 
-                                    onClick={() => handleRemoveMember(m.user_id, m.profiles.display_name)}
-                                    className={`p-2 ${isDawn ? "text-white/40 hover:text-red-500" : "text-zinc-600 hover:text-red-500"} transition-colors bg-[var(--surface-alt)] rounded-lg border border-[var(--surface-border)]`}
-                                  >
-                                    <X size={14} />
-                                  </button>
-                                )
-                              )}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
+                    <MemberList
+                      members={members}
+                      currentUserId={user.id}
+                      isAdmin={activeGroup.admin_id === user.id}
+                      selectedChapterId={state.selectedChapterId}
+                      localMemorisedCount={state.selectedChapterId ? Object.values(state.cards[state.selectedChapterId] || {}).filter(c => c.isMemorised).length : 0}
+                      totalChunks={state.selectedChapterId ? (state.chapters[state.selectedChapterId]?.chunks.length ?? 0) : 0}
+                      memberProgress={memberProgress}
+                      onRemoveMember={handleRemoveMember}
+                    />
                   </div>
                 )}
 
                 {/* Always show Create/Join options at the bottom of the list */}
                 <div className="pt-4 border-t border-[var(--surface-border)] space-y-4">
-                  <p className={`text-[10px] font-bold ${isDawn ? "text-white/60" : "text-zinc-500"} uppercase tracking-widest px-1`}>Add Another Group</p>
+                  <p className={`text-[10px] font-bold text-[var(--muted)] uppercase tracking-widest px-1`}>Add Another Group</p>
                   <div className="grid grid-cols-2 gap-3">
                     <button 
                       onClick={handleCreateGroup}
@@ -722,40 +682,14 @@ export default function GroupPage() {
                 </div>
 
                 <div id="join-form" className="bg-[var(--surface)] glass border border-[var(--surface-border)] rounded-3xl p-6 space-y-4">
-                  <form onSubmit={handleJoinGroup} className="space-y-4">
-                    <div className="space-y-2">
-                      <label className={`text-[10px] font-bold ${isDawn ? "text-white/60" : "text-zinc-500"} uppercase tracking-widest ml-1`}>Join with Group ID</label>
-                      <div className="relative">
-                        <input 
-                          required
-                          value={joinGroupId}
-                          onChange={(e) => setJoinGroupId(e.target.value)}
-                          className="w-full bg-[var(--input-bg)] border border-[var(--surface-border)] rounded-2xl py-4 px-6 text-white text-sm font-mono focus:outline-none focus:ring-2 focus:ring-orange-500/50 transition-all"
-                          placeholder="Paste ID here..."
-                        />
-                        {isPreviewLoading && (
-                          <div className="absolute right-4 top-1/2 -translate-y-1/2">
-                            <Loader2 className="animate-spin text-orange-500" size={18} />
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    {previewGroup && (
-                      <div className="bg-orange-500/5 border border-orange-500/10 rounded-2xl p-4 animate-in zoom-in-95 duration-200">
-                        <p className="text-[10px] text-orange-500 uppercase font-bold tracking-widest mb-1">Group Found</p>
-                        <p className="text-sm font-bold text-white">{previewGroup.name}</p>
-                        <p className="text-[10px] text-zinc-500">Admin: {previewGroup.admin_name}</p>
-                      </div>
-                    )}
-
-                    <button 
-                      disabled={loading || !joinGroupId || isPreviewLoading}
-                      className="w-full py-4 bg-orange-500 text-white font-bold rounded-2xl shadow-lg shadow-orange-500/20 active:scale-95 transition-transform disabled:opacity-50"
-                    >
-                      {loading ? "Joining..." : "Join Group"}
-                    </button>
-                  </form>
+                  <JoinGroupForm
+                    joinGroupId={joinGroupId}
+                    onJoinGroupIdChange={setJoinGroupId}
+                    onSubmit={handleJoinGroup}
+                    loading={loading}
+                    isPreviewLoading={isPreviewLoading}
+                    previewGroup={previewGroup}
+                  />
                 </div>
               </div>
             ) : (
@@ -765,8 +699,8 @@ export default function GroupPage() {
                     <Users size={32} className={isDawn ? "text-white/20" : "text-zinc-700"} />
                   </div>
                   <div className="space-y-1">
-                    <p className={`font-bold ${isDawn ? "text-white/60" : "text-zinc-500"}`}>No Groups Joined</p>
-                    <p className={`${isDawn ? "text-white/40" : "text-zinc-600"} text-sm`}>Create a group or join one with an ID.</p>
+                    <p className={`font-bold text-[var(--muted)]`}>No Groups Joined</p>
+                    <p className={`text-[var(--muted-strong)] text-sm`}>Create a group or join one with an ID.</p>
                   </div>
                   <button 
                     onClick={handleCreateGroup}
@@ -779,47 +713,21 @@ export default function GroupPage() {
                 </div>
 
                 <div className="bg-[var(--surface)] glass border border-[var(--surface-border)] rounded-3xl p-6 space-y-4">
-                  <form onSubmit={handleJoinGroup} className="space-y-4">
-                    <div className="space-y-2">
-                      <label className={`text-[10px] font-bold ${isDawn ? "text-white/60" : "text-zinc-500"} uppercase tracking-widest ml-1`}>Join with Group ID</label>
-                      <div className="relative">
-                        <input 
-                          required
-                          value={joinGroupId}
-                          onChange={(e) => setJoinGroupId(e.target.value)}
-                          className="w-full bg-[var(--input-bg)] border border-[var(--surface-border)] rounded-2xl py-4 px-6 text-white text-sm font-mono focus:outline-none focus:ring-2 focus:ring-orange-500/50 transition-all"
-                          placeholder="Paste ID here..."
-                        />
-                        {isPreviewLoading && (
-                          <div className="absolute right-4 top-1/2 -translate-y-1/2">
-                            <Loader2 className="animate-spin text-orange-500" size={18} />
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    {previewGroup && (
-                      <div className="bg-orange-500/5 border border-orange-500/10 rounded-2xl p-4 animate-in zoom-in-95 duration-200">
-                        <p className="text-[10px] text-orange-500 uppercase font-bold tracking-widest mb-1">Group Found</p>
-                        <p className="text-sm font-bold text-white">{previewGroup.name}</p>
-                        <p className="text-[10px] text-zinc-500">Admin: {previewGroup.admin_name}</p>
-                      </div>
-                    )}
-
-                    <button 
-                      disabled={loading || !joinGroupId || isPreviewLoading}
-                      className="w-full py-4 bg-orange-500 text-white font-bold rounded-2xl shadow-lg shadow-orange-500/20 active:scale-95 transition-transform disabled:opacity-50"
-                    >
-                      {loading ? "Joining..." : "Join Group"}
-                    </button>
-                  </form>
+                  <JoinGroupForm
+                    joinGroupId={joinGroupId}
+                    onJoinGroupIdChange={setJoinGroupId}
+                    onSubmit={handleJoinGroup}
+                    loading={loading}
+                    isPreviewLoading={isPreviewLoading}
+                    previewGroup={previewGroup}
+                  />
                 </div>
               </div>
             )}
           </div>
 
           <div className="pt-8">
-             <p className={`text-center ${isDawn ? "text-white/40" : "text-zinc-600"} text-[10px] uppercase tracking-widest font-bold`}>
+             <p className={`text-center text-[var(--muted-strong)] text-[10px] uppercase tracking-widest font-bold`}>
                Passage v2.0 Social • Beta
              </p>
           </div>

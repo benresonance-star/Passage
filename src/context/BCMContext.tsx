@@ -1,21 +1,22 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState } from "react";
-import { BCMState } from "@/types";
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { BCMState, SM2Card, Chapter, DbUserCard, DbUserChapter, DbUserStats } from "@/types";
 import { INITIAL_STATE, loadState, saveState } from "@/lib/storage";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "./AuthContext";
 import { getChapterSlug } from "@/lib/parser";
 import { shouldResetStreak } from "@/lib/streak";
+import type { RealtimeChannel } from "@supabase/supabase-js";
 
 interface BCMContextType {
   state: BCMState;
   setState: React.Dispatch<React.SetStateAction<BCMState>>;
   isHydrated: boolean;
   userGroupIds: string[];
-  syncProgress: (chapterTitle: string, chunkId: string, card: any) => Promise<void>;
+  syncProgress: (chapterTitle: string, chunkId: string, card: SM2Card) => Promise<void>;
   syncAllMemorised: () => Promise<void>;
-  pushChapter: (chapter: any) => Promise<void>;
+  pushChapter: (chapter: Chapter) => Promise<void>;
   pullVault: () => Promise<void>;
   deleteChapter: (chapterId: string) => Promise<void>;
 }
@@ -31,8 +32,8 @@ export function BCMProvider({ children }: { children: React.ReactNode }) {
 
   // Load group ID and pull vault if logged in
   useEffect(() => {
-    let cardSubscription: any = null;
-    let chapterSubscription: any = null;
+    let cardSubscription: RealtimeChannel | null = null;
+    let chapterSubscription: RealtimeChannel | null = null;
 
     if (user && supabase) {
       const client = supabase; // Narrow for closures
@@ -58,15 +59,15 @@ export function BCMProvider({ children }: { children: React.ReactNode }) {
             schema: 'public', 
             table: 'user_cards',
             filter: `user_id=eq.${user.id}`
-          }, (payload: any) => {
-            if (payload.new && payload.new.data) {
-              const updatedCard = payload.new.data;
-              const chapterId = payload.new.chapter_id;
-              const chunkId = payload.new.chunk_id;
-              const cloudUpdatedAt = new Date(payload.new.updated_at).getTime();
+          }, (payload) => {
+            const row = payload.new as DbUserCard | undefined;
+            if (row?.data) {
+              const updatedCard = row.data;
+              const chapterId = row.chapter_id;
+              const chunkId = row.chunk_id;
+              const cloudUpdatedAt = new Date(row.updated_at).getTime();
               const lastLocal = lastUpdateRef.current[`card_${chunkId}`] || 0;
 
-              // Authoritative Mirroring: Cloud wins if it's newer than our last action on this chunk
               if (cloudUpdatedAt > lastLocal) {
                 setState(prev => {
                   if (JSON.stringify(prev.cards[chapterId]?.[chunkId]) === JSON.stringify(updatedCard)) return prev;
@@ -93,10 +94,11 @@ export function BCMProvider({ children }: { children: React.ReactNode }) {
             schema: 'public', 
             table: 'user_chapters',
             filter: `user_id=eq.${user.id}`
-          }, (payload: any) => {
-            if (payload.new && payload.new.data) {
-              const updatedChapter = payload.new.data;
-              const chapterId = payload.new.chapter_id;
+          }, (payload) => {
+            const row = payload.new as DbUserChapter | undefined;
+            if (row?.data) {
+              const updatedChapter = row.data;
+              const chapterId = row.chapter_id;
               setState(prev => ({
                 ...prev,
                 chapters: {
@@ -119,7 +121,7 @@ export function BCMProvider({ children }: { children: React.ReactNode }) {
     };
   }, [user]);
 
-  const syncProgress = async (chapterTitle: string, chunkId: string, card: any) => {
+  const syncProgress = useCallback(async (chapterTitle: string, chunkId: string, card: SM2Card) => {
     if (!user || !supabase) return;
     const client = supabase;
 
@@ -182,9 +184,9 @@ export function BCMProvider({ children }: { children: React.ReactNode }) {
     } catch (err) {
       console.error("Sync error:", err);
     }
-  };
+  }, [user, userGroupIds, state.stats]);
 
-  const pushChapter = async (chapter: any) => {
+  const pushChapter = useCallback(async (chapter: Chapter) => {
     if (!user || !supabase) return;
     const client = supabase;
     try {
@@ -197,14 +199,13 @@ export function BCMProvider({ children }: { children: React.ReactNode }) {
     } catch (err) {
       console.error("Push chapter error:", err);
     }
-  };
+  }, [user]);
 
-  const pullVault = async () => {
+  const pullVault = useCallback(async () => {
     if (!user || !supabase) return;
     const client = supabase;
 
     try {
-      console.log("Pulling personal vault...");
       
       const { data: chapters } = await client.from('user_chapters').select('*').eq('user_id', user.id);
       const { data: cards } = await client.from('user_cards').select('*').eq('user_id', user.id);
@@ -217,39 +218,36 @@ export function BCMProvider({ children }: { children: React.ReactNode }) {
         const now = Date.now();
         
         // Merge chapters
-        chapters?.forEach((row: any) => {
+        (chapters as DbUserChapter[] | null)?.forEach((row) => {
           newState.chapters[row.chapter_id] = row.data;
         });
 
         // Merge cards with conflict resolution
-        cards?.forEach((row: any) => {
+        (cards as DbUserCard[] | null)?.forEach((row) => {
           const lastLocal = lastUpdateRef.current[`card_${row.chunk_id}`] || 0;
           const cloudTime = new Date(row.updated_at).getTime();
           
-          // Authoritative Merge: Cloud wins if it's newer than our last action
           if (cloudTime > lastLocal) {
             if (!newState.cards[row.chapter_id]) newState.cards[row.chapter_id] = {};
             newState.cards[row.chapter_id][row.chunk_id] = row.data;
-            // Align local sync time with cloud
             lastUpdateRef.current[`card_${row.chunk_id}`] = cloudTime;
           }
         });
 
         // Merge stats
-        stats?.forEach((row: any) => {
+        (stats as DbUserStats[] | null)?.forEach((row) => {
           newState.stats[row.chapter_id] = row.data;
         });
 
         return newState;
       });
 
-      console.log("Vault pulled and merged.");
     } catch (err) {
       console.error("Pull vault error:", err);
     }
-  };
+  }, [user]);
 
-  const syncAllMemorised = async () => {
+  const syncAllMemorised = useCallback(async () => {
     if (!user || !supabase) return;
     const client = supabase;
 
@@ -289,9 +287,9 @@ export function BCMProvider({ children }: { children: React.ReactNode }) {
     } catch (err) {
       console.error("Bulk sync error:", err);
     }
-  };
+  }, [user, state.chapters, state.cards]);
 
-  const deleteChapter = async (chapterId: string) => {
+  const deleteChapter = useCallback(async (chapterId: string) => {
     // 1. Remove from local state
     setState(prev => {
       const { [chapterId]: _, ...remainingChapters } = prev.chapters;
@@ -342,7 +340,7 @@ export function BCMProvider({ children }: { children: React.ReactNode }) {
         console.error("Delete chapter sync error:", err);
       }
     }
-  };
+  }, [user, userGroupIds, state.chapters]);
 
   useEffect(() => {
     const saved = loadState();
@@ -357,7 +355,6 @@ export function BCMProvider({ children }: { children: React.ReactNode }) {
 
       // 1. Migrate Chapter ID if needed
       if (newId !== oldId) {
-        console.log(`Migrating Chapter: ${oldId} -> ${newId}`);
         delete migratedState.chapters[oldId];
         migratedState.chapters[newId] = { ...chapter, id: newId };
         
@@ -392,7 +389,6 @@ export function BCMProvider({ children }: { children: React.ReactNode }) {
         const newChunkId = `${newId}-v${verseRange}`;
 
         if (chunk.id !== newChunkId) {
-          console.log(`Migrating Chunk: ${chunk.id} -> ${newChunkId}`);
           const oldChunkId = chunk.id;
           chunk.id = newChunkId;
           
@@ -449,8 +445,13 @@ export function BCMProvider({ children }: { children: React.ReactNode }) {
     }
   }, [state, isHydrated, user]);
 
+  const contextValue = useMemo(() => ({
+    state, setState, isHydrated, userGroupIds,
+    syncProgress, syncAllMemorised, pushChapter, pullVault, deleteChapter
+  }), [state, isHydrated, userGroupIds, syncProgress, syncAllMemorised, pushChapter, pullVault, deleteChapter]);
+
   return (
-    <BCMContext.Provider value={{ state, setState, isHydrated, userGroupIds, syncProgress, syncAllMemorised, pushChapter, pullVault, deleteChapter }}>
+    <BCMContext.Provider value={contextValue}>
       {children}
     </BCMContext.Provider>
   );
@@ -462,4 +463,15 @@ export function useBCM() {
     throw new Error("useBCM must be used within a BCMProvider");
   }
   return context;
+}
+
+export function useSettings() {
+  const { state } = useBCM();
+  return state.settings;
+}
+
+export function useSelectedChapter() {
+  const { state } = useBCM();
+  const id = state.selectedChapterId;
+  return id ? state.chapters[id] ?? null : null;
 }

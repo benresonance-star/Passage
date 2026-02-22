@@ -40,15 +40,17 @@ export interface Chapter {
   createdAt: string;
 }
 
+export interface ChapterStats {
+  streak: number;
+  lastActivity: string | null;
+}
+
 export interface BCMState {
   versions: Record<string, BibleVersion>;
   chapters: Record<string, Chapter>;
   selectedChapterId: string | null;
   cards: Record<string, Record<string, SM2Card>>; // Keyed by chapterId, then chunkId
-  stats: Record<string, {
-    streak: number;
-    lastActivity: string | null;
-  }>; // Keyed by chapterId
+  stats: Record<string, ChapterStats>; // Keyed by chapterId
   settings: {
     clozeLevel: 0 | 20 | 40 | 60 | 80 | "mnemonic";
     showHeadings: boolean;
@@ -62,5 +64,75 @@ export interface BCMState {
     };
     highlightedWords?: string[]; // Array of normalized words to highlight
   };
+}
+
+// ── Supabase Row Types ──────────────────────────────────────────────
+
+export interface DbUserChapter {
+  user_id: string;
+  chapter_id: string;
+  data: Chapter;
+  updated_at: string;
+}
+
+export interface DbUserCard {
+  user_id: string;
+  chapter_id: string;
+  chunk_id: string;
+  data: SM2Card;
+  updated_at: string;
+}
+
+export interface DbUserStats {
+  user_id: string;
+  chapter_id: string;
+  data: ChapterStats;
+  updated_at: string;
+}
+
+export interface DbSharedProgress {
+  group_id: string;
+  user_id: string;
+  chapter_title: string;
+  chunk_id: string;
+  is_memorised: boolean;
+  updated_at: string;
+}
+
+export interface DbGroupMember {
+  user_id: string;
+  group_id: string;
+  role: "admin" | "member";
+}
+
+export interface DbGroup {
+  id: string;
+  name: string;
+  admin_id: string;
+}
+
+export interface DbProfile {
+  id: string;
+  display_name: string | null;
+  email: string | null;
+  last_active: string | null;
+  theme?: { bg: string; text: string; id?: string } | null;
+}
+
+export interface DbBibleLibraryRow {
+  version_id: string;
+  book_name: string;
+  chapter_number: number;
+  verse_number: number | null;
+  content: string | null;
+  is_heading: boolean;
+  heading_text: string | null;
+  created_at: string;
+}
+
+export interface GroupMemberWithProfile {
+  user_id: string;
+  role: string;
+  profiles: { display_name: string | null; email: string | null; last_active?: string | null };
 }
 

@@ -132,8 +132,8 @@ export function loadState(): BCMState {
       };
 
       // Re-key all chapters with new deterministic IDs
-      Object.values(parsed.chapters as Record<string, any>).forEach((ch) => {
-        const bookName = ch.bookName || "Romans"; // Default for existing
+      Object.values(parsed.chapters as Record<string, Chapter & { bookName?: string; versionId?: string }>).forEach((ch) => {
+        const bookName = ch.bookName || "Romans";
         const versionId = ch.versionId || "niv";
         const newChapterId = getChapterSlug(ch.title, bookName, versionId);
         

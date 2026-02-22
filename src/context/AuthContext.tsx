@@ -2,14 +2,18 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
-import { User } from '@supabase/supabase-js';
+import { User, AuthError, Session } from '@supabase/supabase-js';
+
+interface AuthResult {
+  error: AuthError | { message: string } | null;
+}
 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  signIn: (email: string) => Promise<{ error: any }>;
-  verifyOtp: (email: string, token: string) => Promise<{ error: any }>;
-  signOut: () => Promise<{ error: any }>;
+  signIn: (email: string) => Promise<AuthResult>;
+  verifyOtp: (email: string, token: string) => Promise<AuthResult>;
+  signOut: () => Promise<AuthResult>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -41,11 +45,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     getSession();
 
     // Listen for changes on auth state (logged in, signed out, etc.)
-    const { data: { subscription } } = client.auth.onAuthStateChange((event: string, session: any) => {
+    const { data: { subscription } } = client.auth.onAuthStateChange((event, session) => {
       setUser(session?.user ?? null);
       setLoading(false);
 
-      // Clean the URL if we just signed in via a Magic Link
       if (event === "SIGNED_IN" || event === "INITIAL_SESSION") {
         if (typeof window !== "undefined") {
           const url = new URL(window.location.href);

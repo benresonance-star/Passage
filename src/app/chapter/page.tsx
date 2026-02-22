@@ -1,27 +1,16 @@
 "use client";
 
 import { useBCM } from "@/context/BCMContext";
-import { useRouter } from "next/navigation";
-import { Play, Mic, ChevronRight, Eye, EyeOff, Award, Palette, Settings, X, Eraser } from "lucide-react";
+import { Eye, EyeOff, Award, Palette, Settings, Eraser } from "lucide-react";
 import Link from "next/link";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { EmptyState } from "@/components/EmptyState";
+import { ThemeModal } from "@/components/ThemeModal";
 import { useScrollAwareTopActions } from "@/hooks/useScrollAwareTopActions";
-
-const THEME_PRESETS = [
-  { name: "OLED", bg: "#000000", text: "#f4f4f5" },
-  { name: "Midnight", bg: "#0f172a", text: "#e2e8f0" },
-  { name: "Sepia", bg: "#fdf6e3", text: "#433422" },
-  { name: "Night Dusk", bg: "#1a1816", text: "#f2e8d5", id: "night-dusk" },
-  { name: "Classic", bg: "#18181b", text: "#d4d4d8" },
-  { name: "Dawn", bg: "#3d3566", text: "#fffcf0", id: "dawn" },
-];
 
 export default function ChapterPage() {
   const { state, setState, isHydrated } = useBCM();
-  const router = useRouter();
   const [showThemeModal, setShowThemeModal] = useState(false);
-  const [showMeta, setShowMeta] = useState(true);
   const { isCollapsed: topCollapsed, setCollapsed: setTopCollapsed, resetCollapseTimer: resetTopTimer } = useScrollAwareTopActions();
   const longPressTimer = useRef<NodeJS.Timeout | null>(null);
   const touchStartPos = useRef<{ x: number, y: number } | null>(null);
@@ -31,10 +20,6 @@ export default function ChapterPage() {
 
   const chapterId = state.selectedChapterId;
   const chapter = chapterId ? state.chapters[chapterId] : null;
-
-  const handleTitleClick = () => {
-    // No-op as per user request to always show and remove tap feature
-  };
 
   if (!isHydrated) return null;
   if (!chapter || !chapterId) return <EmptyState />;
@@ -207,18 +192,21 @@ export default function ChapterPage() {
               <button 
                 onClick={(e) => { e.stopPropagation(); setShowThemeModal(true); resetTopTimer(); }}
                 className="p-2 rounded-xl transition-colors text-zinc-500"
+                aria-label="Change theme"
               >
                 <Palette size={20} />
               </button>
             <button 
               onClick={(e) => { e.stopPropagation(); toggleVisibilityMode(); resetTopTimer(); }}
               className={`p-2 rounded-xl transition-colors ${state.settings.visibilityMode === 1 ? "text-orange-500" : state.settings.visibilityMode === 2 ? "text-red-500" : "text-zinc-500"}`}
+              aria-label="Toggle visibility mode"
             >
               {state.settings.visibilityMode === 0 || !state.settings.visibilityMode ? <Eye size={20} /> : <EyeOff size={20} />}
             </button>
               <button 
                 onClick={(e) => { e.stopPropagation(); toggleMemorised(); resetTopTimer(); }}
                 className={`p-2 rounded-xl transition-colors ${state.settings.showMemorised ? "text-amber-400" : "text-zinc-500"}`}
+                aria-label="Toggle memorised highlights"
               >
                 <Award size={20} />
               </button>
@@ -234,6 +222,7 @@ export default function ChapterPage() {
                 }
               }}
               className={`p-2 rounded-xl transition-colors text-zinc-500 ${topCollapsed ? "bg-[var(--theme-ui-bg)] border border-white/10 shadow-md" : ""}`}
+              aria-label="Settings"
             >
               <Settings size={20} />
             </Link>
@@ -241,79 +230,14 @@ export default function ChapterPage() {
         </div>
       </header>
 
-      {/* Theme Modal */}
       {showThemeModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-in fade-in duration-300">
-          <div className="absolute inset-0 bg-[var(--overlay)] backdrop-blur-sm" onClick={() => setShowThemeModal(false)} />
-          <div className="relative w-full max-w-md bg-[var(--overlay-surface)] glass border border-[var(--surface-border)] rounded-[32px] p-8 shadow-2xl animate-in zoom-in-95 duration-300">
-            <div className="flex justify-between items-center mb-8">
-              <h2 className={`text-xl font-bold text-center w-full ml-8 ${isSepia ? "text-zinc-800" : "text-white"}`}>Appearance</h2>
-              <button onClick={() => setShowThemeModal(false)} className="p-2 text-zinc-500">
-                <X size={24} />
-              </button>
-            </div>
-            
-            <div className="space-y-8">
-              <div className="grid grid-cols-2 gap-3">
-                {THEME_PRESETS.map((p) => {
-                  const isSelected = p.id 
-                    ? currentTheme.id === p.id 
-                    : currentTheme.bg === p.bg && !currentTheme.id;
-                  return (
-                    <button
-                      key={p.name}
-                      onClick={() => setTheme(p.bg, p.text, p.id)}
-                      className={`flex items-center gap-3 p-4 rounded-2xl border transition-all ${
-                        isSelected ? "border-orange-500 bg-orange-500/5" : "border-[var(--surface-border)] bg-[var(--surface)]"
-                      }`}
-                    >
-                      <div 
-                        className="w-6 h-6 rounded-full border border-white/10 shadow-inner flex-shrink-0"
-                        style={p.id === "dawn" ? {
-                          background: "linear-gradient(180deg, #3d3566 0%, #dabb8e 50%, #5a8090 100%)"
-                        } : p.id === "night-dusk" ? {
-                          background: "linear-gradient(180deg, #1a1816 0%, #2d2a26 100%)",
-                          backgroundColor: "#1a1816"
-                        } : {
-                          backgroundColor: p.bg
-                        }}
-                      />
-                      <span className={`font-bold text-sm ${isSepia ? "text-zinc-800" : "text-white"}`}>{p.name}</span>
-                    </button>
-                  );
-                })}
-              </div>
-
-              <div className="space-y-4 pt-4 border-t border-[var(--surface-border)]">
-                <div className="flex items-center justify-between">
-                  <span className={`text-sm font-bold ${isSepia ? "text-zinc-600" : "text-zinc-400"}`}>Background</span>
-                  <input 
-                    type="color" 
-                    value={currentTheme.bg} 
-                    onChange={(e) => setTheme(e.target.value, currentTheme.text)}
-                    className={`w-12 h-12 rounded-lg bg-transparent cursor-pointer ${isIPhone ? "border-2 border-black" : ""}`}
-                  />
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className={`text-sm font-bold ${isSepia ? "text-zinc-600" : "text-zinc-400"}`}>Text Color</span>
-                  <input 
-                    type="color" 
-                    value={currentTheme.text} 
-                    onChange={(e) => setTheme(currentTheme.bg, e.target.value)}
-                    className={`w-12 h-12 rounded-lg bg-transparent cursor-pointer ${isIPhone ? "border-2 border-black" : ""}`}
-                  />
-                </div>
-              </div>
-            </div>
-
-            <button 
-              onClick={() => setShowThemeModal(false)}
-              className={`w-full mt-12 py-4 bg-[var(--surface-alt)] font-bold rounded-2xl border border-[var(--surface-border)] active:scale-95 transition-transform ${isSepia ? "text-zinc-800" : "text-white"}`}
-            >
-              Done
-            </button>
-          </div>
-        </div>
+        <ThemeModal
+          currentTheme={currentTheme}
+          onSetTheme={setTheme}
+          onClose={() => setShowThemeModal(false)}
+          isSepia={isSepia}
+          isIPhone={isIPhone}
+        />
       )}
 
       <div className="flex-1 overflow-y-auto px-6 md:px-12 pt-8 pb-safe space-y-8 scrollbar-hide stable-scroll-container">
