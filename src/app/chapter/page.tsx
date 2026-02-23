@@ -337,7 +337,7 @@ export default function ChapterPage() {
                         )
                       ) : (
                         <span className="inline-block mr-2">
-                          {visibilityMode !== 2 && (
+                          {visibilityMode !== 2 && studyUnit !== "verse" && (
                             <span className="text-[12px] align-top opacity-50 mr-1 italic font-normal"
                               style={showAsMemorised ? { color: "var(--chunk-memorised-sub)" } : undefined}
                             >

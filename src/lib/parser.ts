@@ -196,14 +196,30 @@ export function chunkVerses(verses: Verse[], title: string, maxVersesPerChunk: n
 }
 
 export function getVerseSections(chapter: Chapter): StudySection[] {
-  return chapter.verses
-    .filter(v => v.type === "scripture" && v.number != null)
-    .map(v => ({
-      id: `${chapter.id}-v${v.number}`,
-      verseRange: `${v.number}`,
-      verses: [v],
-      text: v.text.replace(/\[LINEBREAK\]/g, " ").replace(/\[PARAGRAPH\]\s*/g, "").trim(),
-    }));
+  const sections: StudySection[] = [];
+  let currentHeadings: Verse[] = [];
+
+  for (const v of chapter.verses) {
+    if (v.type === "heading") {
+      currentHeadings.push(v);
+    } else if (v.type === "scripture" && v.number != null) {
+      sections.push({
+        id: `${chapter.id}-v${v.number}`,
+        verseRange: `${v.number}`,
+        verses: [...currentHeadings, v],
+        text: v.text.replace(/\[LINEBREAK\]/g, " ").replace(/\[PARAGRAPH\]\s*/g, "").trim(),
+      });
+      currentHeadings = [];
+    }
+  }
+
+  // If there are trailing headings, we can attach them to the last section if it exists
+  if (currentHeadings.length > 0 && sections.length > 0) {
+    const lastSection = sections[sections.length - 1];
+    lastSection.verses = [...lastSection.verses, ...currentHeadings];
+  }
+
+  return sections;
 }
 
 export function getSections(chapter: Chapter, unit: "chunk" | "verse"): StudySection[] {
