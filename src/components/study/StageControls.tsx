@@ -199,8 +199,7 @@ export function StageControls({
       )}
 
       {/* Stage navigation bar */}
-      {stage !== "type" && stage !== "result" && (
-        <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between">
           <button
             onClick={onExit}
             className="p-2 text-[var(--theme-ui-subtext)] hover:text-[var(--theme-text)] transition-colors"
@@ -249,8 +248,7 @@ export function StageControls({
           <div className={`text-[9px] font-bold uppercase tracking-widest ${isDawn ? "text-white/50" : "text-zinc-500"}`}>
             {STAGE_LABELS[stage]}
           </div>
-        </div>
-      )}
+      </div>
     </div>
   );
 }
