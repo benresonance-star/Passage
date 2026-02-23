@@ -170,7 +170,7 @@ export function ThemeContent({ children }: { children: React.ReactNode }) {
   return (
     <>
       {/* Dawn breathing gradient — persistent, isolated layer (hidden in Soaking mode to avoid double-draw) */}
-      {isDawn && !isSoaking && <div className="dawn-bg" />}
+      {isDawn && !isFullScreen && <div className="dawn-bg" />}
 
       {/* Persistent background for Splash and Meditation continuity */}
       {(showSplash || showMeditation) && <div className="soak-breathe fixed inset-0 z-[9997]" />}

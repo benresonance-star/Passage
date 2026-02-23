@@ -214,7 +214,10 @@ export default function StudyPage() {
     <div className="fixed inset-0 flex flex-col bg-inherit pt-safe">
       {/* Breathing background for soak stage */}
       {stage === "soak" && (
-        <div className="absolute inset-0 soak-breathe pointer-events-none z-0" />
+        <div
+          className="soak-breathe pointer-events-none"
+          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', zIndex: 0 }}
+        />
       )}
 
       {/* Header */}
