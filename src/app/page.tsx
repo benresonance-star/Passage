@@ -9,6 +9,7 @@ import { supabase } from "@/lib/supabase";
 import { useEffect } from "react";
 import { TeamBoard } from "@/components/TeamBoard";
 import { useConfirm } from "@/components/AppModal";
+import pkg from "../../package.json";
 
 const GUIDE_ITEMS = [
   {
@@ -301,6 +302,10 @@ export default function Home() {
           )}
         </div>
       )}
+
+      <p className="text-center text-[10px] text-[var(--theme-ui-subtext)] opacity-40 pt-8 pb-4">
+        v{pkg.version}
+      </p>
     </div>
   );
 }
