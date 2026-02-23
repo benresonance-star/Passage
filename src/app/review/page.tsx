@@ -148,7 +148,7 @@ export default function ReviewPage() {
 
               <div className="grid grid-cols-2 gap-3">
                 <button
-                  onClick={() => setActiveAndNavigate(chunk.id, "/practice")}
+                  onClick={() => setActiveAndNavigate(chunk.id, "/study")}
                   className="flex items-center justify-center gap-2 py-3 bg-[var(--surface-alt)] text-white text-sm font-bold rounded-xl active:scale-95 transition-transform border border-[var(--surface-border)]"
                 >
                   <Play size={16} fill="currentColor" />

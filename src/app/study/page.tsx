@@ -1,0 +1,356 @@
+"use client";
+
+import { useState, useEffect, useRef, useMemo, useCallback } from "react";
+import { useBCM } from "@/context/BCMContext";
+import { useAuth } from "@/context/AuthContext";
+import { useRouter } from "next/navigation";
+import { useWakeLock } from "@/hooks/useWakeLock";
+import { getSections } from "@/lib/parser";
+import { calculateDiff, DiffResult } from "@/lib/diff";
+import { updateCard } from "@/lib/scheduler";
+import { calculateUpdatedStreak } from "@/lib/streak";
+import { TextAnchor, type StudyStage } from "@/components/study/TextAnchor";
+import { StageControls } from "@/components/study/StageControls";
+import { EmptyState } from "@/components/EmptyState";
+import { CheckCircle2 } from "lucide-react";
+
+export default function StudyPage() {
+  const { state, setState, isHydrated, syncProgress } = useBCM();
+  const { user } = useAuth();
+  const router = useRouter();
+  useWakeLock();
+
+  const [stage, setStage] = useState<StudyStage>("read");
+
+  // Flow state
+  const [flowWordIndex, setFlowWordIndex] = useState(-1);
+  const [flowPlaying, setFlowPlaying] = useState(false);
+  const [flowWpm, setFlowWpm] = useState(100);
+  const [flowFocusMode, setFlowFocusMode] = useState(true);
+  const flowTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Soak state
+  const [soakVerseIndex, setSoakVerseIndex] = useState(0);
+
+  // Recite state
+  const [reciteRevealed, setReciteRevealed] = useState<Set<number>>(new Set());
+
+  // Cloze state
+  const [clozeLevel, setClozeLevel] = useState<0 | 20 | 40 | 60 | 80 | "mnemonic">(
+    (state.settings.clozeLevel as 0 | 20 | 40 | 60 | 80 | "mnemonic") || 20
+  );
+
+  // Type state
+  const [typedText, setTypedText] = useState("");
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Result state
+  const [diffResults, setDiffResults] = useState<{ results: DiffResult[]; accuracy: number } | null>(null);
+
+  // Resolve active section
+  const chapterId = state.selectedChapterId;
+  const chapter = chapterId ? state.chapters[chapterId] : null;
+  const studyUnit = state.settings.studyUnit || "chunk";
+  const sections = useMemo(
+    () => (chapter ? getSections(chapter, studyUnit) : []),
+    [chapter, studyUnit]
+  );
+  const activeId = chapterId ? state.settings.activeChunkId[chapterId] : null;
+  const activeSection = sections.find(s => s.id === activeId);
+
+  const words = useMemo(
+    () => activeSection?.text.split(/\s+/).filter(w => w.length > 0) || [],
+    [activeSection?.text]
+  );
+
+  const currentTheme = state.settings.theme || { bg: "#000000", text: "#f4f4f5" };
+  const isDawn = currentTheme.id === "dawn";
+
+  const scriptureVerses = useMemo(
+    () => activeSection?.verses.filter(v => v.type === "scripture") || [],
+    [activeSection?.verses]
+  );
+
+  // Redirect if no chapter/section
+  useEffect(() => {
+    if (isHydrated && (!chapter || !chapterId)) {
+      router.push("/chapter");
+      return;
+    }
+    if (isHydrated && !activeSection && chapter) {
+      const firstSection = sections[0];
+      if (firstSection) {
+        setState(prev => ({
+          ...prev,
+          settings: {
+            ...prev.settings,
+            activeChunkId: { ...prev.settings.activeChunkId, [chapterId!]: firstSection.id }
+          }
+        }));
+      } else {
+        router.push("/chapter");
+      }
+    }
+  }, [isHydrated, chapter, chapterId, activeSection, sections, router, setState]);
+
+  // Auto-grow textarea
+  useEffect(() => {
+    if (stage === "type" && textareaRef.current) {
+      const textarea = textareaRef.current;
+      textarea.style.height = "auto";
+      const maxH = window.innerHeight - 320;
+      textarea.style.height = `${Math.min(textarea.scrollHeight, maxH)}px`;
+    }
+  }, [typedText, stage]);
+
+  // Flow timer
+  useEffect(() => {
+    if (stage === "flow" && flowPlaying && flowWordIndex < words.length - 1) {
+      const msPerWord = (60 / flowWpm) * 1000;
+      flowTimerRef.current = setTimeout(() => {
+        setFlowWordIndex(prev => prev + 1);
+      }, msPerWord);
+    } else if (flowWordIndex >= words.length - 1) {
+      setFlowPlaying(false);
+    }
+    return () => {
+      if (flowTimerRef.current) clearTimeout(flowTimerRef.current);
+    };
+  }, [stage, flowPlaying, flowWordIndex, words.length, flowWpm]);
+
+  // Ensure SM2 card exists for the active section
+  useEffect(() => {
+    if (!isHydrated || !chapterId || !activeSection) return;
+    const existing = state.cards[chapterId]?.[activeSection.id];
+    if (!existing) {
+      setState(prev => ({
+        ...prev,
+        cards: {
+          ...prev.cards,
+          [chapterId]: {
+            ...(prev.cards[chapterId] || {}),
+            [activeSection.id]: {
+              id: activeSection.id,
+              ease: 2.5,
+              intervalDays: 0,
+              reps: 0,
+              lapses: 0,
+              nextDueAt: new Date().toISOString(),
+              lastScore: null,
+              hardUntilAt: null,
+              isMemorised: false,
+            }
+          }
+        }
+      }));
+    }
+  }, [isHydrated, chapterId, activeSection, state.cards, setState]);
+
+  const handleGrade = useCallback(async (score: number) => {
+    if (!chapterId || !activeSection || !chapter) return;
+    const currentCard = state.cards[chapterId]?.[activeSection.id];
+    if (!currentCard) return;
+
+    const updatedCard = updateCard(currentCard, score);
+
+    setState(prev => {
+      const stats = prev.stats[chapterId] || { streak: 0, lastActivity: null };
+      const newStreak = calculateUpdatedStreak(stats.streak, stats.lastActivity);
+      return {
+        ...prev,
+        cards: {
+          ...prev.cards,
+          [chapterId]: {
+            ...prev.cards[chapterId],
+            [activeSection.id]: updatedCard
+          }
+        },
+        stats: {
+          ...prev.stats,
+          [chapterId]: { streak: newStreak, lastActivity: new Date().toISOString() }
+        }
+      };
+    });
+
+    if (user && chapter) {
+      await syncProgress(chapter.title, activeSection.id, updatedCard);
+    }
+  }, [chapterId, activeSection, chapter, state.cards, setState, user, syncProgress]);
+
+  const handleStageChange = useCallback((newStage: StudyStage) => {
+    // Reset stage-specific state when transitioning
+    if (newStage === "soak") setSoakVerseIndex(0);
+    if (newStage === "flow") { setFlowWordIndex(-1); setFlowPlaying(false); }
+    if (newStage === "recite") setReciteRevealed(new Set());
+    if (newStage === "type") setTypedText("");
+    setStage(newStage);
+  }, []);
+
+  const handleTypeSubmit = useCallback(async () => {
+    if (!activeSection) return;
+    const results = calculateDiff(activeSection.text, typedText);
+    setDiffResults(results);
+    setStage("result");
+    await handleGrade(results.accuracy / 100);
+  }, [activeSection, typedText, handleGrade]);
+
+  const reciteLines = useMemo(() => {
+    const text = scriptureVerses.map(v => v.text).join(" ");
+    return text ? text.split(/([.!?]+\s+)/).filter(Boolean) : [];
+  }, [scriptureVerses]);
+
+  const reciteAllRevealed = useMemo(() => {
+    if (stage !== "recite") return false;
+    const lineCount = activeSection
+      ? activeSection.verses.filter(v => v.type === "scripture").map(v => v.text).join(" ").split(/([.!?]+\s+)/).filter(Boolean).length
+      : 0;
+    return reciteRevealed.size > 0 && reciteRevealed.size >= lineCount;
+  }, [stage, reciteRevealed, activeSection]);
+
+  if (!isHydrated) return null;
+  if (!chapter || !chapterId || !activeSection) return <EmptyState />;
+
+  return (
+    <div className="fixed inset-0 flex flex-col bg-inherit pt-safe">
+      {/* Breathing background for soak stage */}
+      {stage === "soak" && (
+        <div className="absolute inset-0 soak-breathe pointer-events-none z-0" />
+      )}
+
+      {/* Header */}
+      <header className="flex items-center justify-between px-4 pb-2 pt-2 flex-shrink-0 z-10 relative">
+        <div />
+        <div className="text-center">
+          <h1 className={`text-sm font-bold uppercase tracking-widest ${isDawn ? "text-white" : "text-orange-500"}`}>
+            {stage === "result" ? "Results" : `${stage.charAt(0).toUpperCase() + stage.slice(1)} Mode`}
+          </h1>
+          <p className="text-[10px] text-[var(--theme-ui-subtext)] uppercase tracking-tight">
+            {studyUnit === "verse" ? "Verse" : "Verses"} {activeSection.verseRange} · {chapter.title}
+          </p>
+        </div>
+        <div className="w-10" />
+      </header>
+
+      {/* Main content area — text stays anchored here */}
+      <div className={`flex-1 overflow-y-auto scrollbar-hide flex flex-col relative z-10 ${stage === "type" ? "justify-start pt-8" : ""}`}>
+        {stage === "type" ? (
+          <div className="space-y-6 animate-in fade-in duration-500 px-4">
+            <textarea
+              ref={textareaRef}
+              autoFocus
+              value={typedText}
+              onChange={(e) => setTypedText(e.target.value)}
+              className="w-full min-h-[16rem] bg-[var(--theme-ui-bg)] border border-[var(--theme-ui-border)] rounded-2xl p-6 chunk-text-bold leading-relaxed focus:outline-none focus:ring-2 focus:ring-orange-500/50 resize-none overflow-y-auto scrollbar-hide"
+              placeholder="Type from memory..."
+              style={{ color: "var(--theme-text)" }}
+            />
+          </div>
+        ) : stage === "result" && diffResults ? (
+          <div className="space-y-8 animate-in zoom-in-95 duration-300 px-4 my-auto">
+            <div className="bg-[var(--theme-ui-bg)] border border-[var(--theme-ui-border)] rounded-3xl p-6 space-y-6">
+              <div className="flex justify-between items-center">
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 size={20} className="text-green-500" />
+                  <span className="text-2xl font-bold">{diffResults.accuracy}%</span>
+                </div>
+                <div className="text-[var(--theme-ui-subtext)] text-sm">Accuracy</div>
+              </div>
+              <div className="flex flex-wrap gap-x-2 gap-y-1 chunk-text-bold leading-relaxed">
+                {diffResults.results
+                  .filter(res => res.status !== "extra")
+                  .map((res, i) => (
+                    <span
+                      key={i}
+                      className={
+                        res.status === "correct"
+                          ? isDawn ? "text-[#FFCB1F]" : "text-white"
+                          : res.status === "missing"
+                          ? isDawn ? "text-white/50" : "text-orange-500/50"
+                          : ""
+                      }
+                    >
+                      {res.word}
+                    </span>
+                  ))}
+              </div>
+            </div>
+          </div>
+        ) : (
+          <TextAnchor
+            section={activeSection}
+            stage={stage}
+            isDawn={isDawn}
+            soakVerseIndex={soakVerseIndex}
+            flowWordIndex={flowWordIndex}
+            flowFocusMode={flowFocusMode}
+            reciteRevealedVerses={reciteRevealed}
+            onReciteReveal={(idx) => {
+              setReciteRevealed(prev => {
+                const next = new Set(prev);
+                if (next.has(idx)) next.delete(idx); else next.add(idx);
+                return next;
+              });
+            }}
+            clozeLevel={clozeLevel}
+          />
+        )}
+      </div>
+
+      {/* Soak navigation overlay */}
+      {stage === "soak" && scriptureVerses.length > 1 && (
+        <div className="absolute inset-0 z-20 pointer-events-none">
+          <div
+            className="absolute left-0 top-0 bottom-0 w-[30%] pointer-events-auto"
+            onClick={() => setSoakVerseIndex(prev => Math.max(0, prev - 1))}
+          />
+          <div
+            className="absolute right-0 top-0 bottom-0 w-[30%] pointer-events-auto"
+            onClick={() => setSoakVerseIndex(prev => Math.min(scriptureVerses.length - 1, prev + 1))}
+          />
+        </div>
+      )}
+
+      {/* Bottom controls */}
+      <div className="relative z-30">
+        <StageControls
+          stage={stage}
+          isDawn={isDawn}
+          onStageChange={handleStageChange}
+          onExit={() => router.push("/chapter")}
+          flowPlaying={flowPlaying}
+          onFlowToggle={() => {
+            if (!flowPlaying && flowWordIndex < 0) setFlowWordIndex(0);
+            setFlowPlaying(!flowPlaying);
+          }}
+          flowWpm={flowWpm}
+          onFlowWpmChange={setFlowWpm}
+          onFlowSkip={(dir) =>
+            setFlowWordIndex(prev =>
+              dir === "forward" ? Math.min(words.length - 1, prev + 1) : Math.max(-1, prev - 1)
+            )
+          }
+          onFlowReset={() => { setFlowPlaying(false); setFlowWordIndex(-1); }}
+          flowFocusMode={flowFocusMode}
+          onFlowFocusToggle={() => setFlowFocusMode(!flowFocusMode)}
+          clozeLevel={clozeLevel}
+          onClozeLevelChange={setClozeLevel}
+          reciteAllRevealed={reciteAllRevealed}
+          onReciteRevealToggle={() => {
+            if (reciteAllRevealed) {
+              setReciteRevealed(new Set());
+            } else {
+              const count = activeSection.verses.filter(v => v.type === "scripture").map(v => v.text).join(" ")
+                .split(/([.!?]+\s+)/).filter(Boolean).length;
+              setReciteRevealed(new Set(Array.from({ length: count }, (_, i) => i)));
+            }
+          }}
+          onTypeSubmit={handleTypeSubmit}
+          canSubmit={typedText.trim().length > 0}
+          onTryAgain={() => { setTypedText(""); handleStageChange("type"); }}
+          onContinue={() => router.push("/chapter")}
+          accuracy={diffResults?.accuracy}
+        />
+      </div>
+    </div>
+  );
+}

@@ -11,6 +11,10 @@ export interface Chunk {
   text: string;
 }
 
+export type StudySection = Chunk;
+
+export type StudyUnit = "chunk" | "verse";
+
 export interface SM2Card {
   id: string; // same as chunkId
   ease: number; // starts at 2.5
@@ -63,6 +67,7 @@ export interface BCMState {
       id?: string; // "dawn" for the breathing gradient theme
     };
     highlightedWords?: string[]; // Array of normalized words to highlight
+    studyUnit?: StudyUnit;
   };
 }
 

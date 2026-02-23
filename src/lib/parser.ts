@@ -1,4 +1,4 @@
-import { Verse, Chunk } from "@/types";
+import { Verse, Chunk, StudySection, Chapter } from "@/types";
 
 export function parseChapter(text: string, stripRefs: boolean = true): { title: string; verses: Verse[] } {
   let processedText = text;
@@ -193,6 +193,21 @@ export function chunkVerses(verses: Verse[], title: string, maxVersesPerChunk: n
   }
 
   return chunks;
+}
+
+export function getVerseSections(chapter: Chapter): StudySection[] {
+  return chapter.verses
+    .filter(v => v.type === "scripture" && v.number != null)
+    .map(v => ({
+      id: `${chapter.id}-v${v.number}`,
+      verseRange: `${v.number}`,
+      verses: [v],
+      text: v.text.replace(/\[LINEBREAK\]/g, " ").replace(/\[PARAGRAPH\]\s*/g, "").trim(),
+    }));
+}
+
+export function getSections(chapter: Chapter, unit: "chunk" | "verse"): StudySection[] {
+  return unit === "verse" ? getVerseSections(chapter) : chapter.chunks;
 }
 
 export function splitIntoLines(text: string): string[] {

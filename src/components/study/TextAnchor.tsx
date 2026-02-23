@@ -1,0 +1,174 @@
+"use client";
+
+import { useMemo } from "react";
+import { hideWords, generateMnemonic } from "@/lib/cloze";
+import { splitIntoLines } from "@/lib/parser";
+import type { StudySection } from "@/types";
+
+export type StudyStage = "read" | "soak" | "flow" | "recite" | "cloze" | "type" | "result";
+
+interface TextAnchorProps {
+  section: StudySection;
+  stage: StudyStage;
+  isDawn: boolean;
+  soakVerseIndex?: number;
+  flowWordIndex?: number;
+  flowFocusMode?: boolean;
+  reciteRevealedVerses?: Set<number>;
+  onReciteReveal?: (verseIdx: number) => void;
+  clozeLevel?: 0 | 20 | 40 | 60 | 80 | "mnemonic";
+}
+
+export function TextAnchor({
+  section,
+  stage,
+  isDawn,
+  soakVerseIndex = 0,
+  flowWordIndex = -1,
+  flowFocusMode = true,
+  reciteRevealedVerses,
+  onReciteReveal,
+  clozeLevel = 20,
+}: TextAnchorProps) {
+  const scriptureVerses = useMemo(
+    () => section.verses.filter(v => v.type === "scripture"),
+    [section.verses]
+  );
+
+  const clozeText = useMemo(() => {
+    if (stage !== "cloze") return "";
+    if (clozeLevel === "mnemonic") return generateMnemonic(section.text);
+    return hideWords(section.text, clozeLevel, section.id);
+  }, [stage, clozeLevel, section.text, section.id]);
+
+  const reciteLines = useMemo(() => {
+    if (stage !== "recite") return [];
+    const scriptureText = scriptureVerses.map(v => v.text).join(" ");
+    return splitIntoLines(scriptureText);
+  }, [stage, scriptureVerses]);
+
+  if (stage === "cloze") {
+    return (
+      <div className="animate-in fade-in duration-500 px-4 my-auto">
+        <div className="chunk-text-bold text-center leading-relaxed px-4 whitespace-pre-wrap">
+          {clozeText}
+        </div>
+      </div>
+    );
+  }
+
+  if (stage === "recite") {
+    return (
+      <div className="space-y-3 px-4 my-auto animate-in fade-in duration-500">
+        {reciteLines.map((line, i) => {
+          const isRevealed = reciteRevealedVerses?.has(i);
+          return (
+            <div
+              key={i}
+              onClick={() => onReciteReveal?.(i)}
+              className={`p-4 rounded-xl transition-all duration-300 cursor-pointer border ${
+                isRevealed
+                  ? "bg-[var(--theme-ui-bg)] shadow-lg border-[var(--theme-ui-border)]"
+                  : "bg-[var(--theme-ui-bg)] text-transparent border-transparent opacity-40"
+              }`}
+            >
+              <p className="text-lg leading-relaxed select-none">{line}</p>
+            </div>
+          );
+        })}
+      </div>
+    );
+  }
+
+  // Read, Soak, Flow all share the same verse layout
+  let globalWordIdx = 0;
+
+  return (
+    <div className="px-4 my-auto">
+      <div className="chunk-text-bold text-center leading-relaxed px-4">
+        {section.verses.map((v, vIdx) => {
+          if (v.type === "heading") {
+            return (
+              <span key={vIdx} className="block">
+                <span
+                  className="block text-zinc-500 text-[11px] font-bold uppercase tracking-[0.2em] mb-4 mt-2"
+                  style={stage === "soak" ? {
+                    opacity: soakVerseIndex === vIdx ? 1 : 0.15,
+                    transition: "opacity 0.8s ease-out",
+                  } : undefined}
+                >
+                  {v.text}
+                </span>
+              </span>
+            );
+          }
+
+          const scriptureIdx = scriptureVerses.indexOf(v);
+          const isSoakFocused = stage === "soak" && scriptureIdx === soakVerseIndex;
+          const isSoakDimmed = stage === "soak" && scriptureIdx !== soakVerseIndex;
+
+          const words = v.text
+            .replace(/\[LINEBREAK\]/g, " ")
+            .split(/\s+/)
+            .filter(w => w.length > 0);
+
+          const verseEl = (
+            <span key={vIdx} className="inline">
+              {words.map((word) => {
+                const wi = globalWordIdx++;
+                const isFlowRead = stage === "flow" && wi <= flowWordIndex;
+                const isFlowUnread = stage === "flow" && wi > flowWordIndex;
+                const isFlowHidden = isFlowUnread && flowFocusMode;
+
+                return (
+                  <span
+                    key={wi}
+                    className="inline"
+                    style={{
+                      transition: "color 0.8s ease-out, text-shadow 0.8s ease-out, opacity 0.8s ease-out",
+                      ...(isSoakDimmed ? { opacity: 0.15 } : {}),
+                      ...(isSoakFocused ? { opacity: 1 } : {}),
+                      ...(isFlowHidden ? { opacity: 0 } : {}),
+                      ...(isFlowRead
+                        ? { color: "var(--flow-read)", textShadow: "var(--flow-glow, none)" }
+                        : isFlowUnread
+                        ? { color: "var(--flow-unread)", textShadow: "none" }
+                        : {}),
+                    }}
+                  >
+                    {word}{" "}
+                  </span>
+                );
+              })}
+            </span>
+          );
+
+          return verseEl;
+        })}
+      </div>
+      {stage === "read" && (
+        <div className="mt-6 text-center">
+          <p className={`text-sm italic ${isDawn ? "text-white/50" : "text-zinc-500"}`}>
+            Read the text carefully.
+          </p>
+        </div>
+      )}
+      {stage === "soak" && (
+        <div className="mt-6 text-center">
+          <p className={`text-sm italic ${isDawn ? "text-white/50" : "text-zinc-500"}`}>
+            {scriptureVerses.length > 1
+              ? `Verse ${soakVerseIndex + 1} of ${scriptureVerses.length}`
+              : "Dwell on this verse."}
+          </p>
+        </div>
+      )}
+      {stage === "flow" && (
+        <div className="mt-6 text-center">
+          <p className={`text-sm italic animate-in fade-in duration-1000 ${isDawn ? "text-white/50" : "text-zinc-500"}`}>
+            Read the text slowly and deeply.
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}

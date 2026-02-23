@@ -1,12 +1,14 @@
 "use client";
 
 import { useBCM } from "@/context/BCMContext";
-import { Eye, EyeOff, Award, Palette, Settings, Eraser } from "lucide-react";
+import { Eye, EyeOff, Award, Palette, Settings, Eraser, Play } from "lucide-react";
 import Link from "next/link";
-import { useState, useRef } from "react";
+import { useState, useRef, useMemo } from "react";
 import { EmptyState } from "@/components/EmptyState";
 import { ThemeModal } from "@/components/ThemeModal";
 import { useScrollAwareTopActions } from "@/hooks/useScrollAwareTopActions";
+import { getSections } from "@/lib/parser";
+import type { StudyUnit } from "@/types";
 
 export default function ChapterPage() {
   const { state, setState, isHydrated } = useBCM();
@@ -155,6 +157,8 @@ export default function ChapterPage() {
   };
 
   const activeChunkId = state.settings.activeChunkId[chapterId];
+  const studyUnit: StudyUnit = state.settings.studyUnit || "chunk";
+  const sections = useMemo(() => getSections(chapter, studyUnit), [chapter, studyUnit]);
   const currentTheme = state.settings.theme || { bg: "#000000", text: "#f4f4f5" };
   const isDawn = currentTheme.id === "dawn";
   const isSepia = currentTheme.bg === "#fdf6e3";
@@ -162,6 +166,17 @@ export default function ChapterPage() {
   const scriptureVerses = chapter.verses.filter(v => v.type === "scripture");
 
   const isIPhone = typeof window !== "undefined" && /iPhone/.test(navigator.userAgent);
+
+  const setStudyUnit = (unit: StudyUnit) => {
+    setState(prev => ({
+      ...prev,
+      settings: {
+        ...prev.settings,
+        studyUnit: unit,
+        activeChunkId: { ...prev.settings.activeChunkId, [chapterId]: null },
+      }
+    }));
+  };
 
   return (
     <div className="fixed inset-0 flex flex-col bg-inherit pt-safe">
@@ -171,6 +186,21 @@ export default function ChapterPage() {
             <h1 className="text-2xl font-bold">{chapter.title}</h1>
             <div className={`text-[10px] uppercase tracking-wider mt-0.5 transition-all duration-500 ${isDawn ? "text-[var(--theme-ui-subtext)]" : "text-zinc-500"}`}>
               {state.versions[chapter.versionId]?.abbreviation || "NIV"} — {scriptureVerses.length} VERSES — {chapter.chunks.length} PARTS
+            </div>
+            <div className="flex mt-2 rounded-full overflow-hidden border border-[var(--surface-border)] w-fit">
+              {(["chunk", "verse"] as const).map(unit => (
+                <button
+                  key={unit}
+                  onClick={() => setStudyUnit(unit)}
+                  className={`px-3 py-1 text-[9px] font-bold uppercase tracking-widest transition-all ${
+                    studyUnit === unit
+                      ? isDawn ? "bg-white/20 text-white" : "bg-orange-500/20 text-orange-400"
+                      : "text-[var(--theme-ui-subtext)] hover:text-[var(--theme-text)]"
+                  }`}
+                >
+                  {unit === "chunk" ? "Chunks" : "Verses"}
+                </button>
+              ))}
             </div>
           </div>
           <div 
@@ -246,19 +276,19 @@ export default function ChapterPage() {
 
       <div className="flex-1 overflow-y-auto px-6 md:px-12 pt-8 pb-safe space-y-8 scrollbar-hide stable-scroll-container">
         <div className="pb-20 max-w-2xl mx-auto">
-          {chapter.chunks.map((chunk) => {
-            const isActive = activeChunkId === chunk.id;
-            const isMemorised = state.cards[chapterId]?.[chunk.id]?.isMemorised;
+          {sections.map((section) => {
+            const isActive = activeChunkId === section.id;
+            const isMemorised = state.cards[chapterId]?.[section.id]?.isMemorised;
             const showAsMemorised = isMemorised && state.settings.showMemorised;
             const visibilityMode = state.settings.visibilityMode || 0;
 
             return (
               <div
-                key={chunk.id}
-                onMouseDown={() => handleLongPressStart(chunk.id)}
+                key={section.id}
+                onMouseDown={() => handleLongPressStart(section.id)}
                 onMouseUp={handleLongPressEnd}
                 onMouseLeave={handleLongPressEnd}
-                onTouchStart={(e) => handleLongPressStart(chunk.id, e)}
+                onTouchStart={(e) => handleLongPressStart(section.id, e)}
                 onTouchMove={handleTouchMove}
                 onTouchEnd={handleLongPressEnd}
                 onContextMenu={(e) => e.preventDefault()}
@@ -273,15 +303,29 @@ export default function ChapterPage() {
                     <span className={`text-[10px] font-bold uppercase tracking-[0.2em] ${
                       isActive ? "text-[var(--chunk-active)]" : showAsMemorised ? "text-[var(--chunk-memorised)]" : "text-[var(--theme-ui-subtext)]"
                     }`}>
-                      Verse {chunk.verseRange}
+                      {studyUnit === "verse" ? "Verse" : "Verse"} {section.verseRange}
                     </span>
+                  )}
+                  {isActive && (
+                    <Link
+                      href="/study"
+                      onClick={(e) => e.stopPropagation()}
+                      className={`flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all animate-in fade-in zoom-in-95 duration-300 ${
+                        isDawn
+                          ? "bg-white/20 text-white border border-white/30"
+                          : "bg-orange-500 text-white shadow-lg shadow-orange-500/20"
+                      }`}
+                    >
+                      <Play size={10} className="fill-current" />
+                      Study
+                    </Link>
                   )}
                 </div>
                 
                 <div className={`chunk-text ${isActive ? "chunk-text-bold" : showAsMemorised ? "opacity-80" : "opacity-90"}`}
                   style={showAsMemorised ? { color: "var(--chunk-memorised)" } : { color: "var(--theme-text)" }}
                 >
-                  {chunk.verses.map((v, idx) => (
+                  {section.verses.map((v, idx) => (
                     <div key={idx} className={v.type === "heading" ? "w-full text-center" : "inline"}>
                       {v.type === "heading" ? (
                         visibilityMode === 0 && (

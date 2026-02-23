@@ -1,4 +1,4 @@
-# Passage - Bible Chapter Memoriser (v3.0.0)
+# Passage - Bible Chapter Memoriser (v3.1.0)
 
 ## AI Agent Protocol (Mandatory)
 
@@ -51,9 +51,15 @@ Home (/)
 Tab Bar (BottomNav — fixed pill)
   ├── Chapter  (/chapter)
   ├── Soak     (/soak)
-  ├── Practice (/practice)
+  ├── Study    (/study)
   └── Review   (/review)
 
+Guided Session Route
+  └── Study    (/study)  — single-screen study flow with 7 stages
+
+Legacy Routes (still accessible, not in nav)
+  ├── Practice (/practice)  — direct multi-mode practice
+  
 Modal / Push Routes
   ├── Import   (/import)
   ├── Group    (/group)
@@ -113,6 +119,9 @@ interface Chunk {
   text: string;               // Flattened scripture text (no headings)
 }
 
+type StudySection = Chunk;    // A chunk or a single verse — same shape
+type StudyUnit = "chunk" | "verse";
+
 interface SM2Card {
   id: string;                 // Same as chunkId
   ease: number;               // Starts at 2.5
@@ -169,6 +178,7 @@ interface BCMState {
       id?: string;                       // "dawn" or "night-dusk" for special themes
     };
     highlightedWords?: string[];         // Normalised words highlighted by the user
+    studyUnit?: StudyUnit;               // "chunk" (default) or "verse" — controls study section granularity
   };
 }
 ```
@@ -236,8 +246,10 @@ Full chapter text view with interactive chunked layout.
     - **Visibility Mode** (Eye/EyeOff icon): Cycles through 3 modes: 0 = All, 1 = No Headings, 2 = Hide All (headings + verse numbers).
     - **Memorised Toggle** (Award icon): Highlights memorised chunks in amber.
     - **Home** (Settings icon): Navigates to `/`. When collapsed, tapping expands the pill instead.
-- **Chunk Display**: Each chunk is a card showing verse range label, verse text with inline verse numbers, and heading text (when visibility mode = 0). Headings are rendered as centered uppercase labels.
-- **Long-press Activation**: 600ms long-press on a chunk toggles it as the active chunk (highlighted with ring + shadow). Haptic feedback via `navigator.vibrate`. Touch-move cancels the long-press (20px threshold).
+- **Study Unit Toggle**: Segmented control below the header subtitle with two options: "Chunks" (default, groups of ~4 verses) and "Verses" (individual verses). Persisted in `settings.studyUnit`. Switching clears the active section.
+- **Section Display**: Based on the active study unit, each section (chunk or verse) is a card showing verse range label, verse text with inline verse numbers, and heading text (when visibility mode = 0). Headings are rendered as centered uppercase labels.
+- **Long-press Activation**: 600ms long-press on a section toggles it as the active section (highlighted with ring + shadow). Haptic feedback via `navigator.vibrate`. Touch-move cancels the long-press (20px threshold).
+- **Practice Pill**: When a section is active, a small "Study" pill button appears in the section header row (right-aligned next to the verse range label). Tapping navigates to `/study`. Uses `e.stopPropagation()` to prevent long-press interference.
 - **Word Highlighting**: Tap any word to toggle it as highlighted (gold `#FFCB1F`, bold, with glow). Highlights are stored in `settings.highlightedWords` as normalised (lowercase, no punctuation) strings. All instances of the same normalised word are highlighted across the chapter.
 - **Memorised Overlay**: When `showMemorised` is on, memorised chunks are styled with `--chunk-memorised` colour.
 - **Line Breaks**: Verse text containing `[LINEBREAK]` markers is rendered with `<br>` elements.
@@ -302,6 +314,41 @@ Multi-mode practice screen for the active chunk. Modes are sequential or selecta
 
 **Reset:** Custom event `bcm-reset-practice` resets all mode state.
 
+### D2. Study Session (`/study`)
+
+A unified single-screen study flow that guides the user through a study section (chunk or verse) from passive reading to active recall. The study text remains anchored in the same visual position across all stages.
+
+**Study Units:** Users choose between "Chunks" (groups of ~4 verses) or "Verses" (single verse) via a segmented toggle on the Chapter page header. Both use the `StudySection` type (same shape as `Chunk`). SM2 cards are tracked independently for each unit size — IDs don't collide (`-v9-12` for chunks, `-v9` for single verses).
+
+**Entry Points:**
+- **Practice pill**: Appears on the active (highlighted) chunk/verse card on the Chapter page. Long-press activates a section, then tap the pill to enter Study.
+- **Review page**: "Practice" button per chunk navigates to `/study`.
+- **Bottom nav**: Study tab in the navigation bar.
+
+**Stages (ordered by desirable difficulty):**
+
+1. **Read**: Full section text, normal styling. Subtitle: "Read the text carefully."
+2. **Soak**: Inline verse-focus mode — current verse at full opacity, others dimmed to ~15%. Tap left/right zones to navigate between verses. Breathing gradient background overlay. Verse counter shown below text.
+3. **Flow**: Word-by-word timed illumination. Words transition from unread to read styling at user-controlled WPM. Controls: play/pause, skip forward/back, reset, WPM slider, focus mode toggle (hides unread words).
+4. **Recite**: Text split into sentence-based lines (`splitIntoLines`). Lines are hidden (transparent, 40% opacity). Tap to reveal individual lines. Reveal All / Hide All toggle.
+5. **Cloze**: Deterministic word hiding at configurable levels (0%, 20%, 40%, 60%, 80%, Mnemonic). Uses `hideWords()` and `generateMnemonic()` from `lib/cloze.ts`.
+6. **Type**: Section text hidden, replaced by auto-growing textarea. "Submit" calculates diff and advances to Result.
+7. **Result**: Word-level diff display with accuracy percentage. SM-2 grading happens automatically. "Try Again" returns to Type. "Done" exits to `/chapter`.
+
+**Stage Navigation:**
+- Bottom bar with stage indicator dots (current stage is elongated pill, completed stages are filled, future stages are faded).
+- Back/forward chevrons to move between adjacent stages.
+- Tapping a dot jumps to that stage (only accessible stages — current or earlier).
+- Exit (X) button returns to `/chapter`.
+- Stage-specific controls appear above the dots (Flow controls, Cloze level selector, Recite reveal toggle, Type submit button, Result action buttons).
+
+**Text Anchor Pattern:** One `<div>` renders the section text and never unmounts or repositions between stages. Each stage applies a different visual "lens" (opacity, colour, blur, word hiding). Type and Result replace the text area with their own content.
+
+**Components:**
+- `TextAnchor` (`src/components/study/TextAnchor.tsx`): Shared verse renderer with stage-based styling.
+- `StageControls` (`src/components/study/StageControls.tsx`): Bottom navigation and context controls.
+- `StudyPage` (`src/app/study/page.tsx`): Stage state machine, section resolution, SM2 grading.
+
 ### E. Review (`/review`)
 
 Chapter Mastery overview.
@@ -313,7 +360,7 @@ Chapter Mastery overview.
     - Active chunk gets a ring outline (`ring-2 ring-[var(--theme-text)]`).
     - Memorised chunks get amber border styling and `--chunk-memorised` text colour.
 - **Actions per chunk**:
-    - **Practice**: Sets the chunk as active and navigates to `/practice`.
+    - **Practice**: Sets the chunk as active and navigates to `/study`.
     - **Mark / Memorised**: Toggles `isMemorised` on the SM2Card and syncs to cloud.
 - **Tap to select**: Tapping a card sets it as the active chunk.
 
@@ -421,6 +468,8 @@ The `bible_library` Supabase table stores pre-loaded Bible content verse by vers
 - **`parseChapter(text, stripRefs)`**: Extracts title (first non-empty line) and verses. Supports `<n>` verse markers, `<heading>...</heading>` tags, `[LINEBREAK]` preservation, `[PARAGRAPH]` markers from double newlines, and heuristic continuation detection (quotes/lowercase text appended to previous verse).
 - **`chunkVerses(verses, title, max, bookName, versionId)`**: Groups verses into chunks of up to 4 scripture verses. Break points: max size, paragraph markers, heading boundaries. Trailing headings attach to the last chunk.
 - **`getChapterSlug(title, bookName, versionId)`**: Generates deterministic chapter IDs by slugifying `{versionId}-{bookName}-{title}`.
+- **`getVerseSections(chapter)`**: Derives single-verse `StudySection` objects from a chapter's scripture verses. Each section has a deterministic ID (`{chapterId}-v{number}`), a single verse range, and flattened text.
+- **`getSections(chapter, unit)`**: Returns either `chapter.chunks` (when unit is `"chunk"`) or `getVerseSections(chapter)` (when unit is `"verse"`).
 - **`splitIntoLines(text)`**: Splits text on sentence boundaries (`.!?`) for Recite Mode. Lines exceeding 15 words are further split into 12-word sub-lines.
 
 ### F. Text Diffing
