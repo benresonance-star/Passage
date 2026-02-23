@@ -63,6 +63,7 @@ export function ThemeContent({ children }: { children: React.ReactNode }) {
   const isDawn = theme.id === "dawn";
   const isLight = !isDawn && getBrightness(theme.bg) > 128;
   const isSoaking = pathname === "/soak";
+  const isFullScreen = isSoaking || pathname === "/study";
 
   const { isCollapsed, setCollapsed, resetCollapseTimer } = useScrollAwareBottomNav();
 
@@ -196,7 +197,7 @@ export function ThemeContent({ children }: { children: React.ReactNode }) {
       <main 
         className={`relative z-[1] min-h-screen pt-safe max-w-2xl mx-auto px-6 md:px-12 transition-all duration-700 ${isDawn ? dawnFont.className : ""} ${(showSplash || showMeditation || isNavigating) ? "opacity-0 pointer-events-none" : "opacity-100"}`}
         style={{ 
-          paddingBottom: isSoaking ? '0' : `calc(${isCollapsed ? '3rem' : '4rem'} + 1rem + env(safe-area-inset-bottom))`
+          paddingBottom: isFullScreen ? '0' : `calc(${isCollapsed ? '3rem' : '4rem'} + 1rem + env(safe-area-inset-bottom))`
         }}
       >
         <AnimatePresence mode="wait">
@@ -212,7 +213,7 @@ export function ThemeContent({ children }: { children: React.ReactNode }) {
         </AnimatePresence>
       </main>
       
-      {!isSoaking && !showSplash && !showMeditation && !isNavigating && (
+      {!isFullScreen && !showSplash && !showMeditation && !isNavigating && (
         <BottomNav 
           isDawn={isDawn} 
           isCollapsed={isCollapsed} 
