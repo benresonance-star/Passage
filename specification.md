@@ -11,7 +11,8 @@ Before performing any actions in this codebase, all AI agents must:
 3.  **Task Breakdown**: Break the plan into a granular list of actionable tasks.
 4.  **Request Permission**: Obtain explicit user approval before implementing any code changes.
 5.  **Verify & Update Specification**: After implementing a feature, ask the user to confirm it works correctly. Upon confirmation, update this specification to reflect the change and bump the version in both this file's heading and `package.json`.
-6.  **Push to GitHub**: After any successful update to the app, commit all changes and push to the remote repository.
+6.  **Update README**: When any feature is added, changed, or removed, update `README.md` to reflect the change. The README version in its heading, the specification version, and `package.json` version must always match. The README serves as the concise developer quick-start guide; the specification is the authoritative detail. Both must stay in sync.
+7.  **Push to GitHub**: After any successful update to the app, commit all changes and push to the remote repository.
 
 ---
 
@@ -493,5 +494,5 @@ The `bible_library` Supabase table stores pre-loaded Bible content verse by vers
 - **CI/CD**: Automatic deployments from `main` branch via Vercel.
 - **Build**: `next build --webpack`. PWA assets generated at build time.
 - **Testing**: `vitest run` for unit tests, `vitest` for watch mode.
-- **Version Sync**: The version in `package.json`, the specification heading, and the in-app version label must always match. Bump all three together on any release.
+- **Version Sync**: The version in `package.json`, the specification heading, the `README.md` heading, and the in-app version label must always match. Bump all four together on any release.
 - **GitHub Push**: After any successful app update, all changes (including specification updates) must be committed and pushed to the remote repository.
