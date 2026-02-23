@@ -29,8 +29,8 @@ export default function StudyPage() {
   const [flowFocusMode, setFlowFocusMode] = useState(true);
   const flowTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Soak state
-  const [soakVerseIndex, setSoakVerseIndex] = useState(0);
+  // Soak state — set of highlighted scripture-verse indices (toggle on tap)
+  const [soakHighlighted, setSoakHighlighted] = useState<Set<number>>(new Set([0]));
 
   // Recite state
   const [reciteRevealed, setReciteRevealed] = useState<Set<number>>(new Set());
@@ -179,7 +179,7 @@ export default function StudyPage() {
 
   const handleStageChange = useCallback((newStage: StudyStage) => {
     // Reset stage-specific state when transitioning
-    if (newStage === "soak") setSoakVerseIndex(0);
+    if (newStage === "soak") setSoakHighlighted(new Set([0]));
     if (newStage === "flow") { setFlowWordIndex(-1); setFlowPlaying(false); }
     if (newStage === "recite") setReciteRevealed(new Set());
     if (newStage === "type") setTypedText("");
@@ -283,7 +283,14 @@ export default function StudyPage() {
             section={activeSection}
             stage={stage}
             isDawn={isDawn}
-            soakVerseIndex={soakVerseIndex}
+            soakHighlighted={soakHighlighted}
+            onSoakVerseToggle={(idx) => {
+              setSoakHighlighted(prev => {
+                const next = new Set(prev);
+                if (next.has(idx)) next.delete(idx); else next.add(idx);
+                return next;
+              });
+            }}
             flowWordIndex={flowWordIndex}
             flowFocusMode={flowFocusMode}
             reciteRevealedVerses={reciteRevealed}
@@ -298,20 +305,6 @@ export default function StudyPage() {
           />
         )}
       </div>
-
-      {/* Soak navigation overlay */}
-      {stage === "soak" && scriptureVerses.length > 1 && (
-        <div className="absolute inset-0 z-20 pointer-events-none">
-          <div
-            className="absolute left-0 top-0 bottom-0 w-[30%] pointer-events-auto"
-            onClick={() => setSoakVerseIndex(prev => Math.max(0, prev - 1))}
-          />
-          <div
-            className="absolute right-0 top-0 bottom-0 w-[30%] pointer-events-auto"
-            onClick={() => setSoakVerseIndex(prev => Math.min(scriptureVerses.length - 1, prev + 1))}
-          />
-        </div>
-      )}
 
       {/* Bottom controls */}
       <div className="relative z-30">

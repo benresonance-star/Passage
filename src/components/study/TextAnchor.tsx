@@ -11,7 +11,8 @@ interface TextAnchorProps {
   section: StudySection;
   stage: StudyStage;
   isDawn: boolean;
-  soakVerseIndex?: number;
+  soakHighlighted?: Set<number>;
+  onSoakVerseToggle?: (scriptureIdx: number) => void;
   flowWordIndex?: number;
   flowFocusMode?: boolean;
   reciteRevealedVerses?: Set<number>;
@@ -23,7 +24,8 @@ export function TextAnchor({
   section,
   stage,
   isDawn,
-  soakVerseIndex = 0,
+  soakHighlighted,
+  onSoakVerseToggle,
   flowWordIndex = -1,
   flowFocusMode = true,
   reciteRevealedVerses,
@@ -93,7 +95,7 @@ export function TextAnchor({
                 <span
                   className="block text-zinc-500 text-[11px] font-bold uppercase tracking-[0.2em] mb-4 mt-2"
                   style={stage === "soak" ? {
-                    opacity: soakVerseIndex === vIdx ? 1 : 0.15,
+                    opacity: 0.15,
                     transition: "opacity 0.8s ease-out",
                   } : undefined}
                 >
@@ -104,8 +106,8 @@ export function TextAnchor({
           }
 
           const scriptureIdx = scriptureVerses.indexOf(v);
-          const isSoakFocused = stage === "soak" && scriptureIdx === soakVerseIndex;
-          const isSoakDimmed = stage === "soak" && scriptureIdx !== soakVerseIndex;
+          const isSoakFocused = stage === "soak" && soakHighlighted?.has(scriptureIdx);
+          const isSoakDimmed = stage === "soak" && !soakHighlighted?.has(scriptureIdx);
 
           const words = v.text
             .replace(/\[LINEBREAK\]/g, " ")
@@ -113,7 +115,11 @@ export function TextAnchor({
             .filter(w => w.length > 0);
 
           const verseEl = (
-            <span key={vIdx} className="inline">
+            <span
+              key={vIdx}
+              className={`inline ${stage === "soak" ? "cursor-pointer" : ""}`}
+              onClick={stage === "soak" ? () => onSoakVerseToggle?.(scriptureIdx) : undefined}
+            >
               {words.map((word) => {
                 const wi = globalWordIdx++;
                 const isFlowRead = stage === "flow" && wi <= flowWordIndex;
@@ -157,7 +163,7 @@ export function TextAnchor({
         <div className="mt-6 text-center">
           <p className={`text-sm italic ${isDawn ? "text-white/50" : "text-zinc-500"}`}>
             {scriptureVerses.length > 1
-              ? `Verse ${soakVerseIndex + 1} of ${scriptureVerses.length}`
+              ? `${soakHighlighted?.size || 0} of ${scriptureVerses.length} verses focused`
               : "Dwell on this verse."}
           </p>
         </div>
