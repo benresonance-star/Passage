@@ -1,4 +1,4 @@
-# Passage - Bible Chapter Memoriser (v3.1.0)
+# Passage - Bible Chapter Memoriser (v3.2.0)
 
 ## AI Agent Protocol (Mandatory)
 
@@ -503,8 +503,8 @@ The `bible_library` Supabase table stores pre-loaded Bible content verse by vers
 
 ### C. Splash & Meditation Sequence
 - **SplashScreen**: Displays "Passage" title and "Dwell in the Word" subtitle on the breathing gradient background. Uses Cormorant Garamond Light. Subtitle fades in after 1.5s. Holds for 5s, then fades out over 900ms. Shown once per session (tracked via `sessionStorage`).
-- **MeditationScreen**: Displays Isaiah 26:3 quote after splash. Uses the same breathing background. Transitions seamlessly from splash (fires `onFadeStart` while splash still covers screen).
-- **Sequence**: SplashScreen → (fade) → MeditationScreen → (fade) → App content. Managed by `ThemeContent` via `startupPhase` state.
+- **MeditationScreen**: Displays a sequence of meditation verses after the splash screen. Transitions seamlessly from splash (fires `onFadeStart` while splash still covers screen).
+- **Sequence**: SplashScreen → (fade) → MeditationScreen (Proverbs 3:5-6) → (tap) → MeditationScreen (Isaiah 26:3) → (tap) → App content. Managed by `ThemeContent` via `showSplash` and `showMeditation` state.
 
 ### D. Animations
 - **Page transitions**: `animate-in fade-in duration-500` for content appearance.
