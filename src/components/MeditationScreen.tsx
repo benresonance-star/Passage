@@ -22,7 +22,7 @@ const MEDITATION_VERSES: VerseData[] = [
         Trust in the Lord with all your heart,<br />
         <span className="pl-6 md:pl-8">and do not lean on your own understanding.</span><br />
         <span className="pl-2 md:pl-4">In all your ways acknowledge him,</span><br />
-        <span className="pl-6 md:pl-8">and he will make straight your paths</span>
+        <span className="pl-6 md:pl-8">and he will make straight your paths.</span>
       </>
     ),
     citation: "Proverbs 3:5-6 (ESV)",
