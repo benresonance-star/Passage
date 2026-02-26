@@ -1,4 +1,4 @@
-# Passage - Bible Chapter Memoriser (v3.4.0)
+# Passage - Bible Chapter Memoriser (v3.4.1)
 
 An iPhone-first PWA for memorising Bible chapters through chunked practice, immersive soaking, spaced repetition, and shared group progress tracking with cross-device cloud sync.
 
@@ -73,7 +73,7 @@ The app deploys automatically from the `main` branch via Vercel. Environment var
 1. Open the app in **Safari** on your iPhone.
 2. Tap the **Share** button (square with an up arrow).
 3. Scroll down and tap **Add to Home Screen**.
-4. Tap **Add** in the top right corner.
+4. Tap **Add in the top right corner**.
 5. Launch **Passage** from your home screen for the full app experience.
 
 ## Import Formats

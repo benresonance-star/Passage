@@ -30,15 +30,16 @@ export function ThemeContent({ children }: { children: React.ReactNode }) {
   const prefersReducedMotion = useReducedMotion();
 
   // Splash: shown once per browser session
-  // Initialize synchronously to avoid initial flash
-  const [showSplash, setShowSplash] = useState(() => {
-    if (typeof window !== "undefined") {
-      return !wasSplashShown();
-    }
-    return false;
-  });
+  const [showSplash, setShowSplash] = useState(false);
   const [showMeditation, setShowMeditation] = useState(false);
   const [isNavigating, setIsNavigating] = useState(false);
+
+  // Initialize splash on mount to avoid hydration mismatch
+  useEffect(() => {
+    if (!wasSplashShown()) {
+      setShowSplash(true);
+    }
+  }, []);
 
   // Reset navigation guard when pathname changes (route change complete)
   useEffect(() => {
