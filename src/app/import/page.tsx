@@ -43,13 +43,17 @@ export default function ImportPage() {
       const fetchAdminStatus = async () => {
         const { data } = await client
           .from('group_members')
-          .select('role')
+          .select('role, groups(admin_id)')
           .eq('user_id', user.id)
-          .eq('role', 'admin')
           .limit(1)
           .maybeSingle();
         
-        setIsAdmin(!!data);
+        if (data) {
+          const groups = data.groups as { admin_id?: string } | null;
+          setIsAdmin(data.role === 'admin' || groups?.admin_id === user.id);
+        } else {
+          setIsAdmin(false);
+        }
       };
       fetchAdminStatus();
     } else {
@@ -87,8 +91,8 @@ export default function ImportPage() {
     const chapterNumber = chapterMatch ? parseInt(chapterMatch[1]) : 1;
 
     const rows = verses.map((v) => ({
-      version_id: version,
-      book_name: book,
+      version_id: version.toLowerCase().trim(),
+      book_name: book.trim(),
       chapter_number: chapterNumber,
       verse_number: v.type === "scripture" ? v.number : null,
       content: v.type === "scripture" ? v.text.replace(/\[LINEBREAK\]/g, " ").replace(/\[PARAGRAPH\]/g, "").trim() : null,
@@ -100,8 +104,9 @@ export default function ImportPage() {
     const { error } = await supabase.from("bible_library").insert(rows);
     if (error) {
       console.error("Error pushing to global library:", error);
-      toast(`Upload Failed: ${error.message}`, "error");
+      toast(`Upload Failed: ${error.message} (Code: ${error.code})`, "error");
     } else {
+      console.log("Successfully pushed to global library:", { book, title, rowCount: rows.length });
       toast(`${book} ${title} added to global library.`, "success");
     }
   };
