@@ -61,7 +61,7 @@ export default function LibrarySelector({ onSelect }: LibrarySelectorProps) {
     }
     
     if (data) {
-      const uniqueBooks = Array.from(new Set(data.map((b) => b.book_name)));
+      const uniqueBooks = Array.from(new Set(data.map((b) => b.book_name))).sort();
       setBooks(uniqueBooks);
     }
     setLoading(false);

@@ -174,7 +174,7 @@ export default function Home() {
               <div className="space-y-1">
                 <h2 className="text-[var(--theme-ui-subtext)] text-sm font-medium uppercase tracking-wider">Active Chapter</h2>
                 <div className="flex items-center gap-3">
-                  <p className="text-xl font-bold">{selectedChapter.title}</p>
+                  <p className="text-xl font-bold">{selectedChapter.bookName} {selectedChapter.title}</p>
                   {isChapterComplete && (
                     <Trophy size={20} className="text-amber-400 fill-amber-400/20 animate-in zoom-in duration-500" />
                   )}
@@ -182,7 +182,7 @@ export default function Home() {
                 <div className="flex items-center gap-1.5 text-amber-400 text-xs font-medium pt-1">
                   <Award size={14} />
                   <span>
-                    {memorisedCount} / {totalChunks} Chunks
+                    {state.versions[selectedChapter.versionId]?.abbreviation || selectedChapter.versionId} • {memorisedCount} / {totalChunks} Chunks
                   </span>
                 </div>
               </div>
@@ -227,9 +227,11 @@ export default function Home() {
                       <BookOpen size={20} />
                     </div>
                     <div>
-                      <p className={`font-bold ${ch.id === selectedChapter.id ? "text-white" : "text-white"}`}>{ch.title}</p>
+                      <p className={`font-bold ${ch.id === selectedChapter.id ? "text-white" : "text-white"}`}>
+                        {ch.bookName} {ch.title}
+                      </p>
                       <p className={`text-[10px] uppercase tracking-widest font-bold ${ch.id === selectedChapter.id ? "text-white/60" : "text-white/70"}`}>
-                        {Object.values(state.cards[ch.id] || {}).filter(c => c.isMemorised).length} / {ch.chunks.length} Memorised
+                        {state.versions[ch.versionId]?.abbreviation || ch.versionId} • {Object.values(state.cards[ch.id] || {}).filter(c => c.isMemorised).length} / {ch.chunks.length} Memorised
                       </p>
                     </div>
                   </div>
@@ -270,7 +272,10 @@ export default function Home() {
                         <Trophy size={20} />
                       </div>
                       <div>
-                        <p className="font-bold text-amber-400">{ch.title}</p>
+                        <p className="font-bold text-amber-400">{ch.bookName} {ch.title}</p>
+                        <p className="text-[10px] uppercase tracking-widest font-bold text-amber-400/60">
+                          {state.versions[ch.versionId]?.abbreviation || ch.versionId}
+                        </p>
                       </div>
                     </div>
                   </div>
