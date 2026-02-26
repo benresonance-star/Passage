@@ -100,9 +100,9 @@ export default function ImportPage() {
     const { error } = await supabase.from("bible_library").insert(rows);
     if (error) {
       console.error("Error pushing to global library:", error);
-      toast({ title: "Upload Failed", message: error.message, type: "error" });
+      toast(`Upload Failed: ${error.message}`, "error");
     } else {
-      toast({ title: "Global Upload Success", message: `${book} ${title} added to global library.`, type: "success" });
+      toast(`${book} ${title} added to global library.`, "success");
     }
   };
 
