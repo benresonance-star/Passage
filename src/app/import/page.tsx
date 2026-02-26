@@ -39,8 +39,9 @@ export default function ImportPage() {
 
   useEffect(() => {
     if (user && supabase) {
+      const client = supabase; // Narrow for closures
       const fetchAdminStatus = async () => {
-        const { data } = await supabase
+        const { data } = await client
           .from('group_members')
           .select('role')
           .eq('user_id', user.id)
