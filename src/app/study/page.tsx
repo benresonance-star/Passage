@@ -213,7 +213,7 @@ export default function StudyPage() {
   const STAGE_TITLES: Record<StudyStage, string> = {
     read: "Attend",
     soak: "Abide",
-    flow: "Flow",
+    flow: "Breathe",
     recite: "Receive",
     cloze: "Recollect",
     type: "Speak",
@@ -235,7 +235,7 @@ export default function StudyPage() {
         <div />
         <div className="text-center">
           <h1 className={`text-sm font-bold uppercase tracking-widest ${isDawn ? "text-white" : "text-orange-500"}`}>
-            {STAGE_TITLES[stage]} Mode
+            {STAGE_TITLES[stage]}
           </h1>
           <p className="text-[10px] text-[var(--theme-ui-subtext)] uppercase tracking-tight">
             {studyUnit === "verse" ? "Verse" : "Verses"} {activeSection.verseRange} · {chapter.bookName} {chapter.title}

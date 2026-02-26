@@ -254,11 +254,12 @@ Full chapter text view with interactive chunked layout.
 - **Memorised Overlay**: When `showMemorised` is on, memorised chunks are styled with `--chunk-memorised` colour.
 - **Line Breaks**: Verse text containing `[LINEBREAK]` markers is rendered with `<br>` elements.
 
-### C. Soak (`/soak`)
+### C. Abide (`/soak`)
 
-Immersive verse-by-verse meditation screen for the active chunk.
+Immersive verse-by-verse meditation screen.
 
 - **Full-screen layout**: No header, no nav bar. Fixed position covering entire viewport.
+- **Content Loading**: If a specific section (chunk or verse) is active on the Chapter page, Abide mode loads only that section. If no section is active, the entire chapter is loaded for continuous meditation.
 - **Double-buffer crossfade**: Two verse "slots" (A and B) are always in the DOM. On navigation, the inactive slot receives the new verse, then: preparing (60ms paint time) → crossfading (800ms opacity interpolation) → idle (swap active slot). No DOM mutation ever happens during a visible transition.
 - **Navigation**: Swipe left/right (30px threshold, horizontal must exceed 2× vertical) or click left/right zones (30%/30% of screen width). Centre zone (40%) reveals the exit button.
 - **Word Highlighting**: Tap any word to toggle highlight (per-verse, stored in component state as `"verseIndex-wordIndex"` keys).
@@ -268,7 +269,7 @@ Immersive verse-by-verse meditation screen for the active chunk.
 - **Exit**: Bottom-centre X button, initially nearly invisible (opacity 0.12). Tap the bottom zone or centre zone to reveal it (3s auto-hide). Tap the revealed button to exit back to `/chapter`.
 - **Cooldown**: 800ms minimum dwell time before navigation is allowed.
 - **Wake Lock**: Screen stays on via `useWakeLock` hook.
-- **Data mapping**: Headings are stripped — only `"scripture"` type verses from the active chunk are shown.
+- **Data mapping**: Headings are stripped — only `"scripture"` type verses are shown.
 
 ### D. Practice (`/practice`)
 
@@ -276,41 +277,41 @@ Multi-mode practice screen for the active chunk. Modes are sequential or selecta
 
 **Modes:**
 
-1. **Attend Mode**: Full text with verse structure, headings optional. Three action buttons at the bottom:
-    - **Flow**: Enters Flow Mode.
+1. **Attend**: Full text with verse structure, headings optional. Three action buttons at the bottom:
+    - **Breathe**: Enters Breathe Mode.
     - **Receive**: Enters Receive Mode.
     - **Recollect**: Advances to Recollect Mode.
 
-2. **Flow Mode** (sub-mode of Attend): Word-by-word timed reading.
+2. **Breathe** (sub-mode of Attend): Word-by-word timed reading.
     - Words transition from unread (`--flow-unread`) to read (`--flow-read` with `--flow-glow` text shadow) at the current index.
     - **Focus Mode** (default on): Unread words are hidden (opacity 0), revealing text progressively.
     - **FlowControls**: Play/pause, skip forward/back, reset, WPM slider (adjustable speed), focus toggle, close.
     - Timer: `(60 / wpm) * 1000` ms per word. Auto-pauses at end.
 
-3. **Recollect Mode**: Deterministic word hiding.
+3. **Recollect**: Deterministic word hiding.
     - Levels: 0%, 20%, 40%, 60%, 80% (seeded by chunkId for consistency across sessions).
     - **Mnemonic** ("Abc"): First-letter scaffolding via `generateMnemonic()`.
     - Level selector bar with 6 buttons. Active level is highlighted (orange or white/gold in Dawn).
     - Action: "Speak It" advances to Speak Mode.
 
-4. **Speak Mode** (Recall): Free-text textarea for typing from memory.
+4. **Speak** (Recall): Free-text textarea for typing from memory.
     - Auto-growing textarea (max height = viewport - 320px).
     - Placeholder: "Speak from memory..."
     - Action: "Submit" calculates diff and advances to Result Mode. Grading is automatic (`accuracy / 100`).
 
-5. **Result Mode**: Word-level diff display.
+5. **Result**: Word-level diff display.
     - Accuracy percentage with CheckCircle icon.
     - Word-by-word results: correct words in white (or gold in Dawn), missing words in faded orange.
     - "Try Again" button resets to Speak Mode. "Continue" returns to `/chapter`.
     - SM-2 card update happens automatically on submission.
 
-6. **Receive Mode**: Oral practice with tap-to-reveal lines.
+6. **Receive**: Oral practice with tap-to-reveal lines.
     - Text is split into sentence-based lines (`splitIntoLines` — splits on `.!?`, wraps at 15 words).
     - Each line is a tappable pill: hidden (transparent text, 40% opacity) or revealed (visible with border).
     - Eye/EyeOff toggle in header to reveal/hide all at once.
     - "Done" button grades at 0.75 and returns to Attend Mode.
 
-**Back navigation:** Flow → Attend, Recollect → Attend, Receive → Attend, Speak → Recollect, Result → Speak, Attend → `/chapter`.
+**Back navigation:** Breathe → Attend, Recollect → Attend, Receive → Attend, Speak → Recollect, Result → Speak, Attend → `/chapter`.
 
 **Reset:** Custom event `bcm-reset-practice` resets all mode state.
 
@@ -329,7 +330,7 @@ A unified single-screen practice flow that guides the user through a practice se
 
 1. **Attend**: Full section text, normal styling. Subtitle: "Attend to the text carefully."
 2. **Abide**: Inline verse-focus mode — current verse at full opacity, others dimmed to ~15%. Tap left/right zones to navigate between verses. Breathing gradient background overlay. Verse counter shown below text.
-3. **Flow**: Word-by-word timed illumination. Words transition from unread to read styling at user-controlled WPM. Controls: play/pause, skip forward/back, reset, WPM slider, focus mode toggle (hides unread words).
+3. **Breathe**: Word-by-word timed illumination. Words transition from unread to read styling at user-controlled WPM. Controls: play/pause, skip forward/back, reset, WPM slider, focus mode toggle (hides unread words).
 4. **Receive**: Text split into sentence-based lines (`splitIntoLines`). Lines are hidden (transparent, 40% opacity). Tap to reveal individual lines. Reveal All / Hide All toggle.
 5. **Recollect**: Deterministic word hiding at configurable levels (0%, 20%, 40%, 60%, 80%, Mnemonic). Uses `hideWords()` and `generateMnemonic()` from `lib/cloze.ts`.
 6. **Speak**: Section text hidden, replaced by auto-growing textarea. "Submit" calculates diff and advances to Result.

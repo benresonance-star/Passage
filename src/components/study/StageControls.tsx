@@ -7,7 +7,7 @@ const STAGES: StudyStage[] = ["read", "soak", "flow", "recite", "cloze", "type",
 const STAGE_LABELS: Record<StudyStage, string> = {
   read: "Attend",
   soak: "Abide",
-  flow: "Flow",
+  flow: "Breathe",
   recite: "Receive",
   cloze: "Recollect",
   type: "Speak",
