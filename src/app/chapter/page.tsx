@@ -21,7 +21,7 @@ export default function ChapterPage() {
   const isLongPressTriggered = useRef(false);
 
   const chapterId = state.selectedChapterId;
-  const chapter = chapterId ? state.chapters[chapterId] : null;
+  const chapter = isHydrated && chapterId ? state.chapters[chapterId] : null;
 
   if (!isHydrated) return null;
   if (!chapter || !chapterId) return <EmptyState />;

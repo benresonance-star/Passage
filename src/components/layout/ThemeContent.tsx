@@ -186,8 +186,16 @@ export function ThemeContent({ children }: { children: React.ReactNode }) {
         <MeditationScreen 
           onComplete={() => {
             if (pathname === "/") {
-              setIsNavigating(true);
-              router.push("/chapter");
+              // Only navigate if hydrated, otherwise wait for hydration
+              if (isHydrated) {
+                setIsNavigating(true);
+                router.push("/chapter");
+              } else {
+                // This is a rare edge case where meditation ends before hydration.
+                // We'll just hide the meditation screen and let the user land on Home,
+                // or we could show a small loader. For now, just hiding is safer.
+                setShowMeditation(false);
+              }
             } else {
               setShowMeditation(false);
             }
