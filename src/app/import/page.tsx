@@ -151,8 +151,6 @@ export default function ImportPage() {
     router.push("/chapter");
   };
 
-  const hasMarkers = text.includes("<") && text.includes(">");
-
   const versions = Object.values(state.versions);
 
   return (
@@ -262,13 +260,6 @@ export default function ImportPage() {
                   </div>
                   <span className="text-sm text-zinc-300">Strip links & references</span>
                 </div>
-
-                {text.length > 0 && !hasMarkers && (
-                  <div className="flex items-center gap-2 p-3 bg-orange-500/10 border border-orange-500/20 rounded-lg text-orange-500 text-sm">
-                    <AlertTriangle size={16} />
-                    <p>No verse markers detected. Treated as one chunk.</p>
-                  </div>
-                )}
 
                 <button
                   onClick={() => handleReview()}

@@ -11,7 +11,8 @@ export function parseChapter(text: string, stripRefs: boolean = true): { title: 
   }
 
   // Auto-fix missing brackets: "3 Since, then" -> "<3> Since, then"
-  processedText = processedText.replace(/(^|\s)(\d+)(?=\s[A-Z])/g, "$1<$2>");
+  // Matches a number at the start of a line or after a space, followed by a space and a capital letter or quote
+  processedText = processedText.replace(/(^|\n|\s)(\d+)(?=\s[A-Z“"'])/g, "$1<$2>");
 
   const lines = processedText.split("\n").map(l => l.trim());
   let title = "My Chapter";
