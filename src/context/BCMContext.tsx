@@ -316,11 +316,13 @@ export function BCMProvider({ children }: { children: React.ReactNode }) {
     if (user && supabase) {
       const client = supabase;
       try {
+        // Delete dependents first to avoid FK violations
         await Promise.all([
-          client.from('user_chapters').delete().eq('user_id', user.id).eq('chapter_id', chapterId),
           client.from('user_cards').delete().eq('user_id', user.id).eq('chapter_id', chapterId),
           client.from('user_stats').delete().eq('user_id', user.id).eq('chapter_id', chapterId),
         ]);
+        // Finally delete the parent chapter
+        await client.from('user_chapters').delete().eq('user_id', user.id).eq('chapter_id', chapterId);
 
         // Also clean shared_progress if in groups
         const gids = userGroupIds;

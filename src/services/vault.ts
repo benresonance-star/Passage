@@ -70,11 +70,13 @@ export async function upsertStats(userId: string, chapterId: string, stats: Chap
 
 export async function deleteChapterData(userId: string, chapterId: string) {
   const client = getClient();
+  // Delete dependents first to avoid FK violations
   await Promise.all([
-    client.from("user_chapters").delete().eq("user_id", userId).eq("chapter_id", chapterId),
     client.from("user_cards").delete().eq("user_id", userId).eq("chapter_id", chapterId),
     client.from("user_stats").delete().eq("user_id", userId).eq("chapter_id", chapterId),
   ]);
+  // Finally delete the parent chapter
+  await client.from("user_chapters").delete().eq("user_id", userId).eq("chapter_id", chapterId);
 }
 
 export async function syncSharedProgress(
