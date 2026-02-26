@@ -1,4 +1,4 @@
-# Passage - Bible Chapter Memoriser (v3.3.1)
+# Passage - Bible Chapter Memoriser (v3.4.0)
 
 ## AI Agent Protocol (Mandatory)
 
@@ -380,6 +380,7 @@ Two-mode chapter import screen with a smart verification flow.
     - **Review Step**: A dedicated `ReviewView` screen allows users to verify parsed verses, headings, and chunks before saving.
     - **Manual Correction**: Users can edit Book, Title, or Version directly on the review screen.
     - **Footnote Cleaning**: Automatically strips footnote markers (e.g., `[a]`, `[b]`) common in Bible site copies.
+    - **Admin Push to Global**: Admins can toggle "Push to Global Library" to upload pasted text directly to the `bible_library` table, making it available for all users.
     - Expected format: First line = metadata/title. Subsequent lines: `<n> verse text`, `<heading>heading text</heading>`.
     - Book name input field (auto-filled if detected).
     - Version selector dropdown (auto-filled if detected).

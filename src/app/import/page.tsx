@@ -3,13 +3,16 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useBCM } from "@/context/BCMContext";
+import { useAuth } from "@/context/AuthContext";
+import { supabase } from "@/lib/supabase";
 import { parseChapter, chunkVerses, getChapterSlug } from "@/lib/parser";
 import { SM2Card, Chapter, BibleVersion, Verse, Chunk } from "@/types";
-import { ArrowLeft, Save, AlertTriangle, Check, BookOpen, Type, ChevronDown, Eye } from "lucide-react";
+import { ArrowLeft, Save, AlertTriangle, Check, BookOpen, Type, ChevronDown, Eye, Globe } from "lucide-react";
 import Link from "next/link";
 import LibrarySelector from "@/components/LibrarySelector";
 import ReviewView from "@/components/ReviewView";
 import { useConfirm, useToast } from "@/components/AppModal";
+import { useEffect } from "react";
 
 export default function ImportPage() {
   const [text, setText] = useState("");
@@ -18,6 +21,8 @@ export default function ImportPage() {
   const [step, setStep] = useState<"input" | "review">("input");
   const [versionId, setVersionId] = useState("niv");
   const [bookName, setBookName] = useState("");
+  const [pushToGlobal, setPushToGlobal] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [parsedData, setParsedData] = useState<{
     title: string;
     bookName: string;
@@ -27,9 +32,29 @@ export default function ImportPage() {
   } | null>(null);
 
   const { state, setState, pushChapter } = useBCM();
+  const { user } = useAuth();
   const router = useRouter();
   const { confirm, ConfirmDialog } = useConfirm();
   const { toast, ToastContainer } = useToast();
+
+  useEffect(() => {
+    if (user && supabase) {
+      const fetchAdminStatus = async () => {
+        const { data } = await supabase
+          .from('group_members')
+          .select('role')
+          .eq('user_id', user.id)
+          .eq('role', 'admin')
+          .limit(1)
+          .maybeSingle();
+        
+        setIsAdmin(!!data);
+      };
+      fetchAdminStatus();
+    } else {
+      setIsAdmin(true); // Local mode
+    }
+  }, [user]);
 
   const handleReview = () => {
     if (!text.trim()) return;
@@ -51,6 +76,33 @@ export default function ImportPage() {
       chunks,
     });
     setStep("review");
+  };
+
+  const pushToGlobalLibrary = async (title: string, book: string, version: string, verses: Verse[]) => {
+    if (!supabase) return;
+
+    // Extract chapter number from title (e.g. "3:1-17" -> 3, "8" -> 8)
+    const chapterMatch = title.match(/^(\d+)/);
+    const chapterNumber = chapterMatch ? parseInt(chapterMatch[1]) : 1;
+
+    const rows = verses.map((v) => ({
+      version_id: version,
+      book_name: book,
+      chapter_number: chapterNumber,
+      verse_number: v.type === "scripture" ? v.number : null,
+      content: v.type === "scripture" ? v.text.replace(/\[LINEBREAK\]/g, " ").replace(/\[PARAGRAPH\]/g, "").trim() : null,
+      is_heading: v.type === "heading",
+      heading_text: v.type === "heading" ? v.text.trim() : null,
+      created_at: new Date().toISOString(),
+    }));
+
+    const { error } = await supabase.from("bible_library").insert(rows);
+    if (error) {
+      console.error("Error pushing to global library:", error);
+      toast({ title: "Upload Failed", message: error.message, type: "error" });
+    } else {
+      toast({ title: "Global Upload Success", message: `${book} ${title} added to global library.`, type: "success" });
+    }
   };
 
   const handleImport = async (importText?: string, importBook?: string, importVersion?: string) => {
@@ -147,6 +199,11 @@ export default function ImportPage() {
 
     // Cloud Sync
     await pushChapter(newChapter);
+
+    // Global Library Sync (Admin Only)
+    if (pushToGlobal && isAdmin) {
+      await pushToGlobalLibrary(finalTitle, finalBook, finalVersion, finalVerses);
+    }
 
     router.push("/chapter");
   };
@@ -260,6 +317,23 @@ export default function ImportPage() {
                   </div>
                   <span className="text-sm text-zinc-300">Strip links & references</span>
                 </div>
+
+                {isAdmin && (
+                  <div 
+                    onClick={() => setPushToGlobal(!pushToGlobal)}
+                    className="flex items-center gap-3 p-4 bg-[var(--surface)] border border-[var(--surface-border)] rounded-xl cursor-pointer active:bg-[var(--surface-alt)] transition-colors"
+                  >
+                    <div className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${
+                      pushToGlobal ? "bg-orange-500 border-orange-500" : "border-[var(--surface-border)]"
+                    }`}>
+                      {pushToGlobal && <Globe size={14} className="text-white" />}
+                    </div>
+                    <div className="flex-1">
+                      <span className="text-sm text-zinc-300 block">Push to Global Library</span>
+                      <span className="text-[10px] text-zinc-500 uppercase">Admin Only</span>
+                    </div>
+                  </div>
+                )}
 
                 <button
                   onClick={() => handleReview()}
