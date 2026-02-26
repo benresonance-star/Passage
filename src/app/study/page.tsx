@@ -40,7 +40,7 @@ export default function StudyPage() {
     (state.settings.clozeLevel as 0 | 20 | 40 | 60 | 80 | "mnemonic") || 20
   );
 
-  // Type state
+  // Speak state
   const [typedText, setTypedText] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -186,7 +186,7 @@ export default function StudyPage() {
     setStage(newStage);
   }, []);
 
-  const handleTypeSubmit = useCallback(async () => {
+  const handleSpeakSubmit = useCallback(async () => {
     if (!activeSection) return;
     const results = calculateDiff(activeSection.text, typedText);
     setDiffResults(results);
@@ -210,6 +210,16 @@ export default function StudyPage() {
   if (!isHydrated) return null;
   if (!chapter || !chapterId || !activeSection) return <EmptyState />;
 
+  const STAGE_TITLES: Record<StudyStage, string> = {
+    read: "Attend",
+    soak: "Abide",
+    flow: "Flow",
+    recite: "Receive",
+    cloze: "Recollect",
+    type: "Speak",
+    result: "Results"
+  };
+
   return (
     <div className="fixed inset-0 flex flex-col bg-inherit pt-safe">
       {/* Breathing background for soak stage */}
@@ -225,7 +235,7 @@ export default function StudyPage() {
         <div />
         <div className="text-center">
           <h1 className={`text-sm font-bold uppercase tracking-widest ${isDawn ? "text-white" : "text-orange-500"}`}>
-            {stage === "result" ? "Results" : `${stage.charAt(0).toUpperCase() + stage.slice(1)} Mode`}
+            {STAGE_TITLES[stage]} Mode
           </h1>
           <p className="text-[10px] text-[var(--theme-ui-subtext)] uppercase tracking-tight">
             {studyUnit === "verse" ? "Verse" : "Verses"} {activeSection.verseRange} · {chapter.bookName} {chapter.title}
@@ -244,7 +254,7 @@ export default function StudyPage() {
               value={typedText}
               onChange={(e) => setTypedText(e.target.value)}
               className="w-full min-h-[16rem] bg-[var(--theme-ui-bg)] border border-[var(--theme-ui-border)] rounded-2xl p-6 chunk-text-bold leading-relaxed focus:outline-none focus:ring-2 focus:ring-orange-500/50 resize-none overflow-y-auto scrollbar-hide"
-              placeholder="Type from memory..."
+              placeholder="Speak from memory..."
               style={{ color: "var(--theme-text)" }}
             />
           </div>
@@ -340,7 +350,7 @@ export default function StudyPage() {
               setReciteRevealed(new Set(Array.from({ length: count }, (_, i) => i)));
             }
           }}
-          onTypeSubmit={handleTypeSubmit}
+          onTypeSubmit={handleSpeakSubmit}
           canSubmit={typedText.trim().length > 0}
           onTryAgain={() => { setTypedText(""); handleStageChange("type"); }}
           onContinue={() => router.push("/chapter")}

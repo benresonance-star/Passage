@@ -1,4 +1,4 @@
-# Passage - Bible Chapter Memoriser (v3.4.1)
+# Passage - Bible Chapter Memoriser (v3.5.0)
 
 ## AI Agent Protocol (Mandatory)
 
@@ -51,11 +51,11 @@ Home (/)
 Tab Bar (BottomNav — fixed pill)
   ├── Chapter  (/chapter)
   ├── Soak     (/soak)
-  ├── Study    (/study)
+  ├── Practice (/study)
   └── Review   (/review)
 
 Guided Session Route
-  └── Study    (/study)  — single-screen study flow with 7 stages
+  └── Practice (/study)  — single-screen practice flow with 7 stages
 
 Legacy Routes (still accessible, not in nav)
   ├── Practice (/practice)  — direct multi-mode practice
@@ -119,8 +119,8 @@ interface Chunk {
   text: string;               // Flattened scripture text (no headings)
 }
 
-type StudySection = Chunk;    // A chunk or a single verse — same shape
-type StudyUnit = "chunk" | "verse";
+type PracticeSection = Chunk;    // A chunk or a single verse — same shape
+type PracticeUnit = "chunk" | "verse";
 
 interface SM2Card {
   id: string;                 // Same as chunkId
@@ -178,7 +178,7 @@ interface BCMState {
       id?: string;                       // "dawn" or "night-dusk" for special themes
     };
     highlightedWords?: string[];         // Normalised words highlighted by the user
-    studyUnit?: StudyUnit;               // "chunk" (default) or "verse" — controls study section granularity
+    studyUnit?: PracticeUnit;               // "chunk" (default) or "verse" — controls practice section granularity
   };
 }
 ```
@@ -204,7 +204,7 @@ interface BCMState {
 | Table | Key Columns | Purpose |
 |-------|------------|---------|
 | `shared_progress` | `group_id`, `user_id`, `chapter_title`, `chunk_id`, `is_memorised`, `updated_at` | Group leaderboard data |
-| `groups` | `id`, `name`, `admin_id` | Study groups |
+| `groups` | `id`, `name`, `admin_id` | Practice groups |
 | `group_members` | `user_id`, `group_id`, `role` ("admin" / "member") | Membership |
 | `profiles` | `id`, `display_name`, `email`, `last_active`, `theme` | User profiles |
 
@@ -246,10 +246,10 @@ Full chapter text view with interactive chunked layout.
     - **Visibility Mode** (Eye/EyeOff icon): Cycles through 3 modes: 0 = All, 1 = No Headings, 2 = Hide All (headings + verse numbers).
     - **Memorised Toggle** (Award icon): Highlights memorised chunks in amber.
     - **Home** (Settings icon): Navigates to `/`. When collapsed, tapping expands the pill instead.
-- **Study Unit Toggle**: Segmented control below the header subtitle with two options: "Chunks" (default, groups of ~4 verses) and "Verses" (individual verses). Persisted in `settings.studyUnit`. Switching clears the active section.
-- **Section Display**: Based on the active study unit, each section (chunk or verse) is a card showing verse range label, verse text with inline verse numbers, and heading text (when visibility mode = 0). Headings are rendered as centered uppercase labels.
+- **Practice Unit Toggle**: Segmented control below the header subtitle with two options: "Chunks" (default, groups of ~4 verses) and "Verses" (individual verses). Persisted in `settings.studyUnit`. Switching clears the active section.
+- **Section Display**: Based on the active practice unit, each section (chunk or verse) is a card showing verse range label, verse text with inline verse numbers, and heading text (when visibility mode = 0). Headings are rendered as centered uppercase labels.
 - **Long-press Activation**: 600ms long-press on a section toggles it as the active section (highlighted with ring + shadow). Haptic feedback via `navigator.vibrate`. Touch-move cancels the long-press (20px threshold).
-- **Practice Pill**: When a section is active, a small "Study" pill button appears in the section header row (right-aligned next to the verse range label). Tapping navigates to `/study`. Uses `e.stopPropagation()` to prevent long-press interference.
+- **Practice Pill**: When a section is active, a small "Practice" pill button appears in the section header row (right-aligned next to the verse range label). Tapping navigates to `/study`. Uses `e.stopPropagation()` to prevent long-press interference.
 - **Word Highlighting**: Tap any word to toggle it as highlighted (gold `#FFCB1F`, bold, with glow). Highlights are stored in `settings.highlightedWords` as normalised (lowercase, no punctuation) strings. All instances of the same normalised word are highlighted across the chapter.
 - **Memorised Overlay**: When `showMemorised` is on, memorised chunks are styled with `--chunk-memorised` colour.
 - **Line Breaks**: Verse text containing `[LINEBREAK]` markers is rendered with `<br>` elements.
@@ -276,73 +276,73 @@ Multi-mode practice screen for the active chunk. Modes are sequential or selecta
 
 **Modes:**
 
-1. **Read Mode**: Full text with verse structure, headings optional. Three action buttons at the bottom:
+1. **Attend Mode**: Full text with verse structure, headings optional. Three action buttons at the bottom:
     - **Flow**: Enters Flow Mode.
-    - **Recite**: Enters Recite Mode.
-    - **Cloze**: Advances to Cloze Mode.
+    - **Receive**: Enters Receive Mode.
+    - **Recollect**: Advances to Recollect Mode.
 
-2. **Flow Mode** (sub-mode of Read): Word-by-word timed reading.
+2. **Flow Mode** (sub-mode of Attend): Word-by-word timed reading.
     - Words transition from unread (`--flow-unread`) to read (`--flow-read` with `--flow-glow` text shadow) at the current index.
     - **Focus Mode** (default on): Unread words are hidden (opacity 0), revealing text progressively.
     - **FlowControls**: Play/pause, skip forward/back, reset, WPM slider (adjustable speed), focus toggle, close.
     - Timer: `(60 / wpm) * 1000` ms per word. Auto-pauses at end.
 
-3. **Cloze Mode**: Deterministic word hiding.
+3. **Recollect Mode**: Deterministic word hiding.
     - Levels: 0%, 20%, 40%, 60%, 80% (seeded by chunkId for consistency across sessions).
     - **Mnemonic** ("Abc"): First-letter scaffolding via `generateMnemonic()`.
     - Level selector bar with 6 buttons. Active level is highlighted (orange or white/gold in Dawn).
-    - Action: "Type It" advances to Type Mode.
+    - Action: "Speak It" advances to Speak Mode.
 
-4. **Type Mode** (Recall): Free-text textarea for typing from memory.
+4. **Speak Mode** (Recall): Free-text textarea for typing from memory.
     - Auto-growing textarea (max height = viewport - 320px).
-    - Placeholder: "Type from memory..."
+    - Placeholder: "Speak from memory..."
     - Action: "Submit" calculates diff and advances to Result Mode. Grading is automatic (`accuracy / 100`).
 
 5. **Result Mode**: Word-level diff display.
     - Accuracy percentage with CheckCircle icon.
     - Word-by-word results: correct words in white (or gold in Dawn), missing words in faded orange.
-    - "Try Again" button resets to Type Mode. "Continue" returns to `/chapter`.
+    - "Try Again" button resets to Speak Mode. "Continue" returns to `/chapter`.
     - SM-2 card update happens automatically on submission.
 
-6. **Recite Mode**: Oral practice with tap-to-reveal lines.
+6. **Receive Mode**: Oral practice with tap-to-reveal lines.
     - Text is split into sentence-based lines (`splitIntoLines` — splits on `.!?`, wraps at 15 words).
     - Each line is a tappable pill: hidden (transparent text, 40% opacity) or revealed (visible with border).
     - Eye/EyeOff toggle in header to reveal/hide all at once.
-    - "Done" button grades at 0.75 and returns to Read Mode.
+    - "Done" button grades at 0.75 and returns to Attend Mode.
 
-**Back navigation:** Flow → Read, Cloze → Read, Recite → Read, Type → Cloze, Result → Type, Read → `/chapter`.
+**Back navigation:** Flow → Attend, Recollect → Attend, Receive → Attend, Speak → Recollect, Result → Speak, Attend → `/chapter`.
 
 **Reset:** Custom event `bcm-reset-practice` resets all mode state.
 
-### D2. Study Session (`/study`)
+### D2. Practice Session (`/study`)
 
-A unified single-screen study flow that guides the user through a study section (chunk or verse) from passive reading to active recall. The study text remains anchored in the same visual position across all stages.
+A unified single-screen practice flow that guides the user through a practice section (chunk or verse) from passive reading to active recall. The practice text remains anchored in the same visual position across all stages.
 
-**Study Units:** Users choose between "Chunks" (groups of ~4 verses) or "Verses" (single verse) via a segmented toggle on the Chapter page header. Both use the `StudySection` type (same shape as `Chunk`). SM2 cards are tracked independently for each unit size — IDs don't collide (`-v9-12` for chunks, `-v9` for single verses).
+**Practice Units:** Users choose between "Chunks" (groups of ~4 verses) or "Verses" (single verse) via a segmented toggle on the Chapter page header. Both use the `PracticeSection` type (same shape as `Chunk`). SM2 cards are tracked independently for each unit size — IDs don't collide (`-v9-12` for chunks, `-v9` for single verses).
 
 **Entry Points:**
-- **Practice pill**: Appears on the active (highlighted) chunk/verse card on the Chapter page. Long-press activates a section, then tap the pill to enter Study.
+- **Practice pill**: Appears on the active (highlighted) chunk/verse card on the Chapter page. Long-press activates a section, then tap the pill to enter Practice.
 - **Review page**: "Practice" button per chunk navigates to `/study`.
-- **Bottom nav**: Study tab in the navigation bar.
+- **Bottom nav**: Practice tab in the navigation bar.
 
 **Stages (ordered by desirable difficulty):**
 
-1. **Read**: Full section text, normal styling. Subtitle: "Read the text carefully."
-2. **Soak**: Inline verse-focus mode — current verse at full opacity, others dimmed to ~15%. Tap left/right zones to navigate between verses. Breathing gradient background overlay. Verse counter shown below text.
+1. **Attend**: Full section text, normal styling. Subtitle: "Attend to the text carefully."
+2. **Abide**: Inline verse-focus mode — current verse at full opacity, others dimmed to ~15%. Tap left/right zones to navigate between verses. Breathing gradient background overlay. Verse counter shown below text.
 3. **Flow**: Word-by-word timed illumination. Words transition from unread to read styling at user-controlled WPM. Controls: play/pause, skip forward/back, reset, WPM slider, focus mode toggle (hides unread words).
-4. **Recite**: Text split into sentence-based lines (`splitIntoLines`). Lines are hidden (transparent, 40% opacity). Tap to reveal individual lines. Reveal All / Hide All toggle.
-5. **Cloze**: Deterministic word hiding at configurable levels (0%, 20%, 40%, 60%, 80%, Mnemonic). Uses `hideWords()` and `generateMnemonic()` from `lib/cloze.ts`.
-6. **Type**: Section text hidden, replaced by auto-growing textarea. "Submit" calculates diff and advances to Result.
-7. **Result**: Word-level diff display with accuracy percentage. SM-2 grading happens automatically. "Try Again" returns to Type. "Done" exits to `/chapter`.
+4. **Receive**: Text split into sentence-based lines (`splitIntoLines`). Lines are hidden (transparent, 40% opacity). Tap to reveal individual lines. Reveal All / Hide All toggle.
+5. **Recollect**: Deterministic word hiding at configurable levels (0%, 20%, 40%, 60%, 80%, Mnemonic). Uses `hideWords()` and `generateMnemonic()` from `lib/cloze.ts`.
+6. **Speak**: Section text hidden, replaced by auto-growing textarea. "Submit" calculates diff and advances to Result.
+7. **Result**: Word-level diff display with accuracy percentage. SM-2 grading happens automatically. "Try Again" returns to Speak. "Done" exits to `/chapter`.
 
 **Stage Navigation:**
 - Bottom bar with stage indicator dots (current stage is elongated pill, completed stages are filled, future stages are faded).
 - Back/forward chevrons to move between adjacent stages.
 - Tapping a dot jumps to that stage (only accessible stages — current or earlier).
 - Exit (X) button returns to `/chapter`.
-- Stage-specific controls appear above the dots (Flow controls, Cloze level selector, Recite reveal toggle, Type submit button, Result action buttons).
+- Stage-specific controls appear above the dots (Flow controls, Recollect level selector, Receive reveal toggle, Speak submit button, Result action buttons).
 
-**Text Anchor Pattern:** One `<div>` renders the section text and never unmounts or repositions between stages. Each stage applies a different visual "lens" (opacity, colour, blur, word hiding). Type and Result replace the text area with their own content.
+**Text Anchor Pattern:** One `<div>` renders the section text and never unmounts or repositions between stages. Each stage applies a different visual "lens" (opacity, colour, blur, word hiding). Speak and Result replace the text area with their own content.
 
 **Components:**
 - `TextAnchor` (`src/components/study/TextAnchor.tsx`): Shared verse renderer with stage-based styling.
@@ -390,7 +390,7 @@ Two-mode chapter import screen with a smart verification flow.
 
 ### G. Group (`/group`)
 
-Authentication and study group management.
+Authentication and practice group management.
 
 - **Auth Flow**: Email input → 8-digit OTP verification. OTP is entered digit-by-digit in 8 individual input fields with auto-advance.
 - **Profile**: Display name editing (auto-saved on blur/enter).
@@ -473,13 +473,13 @@ The `bible_library` Supabase table stores pre-loaded Bible content verse by vers
 - **`parseChapter(text, stripRefs)`**: Extracts metadata (book, title, version) from the first line or treats it as the title. Supports `<n>` verse markers, `<heading>...</heading>` tags, `[LINEBREAK]` preservation, `[PARAGRAPH]` markers from double newlines, and heuristic continuation detection (quotes/lowercase text appended to previous verse). Also strips footnote markers `[a]`, `[b]`, etc. if `stripRefs` is true.
 - **`chunkVerses(verses, title, max, bookName, versionId)`**: Groups verses into chunks of up to 4 scripture verses. Break points: max size, paragraph markers, heading boundaries. Trailing headings attach to the last chunk.
 - **`getChapterSlug(title, bookName, versionId)`**: Generates deterministic chapter IDs by slugifying `{versionId}-{bookName}-{title}`.
-- **`getVerseSections(chapter)`**: Derives single-verse `StudySection` objects from a chapter's scripture verses. Each section has a deterministic ID (`{chapterId}-v{number}`), a single verse range, and flattened text.
+- **`getVerseSections(chapter)`**: Derives single-verse `PracticeSection` objects from a chapter's scripture verses. Each section has a deterministic ID (`{chapterId}-v{number}`), a single verse range, and flattened text.
 - **`getSections(chapter, unit)`**: Returns either `chapter.chunks` (when unit is `"chunk"`) or `getVerseSections(chapter)` (when unit is `"verse"`).
-- **`splitIntoLines(text)`**: Splits text on sentence boundaries (`.!?`) for Recite Mode. Lines exceeding 15 words are further split into 12-word sub-lines.
+- **`splitIntoLines(text)`**: Splits text on sentence boundaries (`.!?`) for Receive Mode. Lines exceeding 15 words are further split into 12-word sub-lines.
 
 ### F. Text Diffing
 
-`lib/diff.ts` provides word-level accuracy calculation for Type Mode:
+`lib/diff.ts` provides word-level accuracy calculation for Speak Mode:
 
 - **Algorithm**: Sequential matching with an 8-word look-ahead window. For each typed word, searches the expected words within the window. Skipped expected words are marked as `missing`. Unmatched typed words are `extra`.
 - **Normalisation**: Lowercase, strip non-word characters.

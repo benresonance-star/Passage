@@ -155,7 +155,7 @@ export function TextAnchor({
       {stage === "read" && (
         <div className="mt-6 text-center">
           <p className={`text-sm italic ${isDawn ? "text-white/50" : "text-zinc-500"}`}>
-            Read the text carefully.
+            Attend to the text carefully.
           </p>
         </div>
       )}
@@ -164,7 +164,7 @@ export function TextAnchor({
           <p className={`text-sm italic ${isDawn ? "text-white/50" : "text-zinc-500"}`}>
             {scriptureVerses.length > 1
               ? `${soakHighlighted?.size || 0} of ${scriptureVerses.length} verses focused`
-              : "Dwell on this verse."}
+              : "Abide in this verse."}
           </p>
         </div>
       )}

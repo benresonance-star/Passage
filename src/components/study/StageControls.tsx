@@ -5,12 +5,12 @@ import type { StudyStage } from "./TextAnchor";
 
 const STAGES: StudyStage[] = ["read", "soak", "flow", "recite", "cloze", "type", "result"];
 const STAGE_LABELS: Record<StudyStage, string> = {
-  read: "Read",
-  soak: "Soak",
+  read: "Attend",
+  soak: "Abide",
   flow: "Flow",
-  recite: "Recite",
-  cloze: "Cloze",
-  type: "Type",
+  recite: "Receive",
+  cloze: "Recollect",
+  type: "Speak",
   result: "Result",
 };
 

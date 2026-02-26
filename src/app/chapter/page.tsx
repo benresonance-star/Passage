@@ -317,7 +317,7 @@ export default function ChapterPage() {
                       }`}
                     >
                       <Play size={10} className="fill-current" />
-                      Study
+                      Practice
                     </Link>
                   )}
                 </div>

@@ -1,16 +1,16 @@
-# Passage - Bible Chapter Memoriser (v3.4.1)
+# Passage - Bible Chapter Memoriser (v3.5.0)
 
 An iPhone-first PWA for memorising Bible chapters through chunked practice, immersive soaking, spaced repetition, and shared group progress tracking with cross-device cloud sync.
 
 ## Features
 
-- **Guided Study Session**: Single-screen flow from reading to recall with 7 stages — Read, Soak (inline verse-focus), Flow (word-by-word rhythmic reading), Recite (tap-to-reveal), Cloze (scaffolded word-hiding), Type (free recall), and Result (accuracy feedback with SM-2 grading). Text stays anchored in the same position across all stages.
-- **Study Units**: Choose between studying "Chunks" (groups of ~4 verses) or individual "Verses" via a toggle on the Chapter page. Both track SM-2 progress independently.
+- **Guided Practice Session**: Single-screen flow from reading to recall with 7 stages — Attend, Abide (inline verse-focus), Flow (word-by-word rhythmic reading), Receive (tap-to-reveal), Recollect (scaffolded word-hiding), Speak (free recall), and Result (accuracy feedback with SM-2 grading). Text stays anchored in the same position across all stages.
+- **Practice Units**: Choose between practicing "Chunks" (groups of ~4 verses) or individual "Verses" via a toggle on the Chapter page. Both track SM-2 progress independently.
 - **Soak Mode**: Full-screen verse-by-verse meditation with breathing gradient background, double-buffer crossfade transitions, and wake lock.
 - **Spaced Repetition**: Modified SM-2 algorithm with auto-promotion to memorised after 3 consecutive high scores.
 - **Theme Engine**: 6 presets (OLED, Midnight, Sepia, Night Dusk, Classic, Dawn) with CSS custom properties and animated gradients.
 - **Cloud Sync**: Cross-device synchronisation via Supabase with realtime subscriptions and timestamp-based conflict resolution.
-- **Study Groups**: Shared progress boards, invite links, admin-controlled chapter libraries, and member management.
+- **Practice Groups**: Shared progress boards, invite links, admin-controlled chapter libraries, and member management.
 - **Word Highlighting**: Tap any word to highlight all instances across the chapter.
 - **Offline First**: LocalStorage as primary store with background cloud sync.
 
