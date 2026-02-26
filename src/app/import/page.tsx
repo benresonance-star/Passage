@@ -140,7 +140,7 @@ export default function ImportPage() {
         ...prev.settings,
         activeChunkId: {
           ...prev.settings.activeChunkId,
-          [chapterId]: chunks[0]?.id || null,
+          [chapterId]: finalChunks[0]?.id || null,
         },
       },
     }));
