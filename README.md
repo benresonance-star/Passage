@@ -1,4 +1,4 @@
-# Passage - Bible Chapter Memoriser (v3.2.1)
+# Passage - Bible Chapter Memoriser (v3.3.0)
 
 An iPhone-first PWA for memorising Bible chapters through chunked practice, immersive soaking, spaced repetition, and shared group progress tracking with cross-device cloud sync.
 
@@ -82,22 +82,24 @@ The app deploys automatically from the `main` branch via Vercel. Environment var
 
 Select from pre-loaded Bible content stored in Supabase. Choose a version, book, and chapter — the text is imported automatically.
 
-### Paste Mode
-
-Paste formatted text with verse markers and optional heading tags:
+- **Paste Mode**: Paste formatted text with verse markers and optional heading tags. The app now supports a smarter import flow with metadata detection and a review step:
+    - **Metadata Detection**: Automatically detects Book, Chapter/Verse Range, and Version from the first line (e.g., `Colossians 3:1-17 (NIV)`).
+    - **Review Step**: A dedicated review screen allows you to verify parsed verses, headings, and chunks before saving.
+    - **Manual Correction**: Edit Book, Title, or Version directly on the review screen if needed.
+    - **Footnote Cleaning**: Automatically strips footnote markers (e.g., `[a]`, `[b]`) common in Bible site copies.
 
 ```text
-Romans 8
-<heading>Life Through the Spirit</heading>
-<1> Therefore, there is now no condemnation for those who are in Christ Jesus,
-<2> because through Christ Jesus the law of the Spirit who gives life has set you free...
+Colossians 3:1-17 (NIV)
+Living as Those Made Alive in Christ
+
+3 Since, then, you have been raised with Christ...
 ```
 
-- `<n>` marks a verse number.
+- `<n>` marks a verse number (auto-detected if missing brackets).
 - `<heading>...</heading>` marks a section heading.
-- The first line without markers is treated as the title.
+- The first line is parsed for metadata; subsequent lines are treated as headings or verses.
 - New paragraphs are preserved.
-- A "Strip References" toggle removes URLs and parenthetical references.
+- A "Strip References" toggle removes URLs, parenthetical references, and footnote markers.
 
 ## Specification
 

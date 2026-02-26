@@ -1,4 +1,4 @@
-# Passage - Bible Chapter Memoriser (v3.2.1)
+# Passage - Bible Chapter Memoriser (v3.3.0)
 
 ## AI Agent Protocol (Mandatory)
 
@@ -366,7 +366,7 @@ Chapter Mastery overview.
 
 ### F. Import (`/import`)
 
-Two-mode chapter import screen.
+Two-mode chapter import screen with a smart verification flow.
 
 - **Mode Toggle**: "Library" (database icon) or "Paste" (type icon) tabs.
 - **Library Mode** (`LibrarySelector.tsx`):
@@ -376,12 +376,16 @@ Two-mode chapter import screen.
     - Auto-fills book name and version ID.
 - **Paste Mode**:
     - Textarea for pasting formatted text.
-    - Expected format: First line = title. Subsequent lines: `<n> verse text`, `<heading>heading text</heading>`.
-    - Book name input field.
-    - Version selector dropdown (NIV default).
-    - "Strip References" toggle (removes URLs and parenthetical references).
+    - **Smart Metadata Detection**: Automatically detects Book, Chapter/Verse Range, and Version from the first line (e.g., `Colossians 3:1-17 (NIV)`).
+    - **Review Step**: A dedicated `ReviewView` screen allows users to verify parsed verses, headings, and chunks before saving.
+    - **Manual Correction**: Users can edit Book, Title, or Version directly on the review screen.
+    - **Footnote Cleaning**: Automatically strips footnote markers (e.g., `[a]`, `[b]`) common in Bible site copies.
+    - Expected format: First line = metadata/title. Subsequent lines: `<n> verse text`, `<heading>heading text</heading>`.
+    - Book name input field (auto-filled if detected).
+    - Version selector dropdown (auto-filled if detected).
+    - "Strip References" toggle (removes URLs, parenthetical references, and footnote markers).
 - **Duplicate detection**: If a chapter with the same slug already exists, shows a confirm dialog offering to overwrite.
-- **Import flow**: `parseChapter()` → `chunkVerses()` (max 4 verses per chunk) → generates SM2Cards → saves to state → `pushChapter()` to cloud → navigates to `/chapter`.
+- **Import flow**: `parseChapter()` → `ReviewView` → `chunkVerses()` (max 4 verses per chunk) → generates SM2Cards → saves to state → `pushChapter()` to cloud → navigates to `/chapter`.
 
 ### G. Group (`/group`)
 
@@ -465,7 +469,7 @@ The `bible_library` Supabase table stores pre-loaded Bible content verse by vers
 
 `lib/parser.ts` handles text parsing and chunking:
 
-- **`parseChapter(text, stripRefs)`**: Extracts title (first non-empty line) and verses. Supports `<n>` verse markers, `<heading>...</heading>` tags, `[LINEBREAK]` preservation, `[PARAGRAPH]` markers from double newlines, and heuristic continuation detection (quotes/lowercase text appended to previous verse).
+- **`parseChapter(text, stripRefs)`**: Extracts metadata (book, title, version) from the first line or treats it as the title. Supports `<n>` verse markers, `<heading>...</heading>` tags, `[LINEBREAK]` preservation, `[PARAGRAPH]` markers from double newlines, and heuristic continuation detection (quotes/lowercase text appended to previous verse). Also strips footnote markers `[a]`, `[b]`, etc. if `stripRefs` is true.
 - **`chunkVerses(verses, title, max, bookName, versionId)`**: Groups verses into chunks of up to 4 scripture verses. Break points: max size, paragraph markers, heading boundaries. Trailing headings attach to the last chunk.
 - **`getChapterSlug(title, bookName, versionId)`**: Generates deterministic chapter IDs by slugifying `{versionId}-{bookName}-{title}`.
 - **`getVerseSections(chapter)`**: Derives single-verse `StudySection` objects from a chapter's scripture verses. Each section has a deterministic ID (`{chapterId}-v{number}`), a single verse range, and flattened text.

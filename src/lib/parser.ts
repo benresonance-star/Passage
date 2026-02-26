@@ -1,23 +1,41 @@
 import { Verse, Chunk, StudySection, Chapter } from "@/types";
 
-export function parseChapter(text: string, stripRefs: boolean = true): { title: string; verses: Verse[] } {
+export function parseChapter(text: string, stripRefs: boolean = true): { title: string; verses: Verse[]; bookName?: string; versionId?: string } {
   let processedText = text;
   
   if (stripRefs) {
     processedText = processedText.replace(/https?:\/\/\S+/gi, "");
     processedText = processedText.replace(/\([A-Z\d\s:]+(?:\s[A-Z]+)?\)/gi, "");
+    // Strip footnote markers like [a], [b], etc.
+    processedText = processedText.replace(/\[[a-z]\]/g, "");
   }
 
-  // Auto-fix missing brackets
+  // Auto-fix missing brackets: "3 Since, then" -> "<3> Since, then"
   processedText = processedText.replace(/(^|\s)(\d+)(?=\s[A-Z])/g, "$1<$2>");
 
   const lines = processedText.split("\n").map(l => l.trim());
   let title = "My Chapter";
+  let bookName: string | undefined;
+  let versionId: string | undefined;
   const verses: Verse[] = [];
 
   const firstIdx = lines.findIndex(l => l.length > 0);
   if (firstIdx !== -1) {
-    title = lines[firstIdx].replace(/[<>]/g, "");
+    const firstLine = lines[firstIdx];
+    
+    // Check for format: "Book Chapter:Verse-Verse (Version)"
+    // e.g. "Colossians 3:1-17 (NIV)"
+    const metadataMatch = firstLine.match(/^([\d\s]*[a-zA-Z]+)\s+(\d+[:\d-]*)\s*(?:\(([^)]+)\))?$/);
+    
+    if (metadataMatch) {
+      bookName = metadataMatch[1].trim();
+      title = metadataMatch[2].trim();
+      if (metadataMatch[3]) {
+        versionId = metadataMatch[3].toLowerCase().trim();
+      }
+    } else {
+      title = firstLine.replace(/[<>]/g, "");
+    }
     
     // Join the rest of the text to process multi-line verses
     const remainingText = lines.slice(firstIdx + 1).join("\n");
@@ -102,7 +120,7 @@ export function parseChapter(text: string, stripRefs: boolean = true): { title: 
     }
   }
 
-  return { title, verses };
+  return { title, verses, bookName, versionId };
 }
 
 /**
