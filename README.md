@@ -6,7 +6,7 @@ An iPhone-first PWA for memorising Bible chapters through chunked practice, imme
 
 - **Guided Practice Session**: Single-screen flow from reading to recall with 7 stages — Attend, Abide (inline verse-focus), Breathe (word-by-word rhythmic reading), Receive (tap-to-reveal), Recollect (scaffolded word-hiding), Speak (free recall), and Result (accuracy feedback with SM-2 grading). Text stays anchored in the same position across all stages.
 - **Practice Units**: Choose between practicing "Chunks" (groups of ~4 verses) or individual "Verses" via a toggle on the Chapter page. Both track SM-2 progress independently.
-- **Soak Mode**: Full-screen verse-by-verse meditation with breathing gradient background, double-buffer crossfade transitions, and wake lock.
+- **Soak Mode**: Full-screen verse-by-verse meditation with breathing gradient background, double-buffer crossfade transitions, and wake lock. Supports swipe navigation on mobile and click navigation on desktop.
 - **Spaced Repetition**: Modified SM-2 algorithm with auto-promotion to memorised after 3 consecutive high scores.
 - **Theme Engine**: 6 presets (OLED, Midnight, Sepia, Night Dusk, Classic, Dawn) with CSS custom properties and animated gradients.
 - **Cloud Sync**: Cross-device synchronisation via Supabase with realtime subscriptions and timestamp-based conflict resolution.

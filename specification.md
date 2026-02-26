@@ -261,7 +261,7 @@ Immersive verse-by-verse meditation screen.
 - **Full-screen layout**: No header, no nav bar. Fixed position covering entire viewport.
 - **Content Loading**: If a specific section (chunk or verse) is active on the Chapter page, Abide mode loads only that section. If no section is active, the entire chapter is loaded for continuous meditation.
 - **Double-buffer crossfade**: Two verse "slots" (A and B) are always in the DOM. On navigation, the inactive slot receives the new verse, then: preparing (60ms paint time) → crossfading (800ms opacity interpolation) → idle (swap active slot). No DOM mutation ever happens during a visible transition.
-- **Navigation**: Swipe left/right (30px threshold, horizontal must exceed 2× vertical) or click left/right zones (30%/30% of screen width). Centre zone (40%) reveals the exit button.
+- **Navigation**: Swipe left/right (30px threshold, horizontal must exceed 2× vertical) or click left/right zones (30%/30% of screen width) for verse navigation. Centre zone (40%) reveals the exit button. Click navigation is enabled for desktop users.
 - **Word Highlighting**: Tap any word to toggle highlight (per-verse, stored in component state as `"verseIndex-wordIndex"` keys).
 - **Breathing Background**: CSS animation (`soak-breathe` class in `breathe.css`) creates a slowly animating gradient background.
 - **Font**: Cormorant Garamond (Light 300, Regular 400, Bold 700).

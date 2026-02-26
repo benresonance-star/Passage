@@ -216,7 +216,9 @@ export function SoakVerseTap({
   /* ── Click-zone handler (desktop mouse only) ───────────────────── */
   const handleZoneClick = useCallback(
     (direction: 1 | -1) => {
-      if (Date.now() - lastTouchTs.current < 800) return;
+      // On desktop/mouse, lastTouchTs will be 0 or very old.
+      // This check only blocks clicks that immediately follow a touch.
+      if (Date.now() - lastTouchTs.current < 500) return;
       handleNav(direction);
     },
     [handleNav],
@@ -372,7 +374,7 @@ export function SoakVerseTap({
         style={{ transform: 'translateZ(0)' }}
       >
         <div
-          className="w-[30%] h-full cursor-default"
+          className="w-[30%] h-full cursor-pointer"
           data-testid="soak-zone-left"
           onClick={() => handleZoneClick(-1)}
         />
@@ -382,7 +384,7 @@ export function SoakVerseTap({
           onClick={showExitIcon}
         />
         <div
-          className="w-[30%] h-full cursor-default"
+          className="w-[30%] h-full cursor-pointer"
           data-testid="soak-zone-right"
           onClick={() => handleZoneClick(1)}
         />
