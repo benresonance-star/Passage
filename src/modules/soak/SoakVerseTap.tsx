@@ -218,7 +218,8 @@ export function SoakVerseTap({
     (direction: 1 | -1) => {
       // On desktop/mouse, lastTouchTs will be 0 or very old.
       // This check only blocks clicks that immediately follow a touch.
-      if (Date.now() - lastTouchTs.current < 500) return;
+      // Reduced to 300ms for better responsiveness.
+      if (Date.now() - lastTouchTs.current < 300) return;
       handleNav(direction);
     },
     [handleNav],
@@ -369,24 +370,33 @@ export function SoakVerseTap({
 
       {/* Click zones — desktop mouse navigation only */}
       <div
-        className="fixed inset-0 z-[51] flex"
+        className="fixed inset-0 z-[100] flex pointer-events-none"
         data-testid="soak-click-zones"
         style={{ transform: 'translateZ(0)' }}
       >
         <div
-          className="w-[30%] h-full cursor-pointer"
+          className="w-[30%] h-full cursor-pointer pointer-events-auto"
           data-testid="soak-zone-left"
-          onClick={() => handleZoneClick(-1)}
+          onClick={(e) => {
+            e.stopPropagation();
+            handleZoneClick(-1);
+          }}
         />
         <div
-          className="w-[40%] h-full"
+          className="w-[40%] h-full pointer-events-auto"
           data-testid="soak-zone-center"
-          onClick={showExitIcon}
+          onClick={(e) => {
+            e.stopPropagation();
+            showExitIcon();
+          }}
         />
         <div
-          className="w-[30%] h-full cursor-pointer"
+          className="w-[30%] h-full cursor-pointer pointer-events-auto"
           data-testid="soak-zone-right"
-          onClick={() => handleZoneClick(1)}
+          onClick={(e) => {
+            e.stopPropagation();
+            handleZoneClick(1);
+          }}
         />
       </div>
 
