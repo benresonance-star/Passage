@@ -84,11 +84,22 @@ export default function ImportPage() {
   };
 
   const pushToGlobalLibrary = async (title: string, book: string, version: string, verses: Verse[]) => {
-    if (!supabase) return;
+    if (!supabase) {
+      console.error("Supabase client not initialized");
+      return;
+    }
 
     // Extract chapter number from title (e.g. "3:1-17" -> 3, "8" -> 8)
     const chapterMatch = title.match(/^(\d+)/);
     const chapterNumber = chapterMatch ? parseInt(chapterMatch[1]) : 1;
+
+    console.log("Preparing global library push", {
+      title,
+      book,
+      version,
+      chapterNumber,
+      verseCount: verses.length
+    });
 
     const rows = verses.map((v) => ({
       version_id: version.toLowerCase().trim(),
@@ -101,17 +112,23 @@ export default function ImportPage() {
       created_at: new Date().toISOString(),
     }));
 
-    const { error } = await supabase.from("bible_library").insert(rows);
-    if (error) {
-      console.error("Error pushing to global library:", error);
-      toast(`Upload Failed: ${error.message} (Code: ${error.code})`, "error");
-    } else {
-      console.log("Successfully pushed to global library:", { book, title, rowCount: rows.length });
-      toast(`${book} ${title} added to global library.`, "success");
+    try {
+      const { error } = await supabase.from("bible_library").insert(rows);
+      if (error) {
+        console.error("Supabase error pushing to global library:", error);
+        toast(`Upload Failed: ${error.message} (Code: ${error.code})`, "error");
+      } else {
+        console.log("Successfully pushed to global library:", { book, title, rowCount: rows.length });
+        toast(`${book} ${title} added to global library.`, "success");
+      }
+    } catch (err) {
+      console.error("Unexpected error during global library push:", err);
+      toast(`Upload Error: ${err instanceof Error ? err.message : "Unknown error"}`, "error");
     }
   };
 
   const handleImport = async (importText?: string, importBook?: string, importVersion?: string) => {
+    console.log("handleImport triggered", { step, pushToGlobal, isAdmin, hasParsedData: !!parsedData });
     let finalTitle: string;
     let finalVerses: Verse[];
     let finalBook: string;
@@ -179,6 +196,12 @@ export default function ImportPage() {
       createdAt: now,
     };
 
+    // Global Library Sync (Admin Only) - Do this BEFORE redirecting
+    if (pushToGlobal && isAdmin) {
+      console.log("Pushing to global library...");
+      await pushToGlobalLibrary(finalTitle, finalBook, finalVersion, finalVerses);
+    }
+
     setState((prev) => ({
       ...prev,
       chapters: {
@@ -205,11 +228,6 @@ export default function ImportPage() {
 
     // Cloud Sync
     await pushChapter(newChapter);
-
-    // Global Library Sync (Admin Only)
-    if (pushToGlobal && isAdmin) {
-      await pushToGlobalLibrary(finalTitle, finalBook, finalVersion, finalVerses);
-    }
 
     router.push("/chapter");
   };
