@@ -411,7 +411,7 @@ export function SoakVerseTap({
 
       {/* Verse indicator */}
       <div
-        className="fixed top-0 left-0 right-0 z-[53] flex justify-center pt-safe"
+        className="fixed top-0 left-0 right-0 z-[101] flex justify-center pt-safe"
         style={{ paddingTop: "max(env(safe-area-inset-top), 16px)" }}
       >
         <span
@@ -424,7 +424,7 @@ export function SoakVerseTap({
 
       {/* Bottom exit zone — tap to reveal, tap icon to exit */}
       <div
-        className="fixed bottom-0 left-0 right-0 z-[53] flex justify-center pb-safe"
+        className="fixed bottom-0 left-0 right-0 z-[101] flex justify-center pb-safe"
         style={{ paddingBottom: "max(env(safe-area-inset-bottom), 24px)" }}
         onClick={(e) => {
           e.stopPropagation();
