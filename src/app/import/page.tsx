@@ -241,6 +241,11 @@ export default function ImportPage() {
           <ArrowLeft size={24} />
         </Link>
         <h1 className="text-xl">{step === "review" ? "Review Passage" : "Add Passage"}</h1>
+        {isAdmin && user && (
+          <span className="text-[10px] font-bold bg-orange-500/10 text-orange-500 px-2 py-0.5 rounded-full border border-orange-500/20 uppercase tracking-widest">
+            Admin
+          </span>
+        )}
       </header>
 
       {step === "review" && parsedData ? (
