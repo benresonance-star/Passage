@@ -75,10 +75,10 @@ export default function LibrarySelector({ onSelect }: LibrarySelectorProps) {
       .select("chapter_number")
       .eq("book_name", book)
       .eq("version_id", versionId)
-      .order("chapter_number");
+      .order("chapter_number", { ascending: true });
     
     if (data) {
-      const uniqueChapters = Array.from(new Set(data.map((c) => c.chapter_number)));
+      const uniqueChapters = Array.from(new Set(data.map((c) => c.chapter_number))).sort((a, b) => a - b);
       setChapters(uniqueChapters);
     }
     setLoading(false);

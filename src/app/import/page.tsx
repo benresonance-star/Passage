@@ -93,7 +93,7 @@ export default function ImportPage() {
       verse_number: v.type === "scripture" ? v.number : null,
       content: v.type === "scripture" ? v.text.replace(/\[LINEBREAK\]/g, " ").replace(/\[PARAGRAPH\]/g, "").trim() : null,
       is_heading: v.type === "heading",
-      heading_text: v.type === "heading" ? v.text.trim() : null,
+      heading_text: v.type === "heading" ? v.text.replace(/\[LINEBREAK\]/g, " ").replace(/\[PARAGRAPH\]/g, "").trim() : null,
       created_at: new Date().toISOString(),
     }));
 

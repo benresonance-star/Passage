@@ -185,7 +185,7 @@ export default function ChapterPage() {
           <div className="cursor-default">
             <h1 className="text-2xl font-bold">{chapter.bookName} {chapter.title}</h1>
             <div className={`text-[10px] uppercase tracking-wider mt-0.5 transition-all duration-500 ${isDawn ? "text-[var(--theme-ui-subtext)]" : "text-zinc-500"}`}>
-              {state.versions[chapter.versionId]?.abbreviation || "NIV"} — {scriptureVerses.length} VERSES — {chapter.chunks.length} PARTS
+              {state.versions[chapter.versionId]?.abbreviation || chapter.versionId} — {scriptureVerses.length} VERSES — {chapter.chunks.length} PARTS
             </div>
             <div className="flex mt-2 rounded-full overflow-hidden border border-[var(--surface-border)] w-fit">
               {(["chunk", "verse"] as const).map(unit => (
