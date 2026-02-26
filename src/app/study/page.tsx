@@ -228,7 +228,7 @@ export default function StudyPage() {
             {stage === "result" ? "Results" : `${stage.charAt(0).toUpperCase() + stage.slice(1)} Mode`}
           </h1>
           <p className="text-[10px] text-[var(--theme-ui-subtext)] uppercase tracking-tight">
-            {studyUnit === "verse" ? "Verse" : "Verses"} {activeSection.verseRange} · {chapter.title}
+            {studyUnit === "verse" ? "Verse" : "Verses"} {activeSection.verseRange} · {chapter.bookName} {chapter.title}
           </p>
         </div>
         <div className="w-10" />

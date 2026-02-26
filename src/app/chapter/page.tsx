@@ -183,7 +183,7 @@ export default function ChapterPage() {
       <header className={`sticky top-0 backdrop-blur-md pb-2 z-10 ${isDawn ? "bg-transparent border-b border-transparent" : "bg-inherit border-b border-white/10"}`}>
         <div className="px-6 md:px-12 flex justify-between items-start max-w-2xl mx-auto">
           <div className="cursor-default">
-            <h1 className="text-2xl font-bold">{chapter.title}</h1>
+            <h1 className="text-2xl font-bold">{chapter.bookName} {chapter.title}</h1>
             <div className={`text-[10px] uppercase tracking-wider mt-0.5 transition-all duration-500 ${isDawn ? "text-[var(--theme-ui-subtext)]" : "text-zinc-500"}`}>
               {state.versions[chapter.versionId]?.abbreviation || "NIV"} — {scriptureVerses.length} VERSES — {chapter.chunks.length} PARTS
             </div>
