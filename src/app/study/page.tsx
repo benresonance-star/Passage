@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
+import Link from "next/link";
 import { useBCM } from "@/context/BCMContext";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
@@ -12,7 +13,7 @@ import { calculateUpdatedStreak } from "@/lib/streak";
 import { TextAnchor, type StudyStage } from "@/components/study/TextAnchor";
 import { StageControls } from "@/components/study/StageControls";
 import { EmptyState } from "@/components/EmptyState";
-import { CheckCircle2 } from "lucide-react";
+import { CheckCircle2, ArrowLeft } from "lucide-react";
 
 export default function StudyPage() {
   const { state, setState, isHydrated, syncProgress } = useBCM();
@@ -245,8 +246,10 @@ export default function StudyPage() {
 
       {/* Header */}
       <header className="flex items-center justify-between px-4 pb-2 pt-2 flex-shrink-0 z-10 relative">
-        <div />
-        <div className="text-center">
+        <Link href="/chapter" className="p-2 text-zinc-500 bg-[var(--surface)] rounded-full border border-[var(--surface-border)]" aria-label="Back to chapter">
+          <ArrowLeft size={20} />
+        </Link>
+        <div className="text-center absolute left-1/2 -translate-x-1/2">
           <h1 className={`text-sm font-bold uppercase tracking-widest ${isDawn ? "text-white" : "text-orange-500"}`}>
             {STAGE_TITLES[stage]}
           </h1>

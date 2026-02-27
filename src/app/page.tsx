@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useBCM } from "@/context/BCMContext";
-import { Play, BookOpen, Upload, ChevronRight, Award, Trash2, Trophy, Info, X, Users, RefreshCw, ArrowLeft } from "lucide-react";
+import { Play, BookOpen, Upload, ChevronRight, Award, Trash2, Trophy, Info, X, Users, RefreshCw, ArrowLeft, Wind } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/lib/supabase";
 import { useEffect } from "react";
