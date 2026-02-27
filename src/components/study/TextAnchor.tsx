@@ -171,7 +171,7 @@ export function TextAnchor({
       {stage === "flow" && (
         <div className="mt-6 text-center">
           <p className={`text-sm italic animate-in fade-in duration-1000 ${isDawn ? "text-white/50" : "text-zinc-500"}`}>
-            Read the text slowly and deeply.
+            Breathe with the word.
           </p>
         </div>
       )}
