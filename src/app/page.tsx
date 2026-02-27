@@ -85,7 +85,7 @@ export default function Home() {
   return (
     <div className="space-y-8 py-4">
       <ConfirmDialog />
-      <header className="flex justify-between items-center">
+      <header className="flex justify-between items-center relative">
         <Link 
           href="/chapter" 
           className="p-2.5 text-zinc-500 bg-[var(--surface)] rounded-full border border-[var(--surface-border)]" 
