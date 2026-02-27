@@ -1,4 +1,4 @@
-# Passage - Bible Chapter Memoriser (v3.6.0)
+# Passage - Bible Chapter Memoriser (v3.6.1)
 
 ## AI Agent Protocol (Mandatory)
 
@@ -352,11 +352,11 @@ A unified single-screen practice flow that guides the user through a practice se
 - `StageControls` (`src/components/study/StageControls.tsx`): Bottom navigation and context controls.
 - `StudyPage` (`src/app/study/page.tsx`): Stage state machine, section resolution, SM2 grading.
 
-### E. My Progress (`/review`)
+### E. MY PROGRESS (`/review`)
 
 Chapter Mastery overview.
 
-- **Header**: "My Progress" title centered with a back arrow to Home. Progress bar (`memorised / total`) and fraction label.
+- **Header**: "MY PROGRESS" title centered with a back arrow to the Library (Home). Progress bar (`memorised / total`) and fraction label.
 - **Chunk Cards**: Each chunk displayed as a card with:
     - Verse range label (faded when memorised).
     - Full verse text with inline verse numbers, headings, and `[LINEBREAK]` rendering.

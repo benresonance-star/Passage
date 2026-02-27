@@ -47,14 +47,15 @@ export default function ReviewPage() {
 
   return (
     <div className="fixed inset-0 flex flex-col bg-inherit pt-safe">
-      <header className="pb-4 px-4 flex-shrink-0 z-[10] bg-inherit flex items-center justify-between">
+      <header className="pb-4 px-4 flex-shrink-0 z-[10] bg-inherit flex items-center justify-between relative">
         <button 
           onClick={() => router.push("/")}
-          className="p-2 -ml-2 text-[var(--theme-ui-subtext)] hover:text-white transition-colors"
+          className="p-2.5 text-zinc-500 bg-[var(--surface)] rounded-full border border-[var(--surface-border)]" 
+          aria-label="Back to library"
         >
-          <ArrowLeft size={24} />
+          <ArrowLeft size={22} />
         </button>
-        <h1 className="text-lg font-bold">My Progress</h1>
+        <h1 className="text-lg font-bold uppercase tracking-widest absolute left-1/2 -translate-x-1/2">MY PROGRESS</h1>
         <div className="w-10" />
       </header>
       
