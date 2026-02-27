@@ -248,17 +248,22 @@ export function getSections(chapter: Chapter, unit: "chunk" | "verse"): StudySec
 }
 
 export function splitIntoLines(text: string): string[] {
-  const parts = text.split(/([.!?]+\s+)/);
+  // 1. Strip paragraph markers and normalize whitespace
+  const cleanText = text.replace(/\[PARAGRAPH\]\s*/g, "").trim();
+  if (!cleanText) return [];
+
+  // 2. Split on sentence boundaries, keeping the punctuation
+  const parts = cleanText.split(/([.!?]+\s+)/);
   const lines: string[] = [];
   
   for (let i = 0; i < parts.length; i += 2) {
     const line = (parts[i] + (parts[i + 1] || "")).trim();
     if (line.length > 0) {
-      const words = line.split(" ");
+      const words = line.split(/\s+/);
       if (words.length > 15) {
         for (let j = 0; j < words.length; j += 12) {
           const subLine = words.slice(j, j + 12).join(" ");
-          lines.push(subLine);
+          if (subLine.trim()) lines.push(subLine);
         }
       } else {
         lines.push(line);

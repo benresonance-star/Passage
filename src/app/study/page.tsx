@@ -196,7 +196,7 @@ export default function StudyPage() {
 
   const reciteLines = useMemo(() => {
     const text = scriptureVerses.map(v => v.text).join(" ");
-    return text ? text.split(/([.!?]+\s+)/).filter(Boolean) : [];
+    return text ? splitIntoLines(text) : [];
   }, [scriptureVerses]);
 
   const reciteAllRevealed = useMemo(() => {
