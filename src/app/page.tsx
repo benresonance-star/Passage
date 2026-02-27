@@ -47,38 +47,7 @@ export default function Home() {
   const { user } = useAuth();
   const { confirm, ConfirmDialog } = useConfirm();
   const [showInfo, setShowInfo] = useState(false);
-  const [groupId, setGroupId] = useState<string | null>(null);
-  const [groupName, setGroupName] = useState<string | null>(null);
-  const [isAdmin, setIsAdmin] = useState(false);
-
-  useEffect(() => {
-    if (user && supabase) {
-      const client = supabase;
-      const fetchGroup = async () => {
-        try {
-          const { data, error } = await client
-            .from('group_members')
-            .select('group_id, role, groups(name, admin_id)')
-            .eq('user_id', user.id)
-            .limit(1)
-            .maybeSingle();
-          
-          if (error) throw error;
-          if (data) {
-            setGroupId(data.group_id);
-            const groups = data.groups as { name?: string; admin_id?: string } | null;
-            setGroupName(groups?.name || null);
-            setIsAdmin(data.role === 'admin' || groups?.admin_id === user.id);
-          }
-        } catch (err) {
-          console.error("Home group fetch error:", err);
-        }
-      };
-      fetchGroup();
-    } else {
-      setIsAdmin(true); // If not logged in (local mode), user is their own admin
-    }
-  }, [user]);
+  const isAdmin = true; // If not logged in (local mode), user is their own admin
 
   if (!isHydrated) return null;
 
@@ -118,7 +87,7 @@ export default function Home() {
       <ConfirmDialog />
       <header className="flex justify-between items-center">
         <div className="flex items-center w-10" />
-        <h1 className="text-lg font-bold">My Progress</h1>
+        <h1 className="text-lg font-bold uppercase tracking-widest">LIBRARY</h1>
         <div className="flex gap-2">
           <Link 
             href="/group"
@@ -196,15 +165,6 @@ export default function Home() {
               </Link>
             </div>
           </div>
-
-          {groupId && selectedChapter && (
-            <TeamBoard 
-              groupId={groupId} 
-              groupName={groupName || "Group"}
-              chapterTitle={selectedChapter.title} 
-              totalChunks={selectedChapter.chunks.length} 
-            />
-          )}
 
           <div className="space-y-3">
             <h3 className="text-sm font-medium text-[var(--theme-ui-subtext)] uppercase tracking-wider px-1">Library</h3>

@@ -1,4 +1,4 @@
-# Passage - Bible Chapter Memoriser (v3.5.5)
+# Passage - Bible Chapter Memoriser (v3.5.6)
 
 ## AI Agent Protocol (Mandatory)
 
@@ -42,11 +42,11 @@ A fast, offline-capable iPhone-first PWA for memorising Bible chapters through c
 ### A. Screen Map & Navigation Model
 
 ```
-Home (/)
+LIBRARY (/)
   ├── Active Chapter card
-  ├── Team Board (if in group)
   ├── Library list
-  └── Memorised Chapters
+  ├── Memorised Chapters
+  └── Info Modal
         
 Tab Bar (BottomNav — fixed pill)
   ├── Chapter  (/chapter)
@@ -222,12 +222,12 @@ interface BCMState {
 
 ## 5. Screens
 
-### A. Home (`/`)
+### A. LIBRARY (`/`)
 
 The dashboard and library manager.
 
+- **Header**: Displays "LIBRARY" title, Group icon (links to `/group`), and Info icon.
 - **Active Chapter Card**: Shows title, version abbreviation, verse/chunk counts, memorised progress (`n / m Chunks`), trophy icon when fully memorised. Two action buttons: Read Chapter and My Progress.
-- **Team Board** (`TeamBoard.tsx`): Appears below the active chapter if the user belongs to a group. Shows group name and per-member chunk progress in real time.
 - **Library List**: All chapters sorted by creation date (newest first). Each row shows title, memorised count, and a delete button (admin only). The currently active chapter is marked with an "ACTIVE" label and includes a "Progress" button next to the trash can. An "Add New Chapter" button (dashed border, admin only) links to `/import`.
 - **Memorised Chapters**: Separate section for fully memorised chapters with amber/gold styling and trophy icons.
 - **Info Modal**: Bottom sheet with 7-step memorisation guide ("How to Memorise a Chapter").
