@@ -201,11 +201,8 @@ export default function StudyPage() {
 
   const reciteAllRevealed = useMemo(() => {
     if (stage !== "recite") return false;
-    const lineCount = activeSection
-      ? activeSection.verses.filter(v => v.type === "scripture").map(v => v.text).join(" ").split(/([.!?]+\s+)/).filter(Boolean).length
-      : 0;
-    return reciteRevealed.size > 0 && reciteRevealed.size >= lineCount;
-  }, [stage, reciteRevealed, activeSection]);
+    return reciteRevealed.size > 0 && reciteRevealed.size >= reciteLines.length;
+  }, [stage, reciteRevealed, reciteLines.length]);
 
   if (!isHydrated) return null;
   if (!chapter || !chapterId || !activeSection) return <EmptyState />;
@@ -214,7 +211,7 @@ export default function StudyPage() {
     read: "Attend",
     soak: "Abide",
     flow: "Breathe",
-    recite: "Receive",
+    recite: "Reveal",
     cloze: "Recollect",
     type: "Speak",
     result: "Results"
@@ -345,9 +342,7 @@ export default function StudyPage() {
             if (reciteAllRevealed) {
               setReciteRevealed(new Set());
             } else {
-              const count = activeSection.verses.filter(v => v.type === "scripture").map(v => v.text).join(" ")
-                .split(/([.!?]+\s+)/).filter(Boolean).length;
-              setReciteRevealed(new Set(Array.from({ length: count }, (_, i) => i)));
+              setReciteRevealed(new Set(Array.from({ length: reciteLines.length }, (_, i) => i)));
             }
           }}
           onTypeSubmit={handleSpeakSubmit}

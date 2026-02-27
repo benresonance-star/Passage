@@ -8,7 +8,7 @@ const STAGE_LABELS: Record<StudyStage, string> = {
   read: "Attend",
   soak: "Abide",
   flow: "Breathe",
-  recite: "Receive",
+  recite: "Reveal",
   cloze: "Recollect",
   type: "Speak",
   result: "Result",

@@ -279,7 +279,7 @@ Multi-mode practice screen for the active chunk. Modes are sequential or selecta
 
 1. **Attend**: Full text with verse structure, headings optional. Three action buttons at the bottom:
     - **Breathe**: Enters Breathe Mode.
-    - **Receive**: Enters Receive Mode.
+    - **Reveal**: Enters Reveal Mode.
     - **Recollect**: Advances to Recollect Mode.
 
 2. **Breathe** (sub-mode of Attend): Word-by-word timed reading.
@@ -305,13 +305,13 @@ Multi-mode practice screen for the active chunk. Modes are sequential or selecta
     - "Try Again" button resets to Speak Mode. "Continue" returns to `/chapter`.
     - SM-2 card update happens automatically on submission.
 
-6. **Receive**: Oral practice with tap-to-reveal lines.
+6. **Reveal**: Oral practice with tap-to-reveal lines.
     - Text is split into sentence-based lines (`splitIntoLines` — splits on `.!?`, wraps at 15 words).
     - Each line is a tappable pill: hidden (transparent text, 40% opacity) or revealed (visible with border).
     - Eye/EyeOff toggle in header to reveal/hide all at once.
     - "Done" button grades at 0.75 and returns to Attend Mode.
 
-**Back navigation:** Breathe → Attend, Recollect → Attend, Receive → Attend, Speak → Recollect, Result → Speak, Attend → `/chapter`.
+**Back navigation:** Breathe → Attend, Recollect → Attend, Reveal → Attend, Speak → Recollect, Result → Speak, Attend → `/chapter`.
 
 **Reset:** Custom event `bcm-reset-practice` resets all mode state.
 
@@ -331,7 +331,7 @@ A unified single-screen practice flow that guides the user through a practice se
 1. **Attend**: Full section text, normal styling. Subtitle: "Attend to the text carefully."
 2. **Abide**: Inline verse-focus mode — current verse at full opacity, others dimmed to ~15%. Tap left/right zones to navigate between verses. Breathing gradient background overlay. Verse counter shown below text.
 3. **Breathe**: Word-by-word timed illumination. Words transition from unread to read styling at user-controlled WPM. Controls: play/pause, skip forward/back, reset, WPM slider, focus mode toggle (hides unread words).
-4. **Receive**: Text split into sentence-based lines (`splitIntoLines`). Lines are hidden (transparent, 40% opacity). Tap to reveal individual lines. Reveal All / Hide All toggle.
+4. **Reveal**: Text split into sentence-based lines (`splitIntoLines`). Lines are hidden (transparent, 40% opacity). Tap to reveal individual lines. Reveal All / Hide All toggle.
 5. **Recollect**: Deterministic word hiding at configurable levels (0%, 20%, 40%, 60%, 80%, Mnemonic). Uses `hideWords()` and `generateMnemonic()` from `lib/cloze.ts`.
 6. **Speak**: Section text hidden, replaced by auto-growing textarea. "Submit" calculates diff and advances to Result.
 7. **Result**: Word-level diff display with accuracy percentage. SM-2 grading happens automatically. "Try Again" returns to Speak. "Done" exits to `/chapter`.
