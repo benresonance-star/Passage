@@ -5,7 +5,7 @@ import { useBCM } from "@/context/BCMContext";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import { useWakeLock } from "@/hooks/useWakeLock";
-import { getSections } from "@/lib/parser";
+import { getSections, splitIntoLines } from "@/lib/parser";
 import { calculateDiff, DiffResult } from "@/lib/diff";
 import { updateCard } from "@/lib/scheduler";
 import { calculateUpdatedStreak } from "@/lib/streak";
