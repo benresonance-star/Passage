@@ -1,4 +1,4 @@
-# Passage - Bible Chapter Memoriser (v3.5.1)
+# Passage - Bible Chapter Memoriser (v3.5.2)
 
 ## AI Agent Protocol (Mandatory)
 
@@ -58,7 +58,7 @@ Guided Session Route
 
 Legacy Routes (still accessible, not in nav)
   ├── Practice (/practice)  — direct multi-mode practice
-  └── Review   (/review)    — chapter mastery overview (linked from Home)
+  └── My Progress (/review) — chapter mastery overview (linked from Home)
   
 Modal / Push Routes
   ├── Import   (/import)
@@ -226,9 +226,9 @@ interface BCMState {
 
 The dashboard and library manager.
 
-- **Active Chapter Card**: Shows title, version abbreviation, verse/chunk counts, memorised progress (`n / m Chunks`), trophy icon when fully memorised. Three action buttons: Practice, Full Text, and Review.
+- **Active Chapter Card**: Shows title, version abbreviation, verse/chunk counts, memorised progress (`n / m Chunks`), trophy icon when fully memorised. Three action buttons: Practice, Full Text, and My Progress.
 - **Team Board** (`TeamBoard.tsx`): Appears below the active chapter if the user belongs to a group. Shows group name and per-member chunk progress in real time.
-- **Library List**: All chapters sorted by creation date (newest first). Each row shows title, memorised count, and a delete button (admin only). The currently active chapter is marked with an "ACTIVE" label and includes a "Review" button next to the trash can. An "Add New Chapter" button (dashed border, admin only) links to `/import`.
+- **Library List**: All chapters sorted by creation date (newest first). Each row shows title, memorised count, and a delete button (admin only). The currently active chapter is marked with an "ACTIVE" label and includes a "Progress" button next to the trash can. An "Add New Chapter" button (dashed border, admin only) links to `/import`.
 - **Memorised Chapters**: Separate section for fully memorised chapters with amber/gold styling and trophy icons.
 - **Info Modal**: Bottom sheet with 7-step memorisation guide ("How to Memorise a Chapter").
 - **Group Button**: Top-right icon linking to `/group`. Highlighted orange when logged in.
@@ -352,11 +352,11 @@ A unified single-screen practice flow that guides the user through a practice se
 - `StageControls` (`src/components/study/StageControls.tsx`): Bottom navigation and context controls.
 - `StudyPage` (`src/app/study/page.tsx`): Stage state machine, section resolution, SM2 grading.
 
-### E. Review (`/review`)
+### E. My Progress (`/review`)
 
 Chapter Mastery overview.
 
-- **Header**: "Chapter Mastery" title with progress bar (`memorised / total`) and fraction label.
+- **Header**: "My Progress" title centered with a back arrow to Home. Progress bar (`memorised / total`) and fraction label.
 - **Chunk Cards**: Each chunk displayed as a card with:
     - Verse range label (faded when memorised).
     - Full verse text with inline verse numbers, headings, and `[LINEBREAK]` rendering.
@@ -364,7 +364,7 @@ Chapter Mastery overview.
     - Memorised chunks get amber border styling and `--chunk-memorised` text colour.
 - **Actions per chunk**:
     - **Practice**: Sets the chunk as active and navigates to `/study`.
-    - **Mark / Memorised**: Toggles `isMemorised` on the SM2Card and syncs to cloud.
+    - **Mark / Memorised**: Toggles `isMemorised` on the SM2Card and syncs to cloud using unified logic.
 - **Tap to select**: Tapping a card sets it as the active chunk.
 
 ### F. Import (`/import`)
@@ -413,7 +413,12 @@ Authentication and practice group management.
 
 ### A. Learning Loop & SM-2 Algorithm
 
-The spaced repetition system (`lib/scheduler.ts`) uses a modified SM-2 algorithm:
+The spaced repetition system (`lib/scheduler.ts`) uses a modified SM-2 algorithm with a unified memorisation logic:
+
+**Unified Memorisation Logic:**
+- **Bidirectional Sync**: Marking a **Part** as memorised automatically marks all constituent **Verses**. Marking all **Verses** in a part as memorised automatically marks the **Part**.
+- **Unmarking Logic**: Unmarking a **Verse** automatically unmarks its containing **Part**. Unmarking a **Part** automatically unmarks all its constituent **Verses**.
+- **Consistency**: This ensures that switching between "Parts" and "Verses" modes retains the correct memorised state for all units.
 
 **Scoring tiers:**
 - **≥ 0.9 (Nailed it)**: Interval grows (1 day → 6 days → `interval × ease`). Ease increases. Reps increment. Auto-promotes to memorised after 3 consecutive high scores (`MEMORISED_REP_THRESHOLD`).
