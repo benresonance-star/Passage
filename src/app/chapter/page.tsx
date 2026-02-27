@@ -345,97 +345,104 @@ export default function ChapterPage() {
                 </div>
                 
                 <div className={`chunk-text ${isActive ? "chunk-text-bold" : showAsMemorised ? "opacity-80" : "opacity-90"}`}
-                  style={showAsMemorised ? { color: "var(--chunk-memorised)" } : { color: "var(--theme-text)" }}
+                  style={{ color: "var(--theme-text)" }}
                 >
-                  {section.verses.map((v, idx) => (
-                    <div key={idx} className={v.type === "heading" ? "w-full text-center" : "inline"}>
-                      {v.type === "heading" ? (
-                        visibilityMode === 0 && (
-                          <h3 className="text-[11px] font-bold uppercase tracking-[0.2em] my-4 block w-full leading-relaxed"
-                            style={{ color: showAsMemorised ? "var(--chunk-memorised-sub)" : "var(--theme-ui-subtext)" }}
-                          >
-                            {v.text}
-                          </h3>
-                        )
-                      ) : (
-                        <span className="inline-block mr-2">
-                          {visibilityMode !== 2 && studyUnit !== "verse" && (
-                            <span className="text-[12px] align-top opacity-50 mr-1 italic font-normal"
-                              style={showAsMemorised ? { color: "var(--chunk-memorised-sub)" } : undefined}
-                            >
-                              {v.number}
-                            </span>
-                          )}
-                          {v.text.split("[LINEBREAK]").map((line, i) => (
-                            <span key={i}>
-                              {i > 0 && <br />}
-                              {line.split(/(\s+)/).map((part, pIdx) => {
-                                const normalized = normalizeWord(part);
-                                const isHighlighted = normalized && state.settings.highlightedWords?.includes(normalized);
-                                
-                                if (!normalized) return <span key={pIdx}>{part}</span>;
-                                
-                                return (
-                                  <span
-                                    key={pIdx}
-                                    onTouchStart={(e) => {
-                                      // Don't stopPropagation here to allow chunk long-press
-                                      wordTouchStartTime.current = Date.now();
-                                    }}
-                                    onTouchEnd={(e) => {
-                                      const duration = Date.now() - wordTouchStartTime.current;
-                                      // If the long press timer already fired, don't highlight
-                                      if (isLongPressTriggered.current) {
-                                        e.preventDefault();
-                                        e.stopPropagation();
-                                        isLongPressTriggered.current = false; // Reset for next touch
-                                        return;
-                                      }
+                  {section.verses.map((v, idx) => {
+                    const isVerseMemorised = v.type === "scripture" && v.number != null && state.cards[chapterId]?.[`${chapterId}-v${v.number}`]?.isMemorised;
+                    const showVerseAsMemorised = (showAsMemorised || isVerseMemorised) && state.settings.showMemorised;
 
-                                      if (duration < 500) {
-                                        e.preventDefault(); // Prevent ghost click
-                                        e.stopPropagation();
-                                        
-                                        // Also cancel the parent's long press timer since this was a tap
-                                        if (longPressTimer.current) {
-                                          clearTimeout(longPressTimer.current);
-                                          longPressTimer.current = null;
+                    return (
+                      <div key={idx} className={v.type === "heading" ? "w-full text-center" : "inline"}>
+                        {v.type === "heading" ? (
+                          visibilityMode === 0 && (
+                            <h3 className="text-[11px] font-bold uppercase tracking-[0.2em] my-4 block w-full leading-relaxed"
+                              style={{ color: showAsMemorised ? "var(--chunk-memorised-sub)" : "var(--theme-ui-subtext)" }}
+                            >
+                              {v.text}
+                            </h3>
+                          )
+                        ) : (
+                          <span className="inline-block mr-2"
+                            style={showVerseAsMemorised ? { color: "var(--chunk-memorised)" } : undefined}
+                          >
+                            {visibilityMode !== 2 && studyUnit !== "verse" && (
+                              <span className="text-[12px] align-top opacity-50 mr-1 italic font-normal"
+                                style={showVerseAsMemorised ? { color: "var(--chunk-memorised-sub)" } : undefined}
+                              >
+                                {v.number}
+                              </span>
+                            )}
+                            {v.text.split("[LINEBREAK]").map((line, i) => (
+                              <span key={i}>
+                                {i > 0 && <br />}
+                                {line.split(/(\s+)/).map((part, pIdx) => {
+                                  const normalized = normalizeWord(part);
+                                  const isHighlighted = normalized && state.settings.highlightedWords?.includes(normalized);
+                                  
+                                  if (!normalized) return <span key={pIdx}>{part}</span>;
+                                  
+                                  return (
+                                    <span
+                                      key={pIdx}
+                                      onTouchStart={(e) => {
+                                        // Don't stopPropagation here to allow chunk long-press
+                                        wordTouchStartTime.current = Date.now();
+                                      }}
+                                      onTouchEnd={(e) => {
+                                        const duration = Date.now() - wordTouchStartTime.current;
+                                        // If the long press timer already fired, don't highlight
+                                        if (isLongPressTriggered.current) {
+                                          e.preventDefault();
+                                          e.stopPropagation();
+                                          isLongPressTriggered.current = false; // Reset for next touch
+                                          return;
                                         }
-                                        
-                                        toggleWordHighlight(part);
-                                      }
-                                    }}
-                                    onClick={(e) => {
-                                      // Fallback for mouse users
-                                      if (isLongPressActive.current) {
-                                        isLongPressActive.current = false;
-                                        return;
-                                      }
-                                      // If touch events already handled it, e.detail will be 0 or handled
-                                      if (e.detail !== 0) {
-                                        toggleWordHighlight(part);
-                                      }
-                                    }}
-                                    className={`cursor-pointer rounded-sm px-0.5 -mx-0.5 touch-manipulation ${
-                                      isHighlighted 
-                                        ? "text-[#FFCB1F] font-black" 
-                                        : "hover:bg-white/5 transition-colors duration-300"
-                                    }`}
-                                    style={isHighlighted ? { 
-                                      fontWeight: 900,
-                                      textShadow: isDawn ? "0 0 12px rgba(255, 203, 31, 0.4)" : "0 0 8px rgba(255, 203, 31, 0.3)"
-                                    } : undefined}
-                                  >
-                                    {part}
-                                  </span>
-                                );
-                              })}
-                            </span>
-                          ))}
-                        </span>
-                      )}
-                    </div>
-                  ))}
+
+                                        if (duration < 500) {
+                                          e.preventDefault(); // Prevent ghost click
+                                          e.stopPropagation();
+                                          
+                                          // Also cancel the parent's long press timer since this was a tap
+                                          if (longPressTimer.current) {
+                                            clearTimeout(longPressTimer.current);
+                                            longPressTimer.current = null;
+                                          }
+                                          
+                                          toggleWordHighlight(part);
+                                        }
+                                      }}
+                                      onClick={(e) => {
+                                        // Fallback for mouse users
+                                        if (isLongPressActive.current) {
+                                          isLongPressActive.current = false;
+                                          return;
+                                        }
+                                        // If touch events already handled it, e.detail will be 0 or handled
+                                        if (e.detail !== 0) {
+                                          toggleWordHighlight(part);
+                                        }
+                                      }}
+                                      className={`cursor-pointer rounded-sm px-0.5 -mx-0.5 touch-manipulation ${
+                                        isHighlighted 
+                                          ? "text-[#FFCB1F] font-black" 
+                                          : "hover:bg-white/5 transition-colors duration-300"
+                                      }`}
+                                      style={isHighlighted ? { 
+                                        fontWeight: 900,
+                                        textShadow: isDawn ? "0 0 12px rgba(255, 203, 31, 0.4)" : "0 0 8px rgba(255, 203, 31, 0.3)"
+                                      } : undefined}
+                                    >
+                                      {part}
+                                    </span>
+                                  );
+                                })}
+                              </span>
+                            ))}
+                          </span>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             );
