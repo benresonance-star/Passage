@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useBCM } from "@/context/BCMContext";
-import { Play, BookOpen, Upload, ChevronRight, Award, Trash2, Trophy, Info, X, Users, RefreshCw } from "lucide-react";
+import { Play, BookOpen, Upload, ChevronRight, Award, Trash2, Trophy, Info, X, Users, RefreshCw, ArrowLeft } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/lib/supabase";
 import { useEffect } from "react";
@@ -117,9 +117,8 @@ export default function Home() {
     <div className="space-y-8 py-4">
       <ConfirmDialog />
       <header className="flex justify-between items-center">
-        <div className="flex items-center">
-          <BookOpen size={48} className="text-orange-500" />
-        </div>
+        <div className="flex items-center w-10" />
+        <h1 className="text-lg font-bold">My Progress</h1>
         <div className="flex gap-2">
           <Link 
             href="/group"
@@ -196,7 +195,7 @@ export default function Home() {
                 <BookOpen size={20} />Full Text
               </Link>
               <Link href="/review" className="flex items-center justify-center gap-2 py-4 bg-[var(--surface-alt)] text-white font-bold rounded-xl active:scale-95 transition-transform border border-[var(--surface-border)]">
-                <RefreshCw size={20} />Review
+                <Award size={20} />My Progress
               </Link>
             </div>
           </div>
@@ -246,10 +245,11 @@ export default function Home() {
                       <Link 
                         href="/review"
                         onClick={(e) => e.stopPropagation()}
-                        className="p-2 text-orange-500 hover:bg-orange-500/10 rounded-lg transition-colors"
-                        title="Review Chapter"
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-orange-500/10 text-orange-500 rounded-lg transition-colors text-[10px] font-bold uppercase tracking-wider"
+                        title="My Progress"
                       >
-                        <RefreshCw size={18} />
+                        <Award size={14} />
+                        Progress
                       </Link>
                     )}
                     {isAdmin && (

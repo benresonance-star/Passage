@@ -2,7 +2,7 @@
 
 import { useBCM } from "@/context/BCMContext";
 import { useRouter } from "next/navigation";
-import { Play, Mic, Award } from "lucide-react";
+import { Play, Mic, Award, ArrowLeft } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 
 export default function ReviewPage() {
@@ -68,9 +68,19 @@ export default function ReviewPage() {
 
   return (
     <div className="fixed inset-0 flex flex-col bg-inherit pt-safe">
-      <header className="pb-4 px-4 flex-shrink-0 z-[10] bg-inherit">
-        <h1 className="text-2xl font-bold">Chapter Mastery</h1>
-        <div className="flex items-center gap-2 mt-1">
+      <header className="pb-4 px-4 flex-shrink-0 z-[10] bg-inherit flex items-center justify-between">
+        <button 
+          onClick={() => router.push("/")}
+          className="p-2 -ml-2 text-[var(--theme-ui-subtext)] hover:text-white transition-colors"
+        >
+          <ArrowLeft size={24} />
+        </button>
+        <h1 className="text-lg font-bold">My Progress</h1>
+        <div className="w-10" />
+      </header>
+      
+      <div className="px-4 mb-4">
+        <div className="flex items-center gap-2">
           <div className="flex-1 h-1.5 bg-[var(--surface)] rounded-full overflow-hidden border border-[var(--surface-border)]">
             <div 
               className="h-full bg-amber-500 transition-all duration-500" 
@@ -81,7 +91,7 @@ export default function ReviewPage() {
             {memorisedCount} / {totalChunks}
           </span>
         </div>
-      </header>
+      </div>
 
       <div className="flex-1 overflow-y-auto px-4 pt-2 pb-[calc(64px+env(safe-area-inset-bottom)+2rem)] space-y-4 scrollbar-hide stable-scroll-container">
         {allChunks.map(({ chunk, card }) => {
