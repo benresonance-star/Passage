@@ -246,9 +246,7 @@ export default function StudyPage() {
 
       {/* Header */}
       <header className="flex items-center justify-between px-4 pb-2 pt-2 flex-shrink-0 z-10 relative">
-        <Link href="/" className="p-2 text-zinc-500 bg-[var(--surface)] rounded-full border border-[var(--surface-border)]" aria-label="Back to library">
-          <ArrowLeft size={20} />
-        </Link>
+        <div className="w-10" />
         <div className="text-center absolute left-1/2 -translate-x-1/2">
           <h1 className={`text-sm font-bold uppercase tracking-widest ${isDawn ? "text-white" : "text-orange-500"}`}>
             {STAGE_TITLES[stage]}

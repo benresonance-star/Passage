@@ -86,8 +86,14 @@ export default function Home() {
     <div className="space-y-8 py-4">
       <ConfirmDialog />
       <header className="flex justify-between items-center">
-        <div className="flex items-center w-10" />
-        <h1 className="text-lg font-bold uppercase tracking-widest">LIBRARY</h1>
+        <Link 
+          href="/chapter" 
+          className="p-2.5 text-zinc-500 bg-[var(--surface)] rounded-full border border-[var(--surface-border)]" 
+          aria-label="Back to chapter"
+        >
+          <ArrowLeft size={22} />
+        </Link>
+        <h1 className="text-lg font-bold uppercase tracking-widest absolute left-1/2 -translate-x-1/2">LIBRARY</h1>
         <div className="flex gap-2">
           <Link 
             href="/group"
