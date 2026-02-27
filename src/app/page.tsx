@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useBCM } from "@/context/BCMContext";
-import { Play, BookOpen, Upload, ChevronRight, Award, Trash2, Trophy, Info, X, Users } from "lucide-react";
+import { Play, BookOpen, Upload, ChevronRight, Award, Trash2, Trophy, Info, X, Users, RefreshCw } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/lib/supabase";
 import { useEffect } from "react";
@@ -188,12 +188,15 @@ export default function Home() {
               </div>
             </div>
             
-            <div className="grid grid-cols-2 gap-3 pt-2">
+            <div className="grid grid-cols-3 gap-3 pt-2">
               <Link href="/practice" className="flex items-center justify-center gap-2 py-4 bg-orange-500 text-white font-bold rounded-xl active:scale-95 transition-transform">
                 <Play size={20} fill="currentColor" />Practice
               </Link>
               <Link href="/chapter" className="flex items-center justify-center gap-2 py-4 bg-[var(--surface-alt)] text-white font-bold rounded-xl active:scale-95 transition-transform">
                 <BookOpen size={20} />Full Text
+              </Link>
+              <Link href="/review" className="flex items-center justify-center gap-2 py-4 bg-[var(--surface-alt)] text-white font-bold rounded-xl active:scale-95 transition-transform border border-[var(--surface-border)]">
+                <RefreshCw size={20} />Review
               </Link>
             </div>
           </div>
@@ -229,17 +232,32 @@ export default function Home() {
                     <div>
                       <p className={`font-bold ${ch.id === selectedChapter.id ? "text-white" : "text-white"}`}>
                         {ch.bookName} {ch.title}
+                        {ch.id === selectedChapter.id && (
+                          <span className="ml-2 text-[10px] font-black text-orange-500 bg-orange-500/10 px-1.5 py-0.5 rounded-md tracking-tighter">ACTIVE</span>
+                        )}
                       </p>
                       <p className={`text-[10px] uppercase tracking-widest font-bold ${ch.id === selectedChapter.id ? "text-white/60" : "text-white/70"}`}>
                         {state.versions[ch.versionId]?.abbreviation || ch.versionId} • {Object.values(state.cards[ch.id] || {}).filter(c => c.isMemorised).length} / {ch.chunks.length} Memorised
                       </p>
                     </div>
                   </div>
-                  {isAdmin && (
-                    <button onClick={(e) => handleDelete(ch.id, e)} className={`p-2 transition-colors ${ch.id === selectedChapter.id ? "text-white/60 hover:text-red-500" : "text-white/70 hover:text-red-500"}`}>
-                      <Trash2 size={18} />
-                    </button>
-                  )}
+                  <div className="flex items-center gap-1">
+                    {ch.id === selectedChapter.id && (
+                      <Link 
+                        href="/review"
+                        onClick={(e) => e.stopPropagation()}
+                        className="p-2 text-orange-500 hover:bg-orange-500/10 rounded-lg transition-colors"
+                        title="Review Chapter"
+                      >
+                        <RefreshCw size={18} />
+                      </Link>
+                    )}
+                    {isAdmin && (
+                      <button onClick={(e) => handleDelete(ch.id, e)} className={`p-2 transition-colors ${ch.id === selectedChapter.id ? "text-white/60 hover:text-red-500" : "text-white/70 hover:text-red-500"}`}>
+                        <Trash2 size={18} />
+                      </button>
+                    )}
+                  </div>
                 </div>
               ))}
               {isAdmin && (

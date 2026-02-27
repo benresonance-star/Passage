@@ -1,6 +1,7 @@
 "use client";
 
 import { useBCM } from "@/context/BCMContext";
+import { useAuth } from "@/context/AuthContext";
 import { Eye, EyeOff, Award, Palette, Settings, Eraser, Play } from "lucide-react";
 import Link from "next/link";
 import { useState, useRef, useMemo } from "react";
@@ -11,7 +12,8 @@ import { getSections } from "@/lib/parser";
 import type { StudyUnit } from "@/types";
 
 export default function ChapterPage() {
-  const { state, setState, isHydrated } = useBCM();
+  const { state, setState, isHydrated, syncProgress } = useBCM();
+  const { user } = useAuth();
   const [showThemeModal, setShowThemeModal] = useState(false);
   const { isCollapsed: topCollapsed, setCollapsed: setTopCollapsed, resetCollapseTimer: resetTopTimer } = useScrollAwareTopActions();
   const longPressTimer = useRef<NodeJS.Timeout | null>(null);
@@ -144,6 +146,31 @@ export default function ChapterPage() {
         showMemorised: !prev.settings.showMemorised
       }
     }));
+  };
+
+  const handleToggleMemorised = async (chunkId: string) => {
+    const currentCard = state.cards[chapterId]?.[chunkId];
+    if (!currentCard) return;
+    const nextIsMemorised = !currentCard.isMemorised;
+    const updatedCard = { ...currentCard, isMemorised: nextIsMemorised };
+    
+    setState(prev => {
+      return {
+        ...prev,
+        cards: {
+          ...prev.cards,
+          [chapterId]: {
+            ...prev.cards[chapterId],
+            [chunkId]: updatedCard
+          }
+        }
+      };
+    });
+
+    // Cloud Sync
+    if (user && chapter) {
+      await syncProgress(chapter.title, chunkId, updatedCard);
+    }
   };
 
   const setTheme = (bg: string, text: string, id?: string) => {
@@ -307,18 +334,34 @@ export default function ChapterPage() {
                     </span>
                   )}
                   {isActive && (
-                    <Link
-                      href="/study"
-                      onClick={(e) => e.stopPropagation()}
-                      className={`flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all animate-in fade-in zoom-in-95 duration-300 ${
-                        isDawn
-                          ? "bg-white/20 text-white border border-white/30"
-                          : "bg-orange-500 text-white shadow-lg shadow-orange-500/20"
-                      }`}
-                    >
-                      <Play size={10} className="fill-current" />
-                      Practice
-                    </Link>
+                    <div className="flex items-center gap-2 animate-in fade-in zoom-in-95 duration-300">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleToggleMemorised(section.id);
+                        }}
+                        className={`p-1.5 rounded-full transition-all active:scale-90 ${
+                          isMemorised 
+                            ? "text-amber-500 bg-amber-500/10" 
+                            : "text-zinc-500 bg-zinc-500/10"
+                        }`}
+                        title={isMemorised ? "Mark as not memorised" : "Mark as memorised"}
+                      >
+                        <Award size={14} fill={isMemorised ? "currentColor" : "none"} />
+                      </button>
+                      <Link
+                        href="/study"
+                        onClick={(e) => e.stopPropagation()}
+                        className={`flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all ${
+                          isDawn
+                            ? "bg-white/20 text-white border border-white/30"
+                            : "bg-orange-500 text-white shadow-lg shadow-orange-500/20"
+                        }`}
+                      >
+                        <Play size={10} className="fill-current" />
+                        Practice
+                      </Link>
+                    </div>
                   )}
                 </div>
                 

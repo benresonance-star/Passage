@@ -9,7 +9,6 @@ const NAV_ITEMS = [
   { label: "Chapter", href: "/chapter", icon: BookOpen },
   { label: "Soak", href: "/soak", icon: Droplets },
   { label: "Practice", href: "/study", icon: Wind },
-  { label: "Review", href: "/review", icon: RefreshCw },
 ];
 
 export function BottomNav({ 

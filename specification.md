@@ -1,4 +1,4 @@
-# Passage - Bible Chapter Memoriser (v3.5.0)
+# Passage - Bible Chapter Memoriser (v3.5.1)
 
 ## AI Agent Protocol (Mandatory)
 
@@ -51,14 +51,14 @@ Home (/)
 Tab Bar (BottomNav — fixed pill)
   ├── Chapter  (/chapter)
   ├── Soak     (/soak)
-  ├── Practice (/study)
-  └── Review   (/review)
+  └── Practice (/study)
 
 Guided Session Route
   └── Practice (/study)  — single-screen practice flow with 7 stages
 
 Legacy Routes (still accessible, not in nav)
   ├── Practice (/practice)  — direct multi-mode practice
+  └── Review   (/review)    — chapter mastery overview (linked from Home)
   
 Modal / Push Routes
   ├── Import   (/import)
@@ -226,9 +226,9 @@ interface BCMState {
 
 The dashboard and library manager.
 
-- **Active Chapter Card**: Shows title, version abbreviation, verse/chunk counts, memorised progress (`n / m Chunks`), trophy icon when fully memorised. Two action buttons: Practice and Full Text.
+- **Active Chapter Card**: Shows title, version abbreviation, verse/chunk counts, memorised progress (`n / m Chunks`), trophy icon when fully memorised. Three action buttons: Practice, Full Text, and Review.
 - **Team Board** (`TeamBoard.tsx`): Appears below the active chapter if the user belongs to a group. Shows group name and per-member chunk progress in real time.
-- **Library List**: All chapters sorted by creation date (newest first). Each row shows title, memorised count, and a delete button (admin only). An "Add New Chapter" button (dashed border, admin only) links to `/import`.
+- **Library List**: All chapters sorted by creation date (newest first). Each row shows title, memorised count, and a delete button (admin only). The currently active chapter is marked with an "ACTIVE" label and includes a "Review" button next to the trash can. An "Add New Chapter" button (dashed border, admin only) links to `/import`.
 - **Memorised Chapters**: Separate section for fully memorised chapters with amber/gold styling and trophy icons.
 - **Info Modal**: Bottom sheet with 7-step memorisation guide ("How to Memorise a Chapter").
 - **Group Button**: Top-right icon linking to `/group`. Highlighted orange when logged in.
@@ -249,7 +249,9 @@ Full chapter text view with interactive chunked layout.
 - **Practice Unit Toggle**: Segmented control below the header subtitle with two options: "Chunks" (default, groups of ~4 verses) and "Verses" (individual verses). Persisted in `settings.studyUnit`. Switching clears the active section.
 - **Section Display**: Based on the active practice unit, each section (chunk or verse) is a card showing verse range label, verse text with inline verse numbers, and heading text (when visibility mode = 0). Headings are rendered as centered uppercase labels.
 - **Long-press Activation**: 600ms long-press on a section toggles it as the active section (highlighted with ring + shadow). Haptic feedback via `navigator.vibrate`. Touch-move cancels the long-press (20px threshold).
-- **Practice Pill**: When a section is active, a small "Practice" pill button appears in the section header row (right-aligned next to the verse range label). Tapping navigates to `/study`. Uses `e.stopPropagation()` to prevent long-press interference.
+- **Practice & Memorised Actions**: When a section is active, a small action group appears in the section header row (right-aligned):
+    - **Memorised Toggle** (Award icon): Toggles the `isMemorised` state for that section. Styled amber when memorised, zinc when not.
+    - **Practice Pill**: Navigates to `/study`.
 - **Word Highlighting**: Tap any word to toggle it as highlighted (gold `#FFCB1F`, bold, with glow). Highlights are stored in `settings.highlightedWords` as normalised (lowercase, no punctuation) strings. All instances of the same normalised word are highlighted across the chapter.
 - **Memorised Overlay**: When `showMemorised` is on, memorised chunks are styled with `--chunk-memorised` colour.
 - **Line Breaks**: Verse text containing `[LINEBREAK]` markers is rendered with `<br>` elements.
@@ -501,10 +503,10 @@ The `bible_library` Supabase table stores pre-loaded Bible content verse by vers
 ### B. Bottom Navigation
 - **Collapsible pill**: Fixed at bottom centre, rounded-[32px], max-width `md`.
 - **Collapsed state**: `nav-pill-clip` CSS clip-path shrinks to a small pill showing a BookOpen icon. Background uses `color-mix` with transparency + `backdrop-blur-md`.
-- **Expanded state**: `nav-full-clip` shows all 4 nav items in a grid.
+- **Expanded state**: `nav-full-clip` shows 3 nav items in a grid (Chapter, Soak, Practice).
 - **Scroll-aware**: Parent layout (`ThemeContent`) manages collapse state based on scroll events.
 - **Liquid transition**: `clip-path` animation over 500ms `ease-in-out` for smooth shape morphing.
-- **Disabled items**: Soak, Practice, Review are greyed out (20% opacity, `pointer-events-none`) when no chapter is selected.
+- **Disabled items**: Soak and Practice are greyed out (20% opacity, `pointer-events-none`) when no chapter is selected.
 - **Theme-aware**: Dawn gets transparent black background; Sepia gets white background with zinc border; others get surface background.
 
 ### C. Splash & Meditation Sequence
