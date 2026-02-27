@@ -496,11 +496,12 @@ export default function GroupPage() {
       <ConfirmDialog />
       <PromptDialog />
       <ToastContainer />
-      <header className="flex items-center gap-4 py-4">
-        <Link href="/chapter" className="p-2 text-zinc-500 bg-[var(--surface)] rounded-full border border-[var(--surface-border)]" aria-label="Back to chapter">
+      <header className="flex items-center justify-between py-4">
+        <Link href="/" className="p-2 text-zinc-500 bg-[var(--surface)] rounded-full border border-[var(--surface-border)]" aria-label="Back to library">
           <ArrowLeft size={20} />
         </Link>
-        <h1 className="text-2xl font-bold">Study Group</h1>
+        <h1 className="text-lg font-bold uppercase tracking-widest absolute left-1/2 -translate-x-1/2">STUDY GROUP</h1>
+        <div className="w-10" /> {/* Spacer for balance */}
       </header>
 
       {!user ? (

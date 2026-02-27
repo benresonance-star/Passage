@@ -1,4 +1,4 @@
-# Passage - Bible Chapter Memoriser (v3.5.6)
+# Passage - Bible Chapter Memoriser (v3.5.7)
 
 ## AI Agent Protocol (Mandatory)
 
@@ -391,21 +391,20 @@ Two-mode chapter import screen with a smart verification flow.
 - **Duplicate detection**: If a chapter with the same slug already exists, shows a confirm dialog offering to overwrite.
 - **Import flow**: `parseChapter()` → `ReviewView` → `chunkVerses()` (max 4 verses per chunk) → generates SM2Cards → saves to state → `pushChapter()` to cloud → navigates to `/chapter`.
 
-### G. Group (`/group`)
+### G. STUDY GROUP (`/group`)
 
-Authentication and practice group management.
+Social and community progress tracking.
 
-- **Auth Flow**: Email input → 8-digit OTP verification. OTP is entered digit-by-digit in 8 individual input fields with auto-advance.
-- **Profile**: Display name editing (auto-saved on blur/enter).
+- **Header**: "STUDY GROUP" title centered with a back arrow to the Library (Home).
+- **User Profile**: Displays user's initial, display name (editable), and email. Sign-out button.
 - **Group Management**:
-    - **Create Group**: Name input → creates group, user becomes admin.
-    - **Join Group**: Group ID input. Also supports deep-link joining via URL params (`?join=groupId`).
-    - **Invite Link**: Shareable URL containing group ID, with copy-to-clipboard.
-    - **Member List**: Shows all members with display names (or email fallback), progress fraction, and last-active indicator (green dot for < 24h).
-    - **Admin Controls**: Remove members (admin only). Admins cannot remove themselves.
-- **Missing Chapters Notification**: If a group member doesn't have a chapter that others are tracking, shows a prompt to add it.
-- **Leave Group**: Non-admins can leave. Removes membership and shared progress.
-- **Sign Out**: Clears auth session.
+    - **Group Selector**: Tabs for switching between joined groups.
+    - **Active Group Details**: Shows group name, role (Admin/Member), and a "Leave Group" button.
+    - **Invite System**: Displays Group ID and a "Copy Invite Link" button.
+    - **Member List**: Real-time progress of each member for the currently active chapter. Admin can remove members.
+    - **Missing Chapters**: Alerts user if the group is studying chapters they haven't imported yet.
+    - **Create/Join**: Buttons to create a new group or join one via ID.
+- **Auth Flow**: Passwordless sign-in (Email + OTP) for users who are not logged in.
 
 ---
 
