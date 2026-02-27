@@ -241,17 +241,6 @@ export default function Home() {
                     </div>
                   </div>
                   <div className="flex items-center gap-1">
-                    {ch.id === selectedChapter.id && (
-                      <Link 
-                        href="/review"
-                        onClick={(e) => e.stopPropagation()}
-                        className="flex items-center gap-1.5 px-3 py-1.5 bg-orange-500/10 text-orange-500 rounded-lg transition-colors text-[10px] font-bold uppercase tracking-wider"
-                        title="My Progress"
-                      >
-                        <Award size={14} />
-                        Progress
-                      </Link>
-                    )}
                     {isAdmin && (
                       <button onClick={(e) => handleDelete(ch.id, e)} className={`p-2 transition-colors ${ch.id === selectedChapter.id ? "text-white/60 hover:text-red-500" : "text-white/70 hover:text-red-500"}`}>
                         <Trash2 size={18} />
