@@ -1,4 +1,4 @@
-# Passage - Bible Chapter Memoriser (v3.5.8)
+# Passage - Bible Chapter Memoriser (v3.5.9)
 
 ## AI Agent Protocol (Mandatory)
 
@@ -277,7 +277,7 @@ Immersive verse-by-verse meditation screen.
 
 Multi-mode practice screen for the active chunk. Modes are sequential or selectable.
 
-- **Header**: "Attend", "Abide", "Breathe", etc. title centered with a back arrow to the Chapter page. Subtitle shows verse range and chapter title.
+- **Header**: "Attend", "Abide", "Breathe", etc. title centered with a back arrow to the Library (Home). Subtitle shows verse range and chapter title.
 
 1. **Attend**: Full text with verse structure, headings optional. Three action buttons at the bottom:
     - **Breathe**: Enters Breathe Mode.
