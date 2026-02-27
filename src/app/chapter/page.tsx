@@ -225,7 +225,7 @@ export default function ChapterPage() {
                       : "text-[var(--theme-ui-subtext)] hover:text-[var(--theme-text)]"
                   }`}
                 >
-                  {unit === "chunk" ? "Chunks" : "Verses"}
+                  {unit === "chunk" ? "Parts" : "Verses"}
                 </button>
               ))}
             </div>

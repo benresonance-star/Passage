@@ -246,7 +246,7 @@ Full chapter text view with interactive chunked layout.
     - **Visibility Mode** (Eye/EyeOff icon): Cycles through 3 modes: 0 = All, 1 = No Headings, 2 = Hide All (headings + verse numbers).
     - **Memorised Toggle** (Award icon): Highlights memorised chunks in amber.
     - **Home** (Settings icon): Navigates to `/`. When collapsed, tapping expands the pill instead.
-- **Practice Unit Toggle**: Segmented control below the header subtitle with two options: "Chunks" (default, groups of ~4 verses) and "Verses" (individual verses). Persisted in `settings.studyUnit`. Switching clears the active section.
+- **Practice Unit Toggle**: Segmented control below the header subtitle with two options: "Parts" (default, groups of ~4 verses) and "Verses" (individual verses). Persisted in `settings.studyUnit`. Switching clears the active section.
 - **Section Display**: Based on the active practice unit, each section (chunk or verse) is a card showing verse range label, verse text with inline verse numbers, and heading text (when visibility mode = 0). Headings are rendered as centered uppercase labels.
 - **Long-press Activation**: 600ms long-press on a section toggles it as the active section (highlighted with ring + shadow). Haptic feedback via `navigator.vibrate`. Touch-move cancels the long-press (20px threshold).
 - **Practice & Memorised Actions**: When a section is active, a small action group appears in the section header row (right-aligned):
