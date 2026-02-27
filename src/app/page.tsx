@@ -13,32 +13,32 @@ import pkg from "../../package.json";
 
 const GUIDE_ITEMS = [
   {
-    title: "Use short, daily sessions.",
-    desc: "5–10 minutes every day beats long sessions once a week.",
+    title: "Dwell Daily",
+    desc: "5–10 minutes of daily meditation is far more effective than long, weekly sessions.",
   },
   {
-    title: "Learn in chunks, not verses alone.",
-    desc: "Memorise small sections that flow together, then connect them.",
+    title: "Abide in Parts",
+    desc: "Memorise small sections that flow naturally before connecting them into a whole chapter.",
   },
   {
-    title: "Read → hide → recall.",
-    desc: "First read for rhythm, then fill in blanks, then recall from memory.",
+    title: "Attend & Reveal",
+    desc: "Read first for rhythm, then gradually hide words to strengthen your inner voice.",
   },
   {
-    title: "Type or say it out loud.",
-    desc: "Forcing recall strengthens memory far more than rereading.",
+    title: "Speak the Word",
+    desc: "Saying verses aloud or typing them from memory roots the word deeply in your soul.",
   },
   {
-    title: "Expect mistakes — they’re the work.",
-    desc: "The app saves missed lines so you practise what matters most.",
+    title: "Embrace the Gaps",
+    desc: "Mistakes are not failures; they are the markers that show you where to focus your practice.",
   },
   {
-    title: "Return tomorrow, not immediately.",
-    desc: "Spacing your recall is what makes it stick long-term.",
+    title: "Space your Recall",
+    desc: "Let the word rest. Returning to a passage tomorrow is when lasting memory is truly built.",
   },
   {
-    title: "Aim for flow, not perfection.",
-    desc: "Once you can say it smoothly, move on and let review do its job.",
+    title: "Flow over Perfection",
+    desc: "Once the rhythm feels natural, move forward. Trust the process to refine your progress.",
   },
 ];
 
@@ -112,28 +112,33 @@ export default function Home() {
 
       {/* Info Modal */}
       {showInfo && (
-        <div className="fixed inset-0 z-50 animate-in fade-in duration-300">
-          <div className="absolute inset-0 bg-[var(--overlay)] backdrop-blur-sm" onClick={() => setShowInfo(false)} />
-          <div className="absolute inset-x-0 bottom-0 max-w-md mx-auto bg-[var(--overlay-surface)] glass border-t border-[var(--surface-border)] rounded-t-[32px] p-6 pb-8 shadow-2xl animate-in slide-in-from-bottom duration-500 max-h-[95vh] overflow-y-auto">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 animate-in fade-in duration-300">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-md" onClick={() => setShowInfo(false)} />
+          <div className="relative w-full max-w-md bg-[var(--overlay-surface)] glass border border-[var(--surface-border)] rounded-[32px] p-8 shadow-2xl animate-in zoom-in-95 duration-300 max-h-[90vh] overflow-y-auto no-scrollbar">
             <div className="flex justify-between items-start mb-6">
-              <h2 className="text-lg font-bold pr-8">How to Memorise a Chapter (the right way)</h2>
-              <button onClick={() => setShowInfo(false)} className="p-1 text-[var(--theme-ui-subtext)]">
-                <X size={20} />
+              <h2 className="text-xl font-bold pr-8 leading-tight">How to Memorise a Chapter</h2>
+              <button onClick={() => setShowInfo(false)} className="p-1 text-[var(--theme-ui-subtext)] hover:text-white transition-colors">
+                <X size={24} />
               </button>
             </div>
             
-            <div className="space-y-5">
+            <div className="space-y-6">
               {GUIDE_ITEMS.map((item, i) => (
-                <div key={i} className="space-y-0.5">
-                  <h3 className="text-base font-bold text-white leading-tight">{item.title}</h3>
-                  <p className="text-sm text-[var(--theme-ui-subtext)] leading-normal">{item.desc}</p>
+                <div key={i} className="space-y-1">
+                  <div className="flex items-center gap-3">
+                    <div className="w-6 h-6 rounded-full bg-orange-500/10 flex items-center justify-center text-orange-500 text-[10px] font-black border border-orange-500/20">
+                      {i + 1}
+                    </div>
+                    <h3 className="text-base font-bold text-white leading-tight">{item.title}</h3>
+                  </div>
+                  <p className="text-sm text-[var(--theme-ui-subtext)] leading-relaxed pl-9">{item.desc}</p>
                 </div>
               ))}
             </div>
 
             <button 
               onClick={() => setShowInfo(false)}
-              className="w-full mt-8 py-3.5 bg-[var(--surface-alt)] text-white font-bold rounded-2xl border border-[var(--surface-border)] active:scale-95 transition-transform"
+              className="w-full mt-10 py-4 bg-orange-500 text-white font-bold rounded-2xl shadow-lg shadow-orange-500/20 active:scale-95 transition-transform"
             >
               Got it
             </button>

@@ -1,4 +1,4 @@
-# Passage - Bible Chapter Memoriser (v3.6.2)
+# Passage - Bible Chapter Memoriser (v3.6.3)
 
 ## AI Agent Protocol (Mandatory)
 
@@ -230,7 +230,7 @@ The dashboard and library manager.
 - **Active Chapter Card**: Shows title, version abbreviation, verse/chunk counts, memorised progress (`n / m Chunks`), trophy icon when fully memorised. Two action buttons: Read Chapter and My Progress.
 - **Library List**: All chapters sorted by creation date (newest first). Each row shows title, memorised count, and a delete button (admin only). The currently active chapter is marked with an "ACTIVE" label and includes a "Progress" button next to the trash can. An "Add New Chapter" button (dashed border, admin only) links to `/import`.
 - **Memorised Chapters**: Separate section for fully memorised chapters with amber/gold styling and trophy icons.
-- **Info Modal**: Bottom sheet with 7-step memorisation guide ("How to Memorise a Chapter").
+- **Info Modal**: Centered pop-up card with a 7-step meditative memorisation guide ("How to Memorise a Chapter"). Uses zoom-in animation and high-contrast styling.
 - **Group Button**: Top-right icon linking to `/group`. Highlighted orange when logged in.
 - **Admin logic**: If not logged in, user is treated as their own admin. If in a group, only the admin role can add/delete chapters.
 - **Version Label**: Faint text at the bottom of the page showing the current app version (read from `package.json`).
