@@ -1,4 +1,4 @@
-# Passage - Bible Chapter Memoriser (v3.5.4)
+# Passage - Bible Chapter Memoriser (v3.5.5)
 
 ## AI Agent Protocol (Mandatory)
 
@@ -226,7 +226,7 @@ interface BCMState {
 
 The dashboard and library manager.
 
-- **Active Chapter Card**: Shows title, version abbreviation, verse/chunk counts, memorised progress (`n / m Chunks`), trophy icon when fully memorised. Three action buttons: Practice, Full Text, and My Progress.
+- **Active Chapter Card**: Shows title, version abbreviation, verse/chunk counts, memorised progress (`n / m Chunks`), trophy icon when fully memorised. Two action buttons: Read Chapter and My Progress.
 - **Team Board** (`TeamBoard.tsx`): Appears below the active chapter if the user belongs to a group. Shows group name and per-member chunk progress in real time.
 - **Library List**: All chapters sorted by creation date (newest first). Each row shows title, memorised count, and a delete button (admin only). The currently active chapter is marked with an "ACTIVE" label and includes a "Progress" button next to the trash can. An "Add New Chapter" button (dashed border, admin only) links to `/import`.
 - **Memorised Chapters**: Separate section for fully memorised chapters with amber/gold styling and trophy icons.

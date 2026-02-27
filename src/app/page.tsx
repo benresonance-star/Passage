@@ -187,12 +187,9 @@ export default function Home() {
               </div>
             </div>
             
-            <div className="grid grid-cols-3 gap-3 pt-2">
-              <Link href="/practice" className="flex items-center justify-center gap-2 py-4 bg-orange-500 text-white font-bold rounded-xl active:scale-95 transition-transform">
-                <Play size={20} fill="currentColor" />Practice
-              </Link>
-              <Link href="/chapter" className="flex items-center justify-center gap-2 py-4 bg-[var(--surface-alt)] text-white font-bold rounded-xl active:scale-95 transition-transform">
-                <BookOpen size={20} />Full Text
+            <div className="grid grid-cols-2 gap-3 pt-2">
+              <Link href="/chapter" className="flex items-center justify-center gap-2 py-4 bg-orange-500 text-white font-bold rounded-xl active:scale-95 transition-transform">
+                <BookOpen size={20} />Read Chapter
               </Link>
               <Link href="/review" className="flex items-center justify-center gap-2 py-4 bg-[var(--surface-alt)] text-white font-bold rounded-xl active:scale-95 transition-transform border border-[var(--surface-border)]">
                 <Award size={20} />My Progress
