@@ -6,7 +6,7 @@ import { Play, Mic, Award, ArrowLeft } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 
 export default function ReviewPage() {
-  const { state, setState, isHydrated, syncProgress } = useBCM();
+  const { state, setState, isHydrated, syncProgress, toggleMemorised } = useBCM();
   const { user } = useAuth();
   const router = useRouter();
 
@@ -38,28 +38,7 @@ export default function ReviewPage() {
   };
 
   const handleToggleMemorised = async (chunkId: string) => {
-    const currentCard = state.cards[chapterId]?.[chunkId];
-    if (!currentCard) return;
-    const nextIsMemorised = !currentCard.isMemorised;
-    const updatedCard = { ...currentCard, isMemorised: nextIsMemorised };
-    
-    setState(prev => {
-      return {
-        ...prev,
-        cards: {
-          ...prev.cards,
-          [chapterId]: {
-            ...prev.cards[chapterId],
-            [chunkId]: updatedCard
-          }
-        }
-      };
-    });
-
-    // Cloud Sync
-    if (user && chapter) {
-      await syncProgress(chapter.title, chunkId, updatedCard);
-    }
+    await toggleMemorised(chapterId, chunkId);
   };
 
   const activeChunkId = chapterId ? state.settings.activeChunkId[chapterId] : null;

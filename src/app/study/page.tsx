@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { useWakeLock } from "@/hooks/useWakeLock";
 import { getSections, splitIntoLines } from "@/lib/parser";
 import { calculateDiff, DiffResult } from "@/lib/diff";
-import { updateCard } from "@/lib/scheduler";
+import { updateCard, syncMemorisedState } from "@/lib/scheduler";
 import { calculateUpdatedStreak } from "@/lib/streak";
 import { TextAnchor, type StudyStage } from "@/components/study/TextAnchor";
 import { StageControls } from "@/components/study/StageControls";
@@ -156,14 +156,22 @@ export default function StudyPage() {
     setState(prev => {
       const stats = prev.stats[chapterId] || { streak: 0, lastActivity: null };
       const newStreak = calculateUpdatedStreak(stats.streak, stats.lastActivity);
+      
+      const updatedCards = syncMemorisedState(
+        prev.cards[chapterId],
+        chapter,
+        activeSection.id,
+        updatedCard.isMemorised
+      );
+      
+      // Ensure the updated card from SM-2 is preserved in the sync
+      updatedCards[activeSection.id] = updatedCard;
+
       return {
         ...prev,
         cards: {
           ...prev.cards,
-          [chapterId]: {
-            ...prev.cards[chapterId],
-            [activeSection.id]: updatedCard
-          }
+          [chapterId]: updatedCards
         },
         stats: {
           ...prev.stats,
@@ -173,7 +181,15 @@ export default function StudyPage() {
     });
 
     if (user && chapter) {
-      await syncProgress(chapter.title, activeSection.id, updatedCard);
+      // Sync all affected cards
+      const currentCards = state.cards[chapterId];
+      const nextCards = syncMemorisedState(currentCards, chapter, activeSection.id, updatedCard.isMemorised);
+      nextCards[activeSection.id] = updatedCard;
+
+      const syncs = Object.entries(nextCards)
+        .filter(([id, card]) => currentCards[id]?.isMemorised !== card.isMemorised)
+        .map(([id, card]) => syncProgress(chapter.title, id, card));
+      await Promise.all(syncs);
     }
   }, [chapterId, activeSection, chapter, state.cards, setState, user, syncProgress]);
 

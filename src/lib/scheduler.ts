@@ -57,6 +57,76 @@ export function updateCard(card: SM2Card, score: number): SM2Card {
   return newCard;
 }
 
+/**
+ * Unified Memorisation Logic:
+ * Syncs memorised state between parts (chunks) and verses.
+ */
+export function syncMemorisedState(
+  cards: Record<string, SM2Card>,
+  chapter: { chunks: { id: string; verseRange: string }[] },
+  targetId: string,
+  isMemorised: boolean
+): Record<string, SM2Card> {
+  const newCards = { ...cards };
+  const targetCard = newCards[targetId];
+  if (!targetCard) return newCards;
+
+  // 1. Update the target card
+  newCards[targetId] = { ...targetCard, isMemorised };
+
+  const isPart = targetId.includes("-v") && targetId.split("-v").pop()?.includes("-");
+  const isVerse = targetId.includes("-v") && !targetId.split("-v").pop()?.includes("-");
+
+  if (isPart) {
+    // If a PART is toggled, toggle all constituent VERSES
+    const range = targetId.split("-v").pop() || "";
+    const [start, end] = range.split("-").map(Number);
+    const chapterPrefix = targetId.split("-v")[0];
+
+    for (let v = start; v <= end; v++) {
+      const verseId = `${chapterPrefix}-v${v}`;
+      if (newCards[verseId]) {
+        newCards[verseId] = { ...newCards[verseId], isMemorised };
+      }
+    }
+  } else if (isVerse) {
+    // If a VERSE is toggled
+    const verseNum = Number(targetId.split("-v").pop());
+    const chapterPrefix = targetId.split("-v")[0];
+
+    // Find the PART containing this verse
+    const containingPart = chapter.chunks.find(chunk => {
+      const [start, end] = chunk.verseRange.split("-").map(Number);
+      return verseNum >= start && (end ? verseNum <= end : verseNum === start);
+    });
+
+    if (containingPart) {
+      if (!isMemorised) {
+        // If verse is UNMARKED, the part MUST be unmarked
+        if (newCards[containingPart.id]) {
+          newCards[containingPart.id] = { ...newCards[containingPart.id], isMemorised: false };
+        }
+      } else {
+        // If verse is MARKED, check if ALL verses in that part are now marked
+        const [start, end] = containingPart.verseRange.split("-").map(Number);
+        let allVersesMemorised = true;
+        for (let v = start; v <= end; v++) {
+          const vId = `${chapterPrefix}-v${v}`;
+          if (newCards[vId] && !newCards[vId].isMemorised) {
+            allVersesMemorised = false;
+            break;
+          }
+        }
+        if (allVersesMemorised && newCards[containingPart.id]) {
+          newCards[containingPart.id] = { ...newCards[containingPart.id], isMemorised: true };
+        }
+      }
+    }
+  }
+
+  return newCards;
+}
+
 
 
 

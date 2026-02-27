@@ -12,7 +12,7 @@ import { getSections } from "@/lib/parser";
 import type { StudyUnit } from "@/types";
 
 export default function ChapterPage() {
-  const { state, setState, isHydrated, syncProgress } = useBCM();
+  const { state, setState, isHydrated, syncProgress, toggleMemorised: bcmToggleMemorised } = useBCM();
   const { user } = useAuth();
   const [showThemeModal, setShowThemeModal] = useState(false);
   const { isCollapsed: topCollapsed, setCollapsed: setTopCollapsed, resetCollapseTimer: resetTopTimer } = useScrollAwareTopActions();
@@ -149,28 +149,7 @@ export default function ChapterPage() {
   };
 
   const handleToggleMemorised = async (chunkId: string) => {
-    const currentCard = state.cards[chapterId]?.[chunkId];
-    if (!currentCard) return;
-    const nextIsMemorised = !currentCard.isMemorised;
-    const updatedCard = { ...currentCard, isMemorised: nextIsMemorised };
-    
-    setState(prev => {
-      return {
-        ...prev,
-        cards: {
-          ...prev.cards,
-          [chapterId]: {
-            ...prev.cards[chapterId],
-            [chunkId]: updatedCard
-          }
-        }
-      };
-    });
-
-    // Cloud Sync
-    if (user && chapter) {
-      await syncProgress(chapter.title, chunkId, updatedCard);
-    }
+    await bcmToggleMemorised(chapterId, chunkId);
   };
 
   const setTheme = (bg: string, text: string, id?: string) => {

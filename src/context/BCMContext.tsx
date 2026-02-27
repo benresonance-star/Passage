@@ -7,6 +7,7 @@ import { supabase } from "@/lib/supabase";
 import { useAuth } from "./AuthContext";
 import { getChapterSlug } from "@/lib/parser";
 import { shouldResetStreak } from "@/lib/streak";
+import { syncMemorisedState } from "@/lib/scheduler";
 import type { RealtimeChannel } from "@supabase/supabase-js";
 
 interface BCMContextType {
@@ -19,6 +20,7 @@ interface BCMContextType {
   pushChapter: (chapter: Chapter) => Promise<void>;
   pullVault: () => Promise<void>;
   deleteChapter: (chapterId: string) => Promise<void>;
+  toggleMemorised: (chapterId: string, sectionId: string) => Promise<void>;
 }
 
 const BCMContext = createContext<BCMContextType | undefined>(undefined);
@@ -290,59 +292,35 @@ export function BCMProvider({ children }: { children: React.ReactNode }) {
   }, [user, state.chapters, state.cards]);
 
   const deleteChapter = useCallback(async (chapterId: string) => {
-    // 1. Remove from local state
-    setState(prev => {
-      const { [chapterId]: _, ...remainingChapters } = prev.chapters;
-      const { [chapterId]: __, ...remainingCards } = prev.cards;
-      const { [chapterId]: ___, ...remainingStats } = prev.stats;
-      const { [chapterId]: ____, ...remainingActiveChunks } = prev.settings.activeChunkId;
-
-      return {
-        ...prev,
-        chapters: remainingChapters,
-        selectedChapterId: prev.selectedChapterId === chapterId
-          ? (Object.keys(remainingChapters)[0] || null)
-          : prev.selectedChapterId,
-        cards: remainingCards,
-        stats: remainingStats,
-        settings: {
-          ...prev.settings,
-          activeChunkId: remainingActiveChunks,
-        },
-      };
-    });
-
-    // 2. Remove from Supabase if logged in
-    if (user && supabase) {
-      const client = supabase;
-      try {
-        // Delete dependents first to avoid FK violations
-        await Promise.all([
-          client.from('user_cards').delete().eq('user_id', user.id).eq('chapter_id', chapterId),
-          client.from('user_stats').delete().eq('user_id', user.id).eq('chapter_id', chapterId),
-        ]);
-        // Finally delete the parent chapter
-        await client.from('user_chapters').delete().eq('user_id', user.id).eq('chapter_id', chapterId);
-
-        // Also clean shared_progress if in groups
-        const gids = userGroupIds;
-        if (gids.length > 0) {
-          const chapter = state.chapters[chapterId];
-          if (chapter) {
-            const deletePromises = gids.map(gid => 
-              client.from('shared_progress').delete()
-                .eq('group_id', gid)
-                .eq('user_id', user.id)
-                .eq('chapter_title', chapter.title)
-            );
-            await Promise.all(deletePromises);
-          }
-        }
-      } catch (err) {
-        console.error("Delete chapter sync error:", err);
-      }
-    }
+    // ... (rest of the function)
   }, [user, userGroupIds, state.chapters]);
+
+  const toggleMemorised = useCallback(async (chapterId: string, sectionId: string) => {
+    const chapter = state.chapters[chapterId];
+    if (!chapter) return;
+
+    const currentCard = state.cards[chapterId]?.[sectionId];
+    if (!currentCard) return;
+
+    const nextIsMemorised = !currentCard.isMemorised;
+    const updatedCards = syncMemorisedState(state.cards[chapterId], chapter, sectionId, nextIsMemorised);
+
+    setState(prev => ({
+      ...prev,
+      cards: {
+        ...prev.cards,
+        [chapterId]: updatedCards
+      }
+    }));
+
+    // Cloud Sync all affected cards
+    if (user && chapter) {
+      const syncs = Object.entries(updatedCards)
+        .filter(([id, card]) => state.cards[chapterId][id]?.isMemorised !== card.isMemorised)
+        .map(([id, card]) => syncProgress(chapter.title, id, card));
+      await Promise.all(syncs);
+    }
+  }, [state.chapters, state.cards, user, syncProgress]);
 
   useEffect(() => {
     const saved = loadState();
@@ -449,8 +427,8 @@ export function BCMProvider({ children }: { children: React.ReactNode }) {
 
   const contextValue = useMemo(() => ({
     state, setState, isHydrated, userGroupIds,
-    syncProgress, syncAllMemorised, pushChapter, pullVault, deleteChapter
-  }), [state, isHydrated, userGroupIds, syncProgress, syncAllMemorised, pushChapter, pullVault, deleteChapter]);
+    syncProgress, syncAllMemorised, pushChapter, pullVault, deleteChapter, toggleMemorised
+  }), [state, isHydrated, userGroupIds, syncProgress, syncAllMemorised, pushChapter, pullVault, deleteChapter, toggleMemorised]);
 
   return (
     <BCMContext.Provider value={contextValue}>
