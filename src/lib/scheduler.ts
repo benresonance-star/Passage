@@ -57,6 +57,20 @@ export function updateCard(card: SM2Card, score: number): SM2Card {
   return newCard;
 }
 
+export function createDefaultCard(id: string): SM2Card {
+  return {
+    id,
+    ease: 2.5,
+    intervalDays: 0,
+    reps: 0,
+    lapses: 0,
+    nextDueAt: new Date().toISOString(),
+    lastScore: null,
+    hardUntilAt: null,
+    isMemorised: false,
+  };
+}
+
 /**
  * Unified Memorisation Logic:
  * Syncs memorised state between parts (chunks) and verses.
@@ -68,11 +82,12 @@ export function syncMemorisedState(
   isMemorised: boolean
 ): Record<string, SM2Card> {
   const newCards = { ...cards };
-  const targetCard = newCards[targetId];
-  if (!targetCard) return newCards;
-
-  // 1. Update the target card
-  newCards[targetId] = { ...targetCard, isMemorised };
+  
+  // 1. Ensure the target card exists and update it
+  if (!newCards[targetId]) {
+    newCards[targetId] = createDefaultCard(targetId);
+  }
+  newCards[targetId] = { ...newCards[targetId], isMemorised };
 
   const isPart = targetId.includes("-v") && targetId.split("-v").pop()?.includes("-");
   const isVerse = targetId.includes("-v") && !targetId.split("-v").pop()?.includes("-");
@@ -85,9 +100,10 @@ export function syncMemorisedState(
 
     for (let v = start; v <= end; v++) {
       const verseId = `${chapterPrefix}-v${v}`;
-      if (newCards[verseId]) {
-        newCards[verseId] = { ...newCards[verseId], isMemorised };
+      if (!newCards[verseId]) {
+        newCards[verseId] = createDefaultCard(verseId);
       }
+      newCards[verseId] = { ...newCards[verseId], isMemorised };
     }
   } else if (isVerse) {
     // If a VERSE is toggled
@@ -103,21 +119,26 @@ export function syncMemorisedState(
     if (containingPart) {
       if (!isMemorised) {
         // If verse is UNMARKED, the part MUST be unmarked
-        if (newCards[containingPart.id]) {
-          newCards[containingPart.id] = { ...newCards[containingPart.id], isMemorised: false };
+        if (!newCards[containingPart.id]) {
+          newCards[containingPart.id] = createDefaultCard(containingPart.id);
         }
+        newCards[containingPart.id] = { ...newCards[containingPart.id], isMemorised: false };
       } else {
         // If verse is MARKED, check if ALL verses in that part are now marked
         const [start, end] = containingPart.verseRange.split("-").map(Number);
         let allVersesMemorised = true;
         for (let v = start; v <= end; v++) {
           const vId = `${chapterPrefix}-v${v}`;
-          if (newCards[vId] && !newCards[vId].isMemorised) {
+          // If a verse card doesn't exist yet, it definitely isn't memorised
+          if (!newCards[vId] || !newCards[vId].isMemorised) {
             allVersesMemorised = false;
             break;
           }
         }
-        if (allVersesMemorised && newCards[containingPart.id]) {
+        if (allVersesMemorised) {
+          if (!newCards[containingPart.id]) {
+            newCards[containingPart.id] = createDefaultCard(containingPart.id);
+          }
           newCards[containingPart.id] = { ...newCards[containingPart.id], isMemorised: true };
         }
       }

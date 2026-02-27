@@ -300,10 +300,8 @@ export function BCMProvider({ children }: { children: React.ReactNode }) {
     if (!chapter) return;
 
     const currentCard = state.cards[chapterId]?.[sectionId];
-    if (!currentCard) return;
-
-    const nextIsMemorised = !currentCard.isMemorised;
-    const updatedCards = syncMemorisedState(state.cards[chapterId], chapter, sectionId, nextIsMemorised);
+    const nextIsMemorised = currentCard ? !currentCard.isMemorised : true;
+    const updatedCards = syncMemorisedState(state.cards[chapterId] || {}, chapter, sectionId, nextIsMemorised);
 
     setState(prev => ({
       ...prev,
@@ -316,7 +314,7 @@ export function BCMProvider({ children }: { children: React.ReactNode }) {
     // Cloud Sync all affected cards
     if (user && chapter) {
       const syncs = Object.entries(updatedCards)
-        .filter(([id, card]) => state.cards[chapterId][id]?.isMemorised !== card.isMemorised)
+        .filter(([id, card]) => state.cards[chapterId]?.[id]?.isMemorised !== card.isMemorised)
         .map(([id, card]) => syncProgress(chapter.title, id, card));
       await Promise.all(syncs);
     }
