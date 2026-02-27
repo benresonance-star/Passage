@@ -45,7 +45,7 @@ export function TextAnchor({
 
   const reciteLines = useMemo(() => {
     if (stage !== "recite") return [];
-    const scriptureText = scriptureVerses.map(v => v.text).join(" ");
+    const scriptureText = scriptureVerses.map(v => v.text.replace(/\[PARAGRAPH\]\s*/g, "")).join(" ");
     return splitIntoLines(scriptureText);
   }, [stage, scriptureVerses]);
 
