@@ -14,11 +14,27 @@ export function countSyllables(word: string): number {
   return syllables ? syllables.length : 1;
 }
 
+export interface SpeechTuning {
+  sylBase: number;
+  sylStep: number;
+  pauseFull: number;
+  pauseComma: number;
+  pauseHyphen: number;
+}
+
+export const DEFAULT_TUNING: SpeechTuning = {
+  sylBase: 0.6,
+  sylStep: 0.3,
+  pauseFull: 750,
+  pauseComma: 400,
+  pauseHyphen: 150,
+};
+
 /**
  * Calculates the delay in milliseconds for a given word based on its
  * linguistic properties (syllables, punctuation, length) and a base WPM.
  */
-export function getWordDelay(word: string, wpm: number): number {
+export function getWordDelay(word: string, wpm: number, tuning: SpeechTuning = DEFAULT_TUNING): number {
   // Base delay for an "average" word (approx 5 letters / 1.5 syllables)
   // At 100 WPM, 600ms per word.
   const baseDelay = (60 / wpm) * 1000;
@@ -27,16 +43,16 @@ export function getWordDelay(word: string, wpm: number): number {
   
   // Syllable factor: adjust timing based on complexity.
   // We normalize around 1.5 syllables as "standard".
-  const syllableFactor = 0.6 + (syllables * 0.3); // 1 syl = 0.9x, 2 syl = 1.2x, 3 syl = 1.5x
+  const syllableFactor = tuning.sylBase + (syllables * tuning.sylStep);
   
   // Punctuation factor: add pauses for natural breaks.
   let punctuationPause = 0;
   if (/[.!?]$/.test(word)) {
-    punctuationPause = 750; // Increased from 450
+    punctuationPause = tuning.pauseFull;
   } else if (/[,;:—]$/.test(word)) {
-    punctuationPause = 400; // Increased from 250
+    punctuationPause = tuning.pauseComma;
   } else if (/-$/.test(word)) {
-    punctuationPause = 150; // Increased from 100
+    punctuationPause = tuning.pauseHyphen;
   }
 
   // Length factor: very long words take slightly longer even if syllables are low

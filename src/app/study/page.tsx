@@ -7,12 +7,13 @@ import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import { useWakeLock } from "@/hooks/useWakeLock";
 import { getSections, splitIntoLines } from "@/lib/parser";
-import { getWordDelay } from "@/lib/speech";
+import { getWordDelay, DEFAULT_TUNING, type SpeechTuning } from "@/lib/speech";
 import { calculateDiff, DiffResult } from "@/lib/diff";
 import { updateCard, syncMemorisedState } from "@/lib/scheduler";
 import { calculateUpdatedStreak } from "@/lib/streak";
 import { TextAnchor, type StudyStage } from "@/components/study/TextAnchor";
 import { StageControls } from "@/components/study/StageControls";
+import { SpeechTuningOverlay } from "@/components/study/SpeechTuningOverlay";
 import { EmptyState } from "@/components/EmptyState";
 import { CheckCircle2, ArrowLeft } from "lucide-react";
 
@@ -29,6 +30,7 @@ export default function StudyPage() {
   const [flowPlaying, setFlowPlaying] = useState(false);
   const [flowWpm, setFlowWpm] = useState(100);
   const [flowFocusMode, setFlowFocusMode] = useState(true);
+  const [speechTuning, setSpeechTuning] = useState<SpeechTuning>(DEFAULT_TUNING);
   const flowTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Soak state — set of highlighted scripture-verse indices (toggle on tap)
@@ -109,7 +111,7 @@ export default function StudyPage() {
   useEffect(() => {
     if (stage === "flow" && flowPlaying && flowWordIndex < words.length - 1) {
       const currentWord = words[flowWordIndex + 1];
-      const delay = getWordDelay(currentWord, flowWpm);
+      const delay = getWordDelay(currentWord, flowWpm, speechTuning);
       
       flowTimerRef.current = setTimeout(() => {
         setFlowWordIndex(prev => prev + 1);
@@ -120,7 +122,7 @@ export default function StudyPage() {
     return () => {
       if (flowTimerRef.current) clearTimeout(flowTimerRef.current);
     };
-  }, [stage, flowPlaying, flowWordIndex, words, flowWpm]);
+  }, [stage, flowPlaying, flowWordIndex, words, flowWpm, speechTuning]);
 
   // Ensure SM2 card exists for the active section
   useEffect(() => {
@@ -244,6 +246,15 @@ export default function StudyPage() {
         <div
           className="soak-breathe pointer-events-none"
           style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', zIndex: 0 }}
+        />
+      )}
+
+      {/* Speech Tuning Overlay (Temporary) */}
+      {stage === "flow" && (
+        <SpeechTuningOverlay
+          tuning={speechTuning}
+          onTuningChange={setSpeechTuning}
+          isDawn={isDawn}
         />
       )}
 
