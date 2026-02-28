@@ -20,7 +20,7 @@ export function SoakIntro({ fontClassName = "" }: SoakIntroProps) {
         transition={{ duration: 1.2, ease: [0.4, 0, 0.2, 1] }}
         className="relative z-10 text-center px-10 max-w-xl"
       >
-        <blockquote className="soak-text text-[26px] md:text-[32px] leading-[1.6] font-light text-[rgba(255,252,240,0.92)] italic">
+        <blockquote className="text-[26px] md:text-[32px] leading-[1.6] font-light text-[rgba(255,252,240,0.92)] italic">
           In the beginning was the Word,<br />
           and the Word was with God,<br />
           and the Word was God.
