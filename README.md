@@ -1,4 +1,4 @@
-# Passage - Bible Chapter Memoriser (v3.7.0)
+# Passage - Bible Chapter Memoriser (v3.7.1)
 
 An iPhone-first PWA for memorising Bible chapters through chunked practice, immersive soaking, spaced repetition, and shared group progress tracking with cross-device cloud sync.
 
@@ -9,7 +9,7 @@ An iPhone-first PWA for memorising Bible chapters through chunked practice, imme
 - **Practice Units**: Choose between practicing "Parts" (groups of ~4 verses) or individual "Verses" via a toggle on the Chapter page. Both track SM-2 progress independently but share memorisation state.
 - **Soak Mode**: Full-screen verse-by-verse meditation with breathing gradient background, double-buffer crossfade transitions, and wake lock. Supports swipe navigation on mobile and click navigation on desktop.
 - **Spaced Repetition**: Modified SM-2 algorithm with auto-promotion to memorised after 3 consecutive high scores.
-- **Theme Engine**: 6 presets (OLED, Midnight, Sepia, Night Dusk, Classic, Dawn) with CSS custom properties and animated gradients.
+- **Theme Engine**: 7 presets (OLED, Amber, Midnight, Sepia, Night Dusk, Classic, Dawn) with CSS custom properties and animated gradients.
 - **Cloud Sync**: Cross-device synchronisation via Supabase with realtime subscriptions and timestamp-based conflict resolution.
 - **Practice Groups**: Shared progress boards, invite links, admin-controlled chapter libraries, and member management.
 - **Word Highlighting**: Tap any word to highlight all instances across the chapter.

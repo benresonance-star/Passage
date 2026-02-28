@@ -4,6 +4,7 @@ import { X } from "lucide-react";
 
 const THEME_PRESETS = [
   { name: "OLED", bg: "#000000", text: "#f4f4f5" },
+  { name: "Amber", bg: "#000000", text: "#ffb347", id: "amber-night" },
   { name: "Midnight", bg: "#0f172a", text: "#e2e8f0" },
   { name: "Sepia", bg: "#fdf6e3", text: "#433422" },
   { name: "Night Dusk", bg: "#1a1816", text: "#f2e8d5", id: "night-dusk" },

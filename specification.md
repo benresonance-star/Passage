@@ -1,4 +1,4 @@
-# Passage - Bible Chapter Memoriser (v3.7.0)
+# Passage - Bible Chapter Memoriser (v3.7.1)
 
 ## AI Agent Protocol (Mandatory)
 
@@ -430,11 +430,12 @@ The spaced repetition system (`lib/scheduler.ts`) uses a modified SM-2 algorithm
 
 ### B. Theme Engine
 
-Six theme presets defined in `ThemeModal.tsx`:
+Seven theme presets defined in `ThemeModal.tsx`:
 
 | Name | Background | Text | ID | Special |
 |------|-----------|------|----|---------|
 | OLED | `#000000` | `#f4f4f5` | — | Pure black |
+| Amber | `#000000` | `#ffb347` | `amber-night` | Zero blue light, night mode |
 | Midnight | `#0f172a` | `#e2e8f0` | — | Dark blue |
 | Sepia | `#fdf6e3` | `#433422` | — | Light/warm, white nav bg |
 | Night Dusk | `#1a1816` | `#f2e8d5` | `night-dusk` | Warm dark with gradient |
