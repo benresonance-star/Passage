@@ -7,6 +7,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import { useWakeLock } from "@/hooks/useWakeLock";
 import { getSections, splitIntoLines } from "@/lib/parser";
+import { getWordDelay } from "@/lib/speech";
 import { calculateDiff, DiffResult } from "@/lib/diff";
 import { updateCard, syncMemorisedState } from "@/lib/scheduler";
 import { calculateUpdatedStreak } from "@/lib/streak";
@@ -107,17 +108,19 @@ export default function StudyPage() {
   // Flow timer
   useEffect(() => {
     if (stage === "flow" && flowPlaying && flowWordIndex < words.length - 1) {
-      const msPerWord = (60 / flowWpm) * 1000;
+      const currentWord = words[flowWordIndex + 1];
+      const delay = getWordDelay(currentWord, flowWpm);
+      
       flowTimerRef.current = setTimeout(() => {
         setFlowWordIndex(prev => prev + 1);
-      }, msPerWord);
+      }, delay);
     } else if (flowWordIndex >= words.length - 1) {
       setFlowPlaying(false);
     }
     return () => {
       if (flowTimerRef.current) clearTimeout(flowTimerRef.current);
     };
-  }, [stage, flowPlaying, flowWordIndex, words.length, flowWpm]);
+  }, [stage, flowPlaying, flowWordIndex, words, flowWpm]);
 
   // Ensure SM2 card exists for the active section
   useEffect(() => {
