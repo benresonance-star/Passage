@@ -32,11 +32,11 @@ export function getWordDelay(word: string, wpm: number): number {
   // Punctuation factor: add pauses for natural breaks.
   let punctuationPause = 0;
   if (/[.!?]$/.test(word)) {
-    punctuationPause = 450;
+    punctuationPause = 750; // Increased from 450
   } else if (/[,;:—]$/.test(word)) {
-    punctuationPause = 250;
+    punctuationPause = 400; // Increased from 250
   } else if (/-$/.test(word)) {
-    punctuationPause = 100;
+    punctuationPause = 150; // Increased from 100
   }
 
   // Length factor: very long words take slightly longer even if syllables are low
