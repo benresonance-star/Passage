@@ -1,4 +1,4 @@
-# Passage - Bible Chapter Memoriser (v3.6.8)
+# Passage - Bible Chapter Memoriser (v3.6.9)
 
 ## AI Agent Protocol (Mandatory)
 

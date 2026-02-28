@@ -61,7 +61,7 @@ export function TextAnchor({
 
   if (stage === "recite") {
     return (
-      <div className="space-y-3 px-6 md:px-12 my-auto animate-in fade-in duration-500 max-w-2xl mx-auto w-full">
+      <div className="space-y-3 px-6 md:px-12 animate-in fade-in duration-500 max-w-2xl mx-auto w-full py-8">
         {reciteLines.map((line, i) => {
           const isRevealed = reciteRevealedVerses?.has(i);
           return (
@@ -73,6 +73,7 @@ export function TextAnchor({
                   ? "bg-[var(--theme-ui-bg)] shadow-lg border-[var(--theme-ui-border)]"
                   : "bg-[var(--theme-ui-bg)] text-transparent border-transparent opacity-40"
               }`}
+              style={{ touchAction: 'pan-y' }}
             >
               <p className="text-lg leading-relaxed select-none">{line}</p>
             </div>

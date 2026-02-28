@@ -259,7 +259,7 @@ export default function StudyPage() {
       </header>
 
       {/* Main content area — text stays anchored here */}
-      <div className={`flex-1 overflow-y-auto scrollbar-hide flex flex-col relative z-10 ${stage === "type" ? "justify-start pt-8" : ""}`}>
+      <div className={`flex-1 overflow-y-auto scrollbar-hide stable-scroll-container flex flex-col relative z-10 ${stage === "type" ? "justify-start pt-8" : ""}`}>
         {stage === "type" ? (
           <div className="space-y-6 animate-in fade-in duration-500 px-6 md:px-12 max-w-2xl mx-auto w-full">
             <textarea
