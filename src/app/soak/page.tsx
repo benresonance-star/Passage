@@ -1,12 +1,14 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useBCM } from "@/context/BCMContext";
 import { useRouter } from "next/navigation";
 import { useWakeLock } from "@/hooks/useWakeLock";
 import { SoakVerseTap } from "@/modules/soak/SoakVerseTap";
+import { SoakIntro } from "@/components/SoakIntro";
 import type { SoakSection } from "@/modules/soak/types";
 import { Cormorant_Garamond } from "next/font/google";
+import { AnimatePresence } from "framer-motion";
 
 const soakFont = Cormorant_Garamond({
   subsets: ["latin"],
@@ -17,6 +19,8 @@ export default function SoakPage() {
   const { state, isHydrated } = useBCM();
   const router = useRouter();
   useWakeLock();
+
+  const [showIntro, setShowIntro] = useState(true);
 
   const chapterId = state.selectedChapterId;
   const chapter = chapterId ? state.chapters[chapterId] : null;
@@ -30,6 +34,13 @@ export default function SoakPage() {
       router.push("/chapter");
     }
   }, [isHydrated, chapter, router]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowIntro(false);
+    }, 3000);
+    return () => clearTimeout(timer);
+  }, []);
 
   if (!isHydrated || !chapter) return null;
 
@@ -73,11 +84,20 @@ export default function SoakPage() {
   }
 
   return (
-    <SoakVerseTap
-      section={section}
-      fontClassName={soakFont.className}
-      onExit={() => router.push("/chapter")}
-    />
+    <div className={soakFont.className}>
+      <AnimatePresence>
+        {showIntro ? (
+          <SoakIntro key="intro" />
+        ) : (
+          <SoakVerseTap
+            key="soak"
+            section={section}
+            fontClassName={soakFont.className}
+            onExit={() => router.push("/chapter")}
+          />
+        )}
+      </AnimatePresence>
+    </div>
   );
 }
 

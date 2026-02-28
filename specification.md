@@ -1,4 +1,4 @@
-# Passage - Bible Chapter Memoriser (v3.7.3)
+# Passage - Bible Chapter Memoriser (v3.7.4)
 
 ## AI Agent Protocol (Mandatory)
 
@@ -260,6 +260,7 @@ Full chapter text view with interactive chunked layout.
 
 Immersive verse-by-verse meditation screen.
 
+- **Soak Intro**: A 3-second introductory screen displaying John 1:1 ("In the beginning was the Word...") with a fade-in/fade-out animation before the meditation begins.
 - **Full-screen layout**: No header, no nav bar. Fixed position covering entire viewport.
 - **Content Loading**: If a specific section (chunk or verse) is active on the Chapter page, Abide mode loads only that section. If no section is active, the entire chapter is loaded for continuous meditation.
 - **Double-buffer crossfade**: Two verse "slots" (A and B) are always in the DOM. On navigation, the inactive slot receives the new verse, then: preparing (60ms paint time) → crossfading (800ms opacity interpolation) → idle (swap active slot). No DOM mutation ever happens during a visible transition.
