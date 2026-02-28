@@ -10,6 +10,8 @@ import { shouldResetStreak } from "@/lib/streak";
 import { syncMemorisedState } from "@/lib/scheduler";
 import type { RealtimeChannel } from "@supabase/supabase-js";
 
+import { deleteChapterData, deleteSharedProgress } from "@/services/vault";
+
 interface BCMContextType {
   state: BCMState;
   setState: React.Dispatch<React.SetStateAction<BCMState>>;
@@ -292,7 +294,49 @@ export function BCMProvider({ children }: { children: React.ReactNode }) {
   }, [user, state.chapters, state.cards]);
 
   const deleteChapter = useCallback(async (chapterId: string) => {
-    // ... (rest of the function)
+    const chapter = state.chapters[chapterId];
+    if (!chapter) return;
+
+    // 1. Update Local State
+    setState(prev => {
+      const newState = { ...prev };
+      
+      // Remove chapter
+      const { [chapterId]: _, ...remainingChapters } = newState.chapters;
+      newState.chapters = remainingChapters;
+
+      // Remove cards
+      const { [chapterId]: __, ...remainingCards } = newState.cards;
+      newState.cards = remainingCards;
+
+      // Remove stats
+      const { [chapterId]: ___, ...remainingStats } = newState.stats;
+      newState.stats = remainingStats;
+
+      // Remove active chunk settings
+      const { [chapterId]: ____, ...remainingActiveChunks } = newState.settings.activeChunkId;
+      newState.settings.activeChunkId = remainingActiveChunks;
+
+      // Reset selection if needed
+      if (newState.selectedChapterId === chapterId) {
+        newState.selectedChapterId = null;
+      }
+
+      return newState;
+    });
+
+    // 2. Cloud Sync
+    if (user && supabase) {
+      try {
+        await deleteChapterData(user.id, chapterId);
+        
+        if (userGroupIds.length > 0) {
+          await deleteSharedProgress(userGroupIds, user.id, chapter.title);
+        }
+      } catch (err) {
+        console.error("Delete chapter cloud error:", err);
+      }
+    }
   }, [user, userGroupIds, state.chapters]);
 
   const toggleMemorised = useCallback(async (chapterId: string, sectionId: string) => {
