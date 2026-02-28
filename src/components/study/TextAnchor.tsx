@@ -51,8 +51,8 @@ export function TextAnchor({
 
   if (stage === "cloze") {
     return (
-      <div className="animate-in fade-in duration-500 px-4 my-auto">
-        <div className="chunk-text-bold text-center leading-relaxed px-4 whitespace-pre-wrap">
+      <div className="animate-in fade-in duration-500 px-6 md:px-12 my-auto max-w-2xl mx-auto w-full">
+        <div className="chunk-text-bold text-center leading-relaxed whitespace-pre-wrap">
           {clozeText}
         </div>
       </div>
@@ -61,7 +61,7 @@ export function TextAnchor({
 
   if (stage === "recite") {
     return (
-      <div className="space-y-3 px-4 my-auto animate-in fade-in duration-500">
+      <div className="space-y-3 px-6 md:px-12 my-auto animate-in fade-in duration-500 max-w-2xl mx-auto w-full">
         {reciteLines.map((line, i) => {
           const isRevealed = reciteRevealedVerses?.has(i);
           return (
@@ -86,8 +86,8 @@ export function TextAnchor({
   let globalWordIdx = 0;
 
   return (
-    <div className="px-4 my-auto">
-      <div className="chunk-text-bold text-center leading-relaxed px-4">
+    <div className="px-6 md:px-12 my-auto max-w-2xl mx-auto w-full">
+      <div className="chunk-text-bold text-center leading-relaxed">
         {section.verses.map((v, vIdx) => {
           if (v.type === "heading") {
             return (

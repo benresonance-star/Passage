@@ -245,7 +245,7 @@ export default function StudyPage() {
       )}
 
       {/* Header */}
-      <header className="flex items-center justify-between px-4 pb-2 pt-2 flex-shrink-0 z-10 relative">
+      <header className="flex items-center justify-between px-6 md:px-12 pb-2 pt-2 flex-shrink-0 z-10 relative">
         <div className="w-10" />
         <div className="text-center absolute left-1/2 -translate-x-1/2">
           <h1 className={`text-sm font-bold uppercase tracking-widest ${isDawn ? "text-white" : "text-orange-500"}`}>
@@ -261,7 +261,7 @@ export default function StudyPage() {
       {/* Main content area — text stays anchored here */}
       <div className={`flex-1 overflow-y-auto scrollbar-hide flex flex-col relative z-10 ${stage === "type" ? "justify-start pt-8" : ""}`}>
         {stage === "type" ? (
-          <div className="space-y-6 animate-in fade-in duration-500 px-4">
+          <div className="space-y-6 animate-in fade-in duration-500 px-6 md:px-12 max-w-2xl mx-auto w-full">
             <textarea
               ref={textareaRef}
               autoFocus
@@ -273,7 +273,7 @@ export default function StudyPage() {
             />
           </div>
         ) : stage === "result" && diffResults ? (
-          <div className="space-y-8 animate-in zoom-in-95 duration-300 px-4 my-auto">
+          <div className="space-y-8 animate-in zoom-in-95 duration-300 px-6 md:px-12 my-auto max-w-2xl mx-auto w-full">
             <div className="bg-[var(--theme-ui-bg)] border border-[var(--theme-ui-border)] rounded-3xl p-6 space-y-6">
               <div className="flex justify-between items-center">
                 <div className="flex items-center gap-2">
