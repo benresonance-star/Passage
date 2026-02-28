@@ -86,7 +86,7 @@ export function TextAnchor({
   let globalWordIdx = 0;
 
   return (
-    <div className="px-6 md:px-12 my-auto max-w-2xl mx-auto w-full">
+    <div className={`px-6 md:px-12 my-auto max-w-2xl mx-auto w-full ${stage === "soak" ? "soak-breathe-text" : ""}`}>
       <div className="chunk-text-bold text-center leading-relaxed">
         {section.verses.map((v, vIdx) => {
           if (v.type === "heading") {
