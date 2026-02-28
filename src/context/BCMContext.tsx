@@ -319,7 +319,8 @@ export function BCMProvider({ children }: { children: React.ReactNode }) {
 
       // Reset selection if needed
       if (newState.selectedChapterId === chapterId) {
-        newState.selectedChapterId = null;
+        const remainingIds = Object.keys(remainingChapters);
+        newState.selectedChapterId = remainingIds.length > 0 ? remainingIds[0] : null;
       }
 
       return newState;

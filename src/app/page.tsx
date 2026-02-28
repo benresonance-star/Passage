@@ -146,36 +146,38 @@ export default function Home() {
         </div>
       )}
 
-      {selectedChapter ? (
+      {chapters.length > 0 ? (
         <div className="space-y-8">
-          <div className="bg-[var(--surface)] glass border border-[var(--surface-border)] rounded-2xl p-6 space-y-4 shadow-xl relative overflow-hidden">
-            <div className="flex justify-between items-start">
-              <div className="space-y-1">
-                <h2 className="text-[var(--theme-ui-subtext)] text-sm font-medium uppercase tracking-wider">Active Chapter</h2>
-                <div className="flex items-center gap-3">
-                  <p className="text-xl font-bold">{selectedChapter.bookName} {selectedChapter.title}</p>
-                  {isChapterComplete && (
-                    <Trophy size={20} className="text-amber-400 fill-amber-400/20 animate-in zoom-in duration-500" />
-                  )}
-                </div>
-                <div className="flex items-center gap-1.5 text-amber-400 text-xs font-medium pt-1">
-                  <Award size={14} />
-                  <span>
-                    {state.versions[selectedChapter.versionId]?.abbreviation || selectedChapter.versionId} • {memorisedCount} / {totalChunks} Chunks
-                  </span>
+          {selectedChapter && (
+            <div className="bg-[var(--surface)] glass border border-[var(--surface-border)] rounded-2xl p-6 space-y-4 shadow-xl relative overflow-hidden">
+              <div className="flex justify-between items-start">
+                <div className="space-y-1">
+                  <h2 className="text-[var(--theme-ui-subtext)] text-sm font-medium uppercase tracking-wider">Active Chapter</h2>
+                  <div className="flex items-center gap-3">
+                    <p className="text-xl font-bold">{selectedChapter.bookName} {selectedChapter.title}</p>
+                    {isChapterComplete && (
+                      <Trophy size={20} className="text-amber-400 fill-amber-400/20 animate-in zoom-in duration-500" />
+                    )}
+                  </div>
+                  <div className="flex items-center gap-1.5 text-amber-400 text-xs font-medium pt-1">
+                    <Award size={14} />
+                    <span>
+                      {state.versions[selectedChapter.versionId]?.abbreviation || selectedChapter.versionId} • {memorisedCount} / {totalChunks} Chunks
+                    </span>
+                  </div>
                 </div>
               </div>
+              
+              <div className="grid grid-cols-2 gap-3 pt-2">
+                <Link href="/chapter" className="flex items-center justify-center gap-2 py-4 bg-orange-500 text-white font-bold rounded-xl active:scale-95 transition-transform">
+                  <BookOpen size={20} />Read Chapter
+                </Link>
+                <Link href="/review" className="flex items-center justify-center gap-2 py-4 bg-[var(--surface-alt)] text-white font-bold rounded-xl active:scale-95 transition-transform border border-[var(--surface-border)]">
+                  <Award size={20} />My Progress
+                </Link>
+              </div>
             </div>
-            
-            <div className="grid grid-cols-2 gap-3 pt-2">
-              <Link href="/chapter" className="flex items-center justify-center gap-2 py-4 bg-orange-500 text-white font-bold rounded-xl active:scale-95 transition-transform">
-                <BookOpen size={20} />Read Chapter
-              </Link>
-              <Link href="/review" className="flex items-center justify-center gap-2 py-4 bg-[var(--surface-alt)] text-white font-bold rounded-xl active:scale-95 transition-transform border border-[var(--surface-border)]">
-                <Award size={20} />My Progress
-              </Link>
-            </div>
-          </div>
+          )}
 
           <div className="space-y-3">
             <h3 className="text-sm font-medium text-[var(--theme-ui-subtext)] uppercase tracking-wider px-1">Library</h3>
@@ -185,32 +187,32 @@ export default function Home() {
                   key={ch.id}
                   onClick={() => handleSwitch(ch.id)}
                   className={`flex items-center justify-between p-4 rounded-xl border transition-all active:scale-[0.98] ${
-                    ch.id === selectedChapter.id 
+                    selectedChapter && ch.id === selectedChapter.id 
                       ? "bg-white/5 border-white/20" 
                       : "bg-[var(--surface)] border-[var(--surface-border)] active:bg-[var(--surface-alt)]"
                   }`}
                 >
                   <div className="flex items-center gap-4">
                     <div className={`w-10 h-10 rounded-lg flex items-center justify-center border ${
-                      ch.id === selectedChapter.id ? "bg-white/10 border-white/30 text-white" : "bg-[var(--surface-alt)] border-[var(--surface-border)] text-white"
+                      selectedChapter && ch.id === selectedChapter.id ? "bg-white/10 border-white/30 text-white" : "bg-[var(--surface-alt)] border-[var(--surface-border)] text-white"
                     }`}>
                       <BookOpen size={20} />
                     </div>
                     <div>
-                      <p className={`font-bold ${ch.id === selectedChapter.id ? "text-white" : "text-white"}`}>
+                      <p className={`font-bold ${selectedChapter && ch.id === selectedChapter.id ? "text-white" : "text-white"}`}>
                         {ch.bookName} {ch.title}
-                        {ch.id === selectedChapter.id && (
+                        {selectedChapter && ch.id === selectedChapter.id && (
                           <span className="ml-2 text-[10px] font-black text-orange-500 bg-orange-500/10 px-1.5 py-0.5 rounded-md tracking-tighter">ACTIVE</span>
                         )}
                       </p>
-                      <p className={`text-[10px] uppercase tracking-widest font-bold ${ch.id === selectedChapter.id ? "text-white/60" : "text-white/70"}`}>
+                      <p className={`text-[10px] uppercase tracking-widest font-bold ${selectedChapter && ch.id === selectedChapter.id ? "text-white/60" : "text-white/70"}`}>
                         {state.versions[ch.versionId]?.abbreviation || ch.versionId} • {Object.values(state.cards[ch.id] || {}).filter(c => c.isMemorised).length} / {ch.chunks.length} Memorised
                       </p>
                     </div>
                   </div>
                   <div className="flex items-center gap-1">
                     {isAdmin && (
-                      <button onClick={(e) => handleDelete(ch.id, e)} className={`p-2 transition-colors ${ch.id === selectedChapter.id ? "text-white/60 hover:text-red-500" : "text-white/70 hover:text-red-500"}`}>
+                      <button onClick={(e) => handleDelete(ch.id, e)} className={`p-2 transition-colors ${selectedChapter && ch.id === selectedChapter.id ? "text-white/60 hover:text-red-500" : "text-white/70 hover:text-red-500"}`}>
                         <Trash2 size={18} />
                       </button>
                     )}
