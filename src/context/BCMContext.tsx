@@ -434,12 +434,14 @@ export function BCMProvider({ children }: { children: React.ReactNode }) {
     });
 
     // Check for streak reset on load
-    Object.keys(migratedState.stats).forEach(chapterId => {
-      const stats = migratedState.stats[chapterId];
-      if (shouldResetStreak(stats.lastActivity)) {
-        stats.streak = 0;
-      }
-    });
+    if (migratedState.stats) {
+      Object.keys(migratedState.stats).forEach(chapterId => {
+        const stats = migratedState.stats[chapterId];
+        if (stats && shouldResetStreak(stats.lastActivity)) {
+          stats.streak = 0;
+        }
+      });
+    }
     
     setState(migratedState);
     setIsHydrated(true);
