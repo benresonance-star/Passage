@@ -22,14 +22,13 @@ export function SoakIntro({ fontClassName = "" }: SoakIntroProps) {
       >
         <blockquote className="text-[26px] md:text-[32px] leading-[1.6] font-light text-[rgba(255,252,240,0.92)] italic">
           Be still and know that I am God
+          <cite className="block mt-4 text-[13px] tracking-[0.25em] uppercase font-light text-[rgba(255,252,240,0.6)] not-italic">
+            Psalm 46:10 (ESV)
+          </cite>
           <div className="mt-8 text-[14px] tracking-[0.1em] text-[rgba(255,252,240,0.7)] not-italic font-normal">
             Let the Holy Spirit guide you...
           </div>
         </blockquote>
-        
-        <cite className="block mt-10 text-[13px] tracking-[0.25em] uppercase font-light text-[rgba(255,252,240,0.6)] not-italic">
-          Psalm 46:10 (ESV)
-        </cite>
       </motion.div>
     </div>
   );
