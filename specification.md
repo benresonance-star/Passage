@@ -1,4 +1,4 @@
-# Passage - Bible Chapter Memoriser (v3.7.1)
+# Passage - Bible Chapter Memoriser (v3.7.2)
 
 ## AI Agent Protocol (Mandatory)
 
@@ -332,7 +332,7 @@ A unified single-screen practice flow that guides the user through a practice se
 
 1. **Attend**: Full section text, normal styling. Subtitle: "Attend to the text carefully."
 2. **Abide**: Inline verse-focus mode — current verse at full opacity, others dimmed to ~15%. Tap left/right zones to navigate between verses. Breathing gradient background overlay. Verse counter shown below text.
-3. **Breathe**: Word-by-word timed illumination with natural speech pacing. Words transition from unread to read styling at user-controlled WPM, adjusted by a syllable-based timing model that accounts for word complexity and punctuation pauses (e.g., longer pauses for periods and commas). Controls: play/pause, skip forward/back, reset, WPM slider, focus mode toggle (hides unread words).
+3. **Breathe**: Word-by-word timed illumination with natural speech pacing. Words transition from unread to read styling at user-controlled WPM, adjusted by a syllable-based timing model that accounts for word complexity and punctuation pauses (e.g., longer pauses for periods and commas, occurring after the word is revealed). Controls: play/pause, skip forward/back, reset, WPM slider, focus mode toggle (hides unread words).
 4. **Reveal**: Text split into sentence-based lines (`splitIntoLines`). Lines are hidden (transparent, 40% opacity). Tap to reveal individual lines. Reveal All / Hide All toggle.
 5. **Recollect**: Deterministic word hiding at configurable levels (0%, 20%, 40%, 60%, 80%, Mnemonic). Uses `hideWords()` and `generateMnemonic()` from `lib/cloze.ts`.
 6. **Speak**: Section text hidden, replaced by auto-growing textarea. "Submit" calculates diff and advances to Result.
