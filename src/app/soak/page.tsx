@@ -87,7 +87,7 @@ export default function SoakPage() {
     <div className={soakFont.className}>
       <AnimatePresence>
         {showIntro ? (
-          <SoakIntro key="intro" />
+          <SoakIntro key="intro" fontClassName={soakFont.className} />
         ) : (
           <SoakVerseTap
             key="soak"
