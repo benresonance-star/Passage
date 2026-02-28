@@ -23,6 +23,9 @@ const MEDITATION_VERSES: VerseData[] = [
         <span className="pl-6 md:pl-8">and do not lean on your own understanding.</span><br />
         <span className="pl-2 md:pl-4">In all your ways acknowledge him,</span><br />
         <span className="pl-6 md:pl-8">and he will make straight your paths.</span>
+        <div className="mt-8 text-[14px] tracking-[0.1em] text-[rgba(255,252,240,0.7)] not-italic font-normal">
+          Let the Holy Spirit guide you...
+        </div>
       </>
     ),
     citation: "Proverbs 3:5-6 (ESV)",
