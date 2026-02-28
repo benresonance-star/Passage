@@ -437,7 +437,7 @@ export function BCMProvider({ children }: { children: React.ReactNode }) {
     if (migratedState.stats) {
       Object.keys(migratedState.stats).forEach(chapterId => {
         const stats = migratedState.stats[chapterId];
-        if (stats && shouldResetStreak(stats.lastActivity)) {
+        if (stats && stats.lastActivity && shouldResetStreak(stats.lastActivity)) {
           stats.streak = 0;
         }
       });
