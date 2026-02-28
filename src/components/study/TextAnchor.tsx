@@ -153,14 +153,14 @@ export function TextAnchor({
         })}
       </div>
       {stage === "read" && (
-        <div className="mt-6 text-center">
+        <div className="mt-6 text-center h-5">
           <p className={`text-sm italic ${isDawn ? "text-white/50" : "text-zinc-500"}`}>
             Attend to the text carefully.
           </p>
         </div>
       )}
       {stage === "soak" && (
-        <div className="mt-6 text-center">
+        <div className="mt-6 text-center h-5">
           <p className={`text-sm italic ${isDawn ? "text-white/50" : "text-zinc-500"}`}>
             {scriptureVerses.length > 1
               ? `${soakHighlighted?.size || 0} of ${scriptureVerses.length} verses focused`
@@ -169,7 +169,7 @@ export function TextAnchor({
         </div>
       )}
       {stage === "flow" && (
-        <div className="mt-6 text-center">
+        <div className="mt-6 text-center h-5">
           <p className={`text-sm italic animate-in fade-in duration-1000 ${isDawn ? "text-white/50" : "text-zinc-500"}`}>
             Breathe with the word.
           </p>
