@@ -28,7 +28,7 @@ export default function StudyPage() {
   // Flow state
   const [flowWordIndex, setFlowWordIndex] = useState(-1);
   const [flowPlaying, setFlowPlaying] = useState(false);
-  const [flowWpm, setFlowWpm] = useState(100);
+  const [flowWpm, setFlowWpm] = useState(230);
   const [flowFocusMode, setFlowFocusMode] = useState(true);
   const [speechTuning, setSpeechTuning] = useState<SpeechTuning>(DEFAULT_TUNING);
   const flowTimerRef = useRef<NodeJS.Timeout | null>(null);

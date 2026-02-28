@@ -24,9 +24,9 @@ export interface SpeechTuning {
 
 export const DEFAULT_TUNING: SpeechTuning = {
   sylBase: 0.6,
-  sylStep: 0.3,
-  pauseFull: 750,
-  pauseComma: 400,
+  sylStep: 0.6,
+  pauseFull: 1000,
+  pauseComma: 500,
   pauseHyphen: 150,
 };
 

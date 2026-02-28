@@ -111,7 +111,7 @@ export function StageControls({
               <input
                 type="range"
                 min={40}
-                max={300}
+                max={400}
                 value={flowWpm}
                 onChange={(e) => onFlowWpmChange?.(Number(e.target.value))}
                 className="w-16 h-1 accent-orange-500"
