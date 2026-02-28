@@ -12,7 +12,7 @@ import { getSections } from "@/lib/parser";
 import type { StudyUnit } from "@/types";
 
 export default function ChapterPage() {
-  const { state, setState, isHydrated, syncProgress, toggleMemorised: bcmToggleMemorised } = useBCM();
+  const { state, setState, isHydrated, toggleMemorised: bcmToggleMemorised } = useBCM();
   const { user } = useAuth();
   const [showThemeModal, setShowThemeModal] = useState(false);
   const { isCollapsed: topCollapsed, setCollapsed: setTopCollapsed, resetCollapseTimer: resetTopTimer } = useScrollAwareTopActions();
@@ -23,153 +23,28 @@ export default function ChapterPage() {
   const isLongPressTriggered = useRef(false);
 
   const chapterId = state.selectedChapterId;
-  const chapter = isHydrated && chapterId ? state.chapters[chapterId] : null;
+  const chapter = chapterId ? state.chapters[chapterId] : null;
+  const activeChunkId = chapterId ? state.settings.activeChunkId[chapterId] : null;
+  const studyUnit: StudyUnit = state.settings.studyUnit || "chunk";
+  
+  const sections = useMemo(() => {
+    if (!chapter) return [];
+    return getSections(chapter, studyUnit);
+  }, [chapter, studyUnit]);
+
+  const currentTheme = state.settings.theme || { bg: "#000000", text: "#f4f4f5" };
+  const isDawn = currentTheme.id === "dawn";
+  const isSepia = currentTheme.bg === "#fdf6e3";
+
+  const scriptureVerses = useMemo(() => {
+    if (!chapter) return [];
+    return chapter.verses.filter(v => v.type === "scripture");
+  }, [chapter]);
 
   if (!isHydrated) return null;
   if (!chapter || !chapterId) return <EmptyState />;
 
   const normalizeWord = (word: string) => {
-    return word.replace(/[^\w]/g, '').toLowerCase();
-  };
-
-  const toggleWordHighlight = (word: string) => {
-    const normalized = normalizeWord(word);
-    if (!normalized) return;
-
-    setState(prev => {
-      const current = prev.settings.highlightedWords || [];
-      const isHighlighted = current.includes(normalized);
-      const next = isHighlighted 
-        ? current.filter(w => w !== normalized)
-        : [...current, normalized];
-      
-      return {
-        ...prev,
-        settings: {
-          ...prev.settings,
-          highlightedWords: next
-        }
-      };
-    });
-  };
-
-  const clearHighlights = () => {
-    setState(prev => ({
-      ...prev,
-      settings: {
-        ...prev.settings,
-        highlightedWords: []
-      }
-    }));
-  };
-
-  const handleLongPressStart = (chunkId: string, e?: React.TouchEvent | React.MouseEvent) => {
-    if (e && 'touches' in e) {
-      touchStartPos.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-    }
-    
-    isLongPressActive.current = false;
-    isLongPressTriggered.current = false;
-
-    longPressTimer.current = setTimeout(() => {
-      setActiveChunk(chunkId);
-      isLongPressActive.current = true;
-      isLongPressTriggered.current = true;
-      // Optional: trigger haptic feedback if available
-      if (window.navigator && window.navigator.vibrate) {
-        window.navigator.vibrate(50);
-      }
-    }, 600);
-  };
-
-  const handleTouchMove = (e: React.TouchEvent) => {
-    if (!touchStartPos.current || !longPressTimer.current) return;
-
-    const touch = e.touches[0];
-    const dx = Math.abs(touch.clientX - touchStartPos.current.x);
-    const dy = Math.abs(touch.clientY - touchStartPos.current.y);
-
-    // If moved more than 20px, cancel the long press
-    if (dx > 20 || dy > 20) {
-      handleLongPressEnd();
-    }
-  };
-
-  const handleLongPressEnd = () => {
-    if (longPressTimer.current) {
-      clearTimeout(longPressTimer.current);
-      longPressTimer.current = null;
-    }
-    touchStartPos.current = null;
-  };
-
-  const setActiveChunk = (chunkId: string) => {
-    setState((prev) => {
-      const currentActiveId = prev.settings.activeChunkId[chapterId];
-      const nextActiveId = currentActiveId === chunkId ? null : chunkId;
-      
-      return {
-        ...prev,
-        settings: {
-          ...prev.settings,
-          activeChunkId: {
-            ...prev.settings.activeChunkId,
-            [chapterId]: nextActiveId
-          },
-        },
-      };
-    });
-  };
-
-  const toggleVisibilityMode = () => {
-    setState(prev => {
-      const currentMode = prev.settings.visibilityMode || 0;
-      const nextMode = ((currentMode + 1) % 3) as 0 | 1 | 2;
-      
-      return {
-        ...prev,
-        settings: {
-          ...prev.settings,
-          visibilityMode: nextMode,
-          // Sync legacy showHeadings for backward compatibility if needed
-          showHeadings: nextMode === 0
-        }
-      };
-    });
-  };
-
-  const toggleMemorised = () => {
-    setState(prev => ({
-      ...prev,
-      settings: {
-        ...prev.settings,
-        showMemorised: !prev.settings.showMemorised
-      }
-    }));
-  };
-
-  const handleToggleMemorised = async (chunkId: string) => {
-    await bcmToggleMemorised(chapterId, chunkId);
-  };
-
-  const setTheme = (bg: string, text: string, id?: string) => {
-    setState(prev => ({
-      ...prev,
-      settings: {
-        ...prev.settings,
-        theme: { bg, text, id }
-      }
-    }));
-  };
-
-  const activeChunkId = state.settings.activeChunkId[chapterId];
-  const studyUnit: StudyUnit = state.settings.studyUnit || "chunk";
-  const sections = useMemo(() => getSections(chapter, studyUnit), [chapter, studyUnit]);
-  const currentTheme = state.settings.theme || { bg: "#000000", text: "#f4f4f5" };
-  const isDawn = currentTheme.id === "dawn";
-  const isSepia = currentTheme.bg === "#fdf6e3";
-
-  const scriptureVerses = chapter.verses.filter(v => v.type === "scripture");
 
   const isIPhone = typeof window !== "undefined" && /iPhone/.test(navigator.userAgent);
 
