@@ -1,4 +1,4 @@
-# Passage - Bible Chapter Memoriser (v3.7.2)
+# Passage - Bible Chapter Memoriser (v3.7.3)
 
 An iPhone-first PWA for memorising Bible chapters through chunked practice, immersive soaking, spaced repetition, and shared group progress tracking with cross-device cloud sync.
 

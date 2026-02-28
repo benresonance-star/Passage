@@ -112,7 +112,9 @@ export default function StudyPage() {
     if (stage === "flow" && flowPlaying && flowWordIndex < words.length - 1) {
       // Calculate delay based on the word that was JUST revealed (or a base delay if starting)
       const referenceWord = flowWordIndex >= 0 ? words[flowWordIndex] : "";
-      const delay = referenceWord ? getWordDelay(referenceWord, flowWpm, speechTuning) : (60 / flowWpm) * 1000;
+      const delay = referenceWord 
+        ? getWordDelay(referenceWord, flowWpm, speechTuning, flowWordIndex, words) 
+        : (60 / flowWpm) * 1000;
       
       flowTimerRef.current = setTimeout(() => {
         setFlowWordIndex(prev => prev + 1);

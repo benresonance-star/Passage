@@ -122,6 +122,23 @@ export function SpeechTuningOverlay({ tuning, onTuningChange, isDawn }: SpeechTu
             className="w-full h-1.5 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-orange-500"
           />
         </div>
+
+        {/* Prosody Intensity */}
+        <div className="space-y-2">
+          <div className="flex justify-between text-[10px] uppercase tracking-wider text-zinc-400">
+            <span>Prosody Intensity</span>
+            <span className="font-mono text-white">{(tuning.prosodyIntensity * 100).toFixed(0)}%</span>
+          </div>
+          <input
+            type="range"
+            min="0"
+            max="1"
+            step="0.05"
+            value={tuning.prosodyIntensity}
+            onChange={(e) => handleChange("prosodyIntensity", parseFloat(e.target.value))}
+            className="w-full h-1.5 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-orange-500"
+          />
+        </div>
       </div>
 
       <div className="mt-6 pt-4 border-t border-white/10 text-[9px] text-zinc-500 italic leading-relaxed">
