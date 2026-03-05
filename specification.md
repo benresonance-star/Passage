@@ -234,7 +234,7 @@ The dashboard and library manager.
 - **Greeting**: "Hello {name}" (using profile data) with a welcoming subtitle.
 - **Recall Button**: Spaced repetition action. Visible if at least one section is memorised. Enabled only when the recall timer (based on the shortest interval of all memorised sections) has elapsed. Triggers a "recite through" flow in `/study`.
 - **Learn Next Button**: Automatically identifies the next unmemorised section and navigates to `/study` to begin learning.
-- **Header**: Displays centered "HOME" title with a back arrow to the Chapter page (`/chapter`), and a collapsible top actions bar.
+- **Header**: Displays centered "HOME" title and a collapsible top actions bar.
 - **Top Actions** (collapsible pill, same pattern as Chapter page):
     - **Theme** (Palette icon): Opens `ThemeModal` overlay.
     - **User Settings** (User icon): Opens prompt to edit display name (visible when logged in).

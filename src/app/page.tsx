@@ -134,13 +134,7 @@ export default function Home() {
       <PromptDialog />
       <ToastContainer />
       <header className="flex justify-between items-center relative">
-        <Link 
-          href="/chapter" 
-          className="p-2.5 text-zinc-500 bg-[var(--surface)] rounded-full border border-[var(--surface-border)]" 
-          aria-label="Back to chapter"
-        >
-          <ArrowLeft size={22} />
-        </Link>
+        <div className="w-10" /> {/* Spacer to keep title centered */}
         <h1 className="text-lg font-bold uppercase tracking-widest absolute left-1/2 -translate-x-1/2">HOME</h1>
         <div 
           className="relative h-10 will-change-[clip-path,opacity]"
