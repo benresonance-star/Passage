@@ -3,13 +3,14 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useBCM } from "@/context/BCMContext";
-import { Play, BookOpen, Upload, ChevronRight, Award, Trash2, Trophy, Info, X, Users, RefreshCw, ArrowLeft, Wind, ChevronDown } from "lucide-react";
+import { Play, BookOpen, Upload, ChevronRight, Award, Trash2, Trophy, Info, X, Users, RefreshCw, ArrowLeft, Wind, ChevronDown, Palette, User } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/lib/supabase";
-import { useEffect } from "react";
+import { useEffect, useCallback } from "react";
 import { TeamBoard } from "@/components/TeamBoard";
 import { HomeRecallSection } from "@/components/HomeRecallSection";
-import { useConfirm } from "@/components/AppModal";
+import { ThemeModal } from "@/components/ThemeModal";
+import { useConfirm, usePrompt, useToast } from "@/components/AppModal";
 import { AnimatePresence, motion } from "framer-motion";
 import pkg from "../../package.json";
 
@@ -48,11 +49,51 @@ export default function Home() {
   const { state, setState, isHydrated, deleteChapter } = useBCM();
   const { user } = useAuth();
   const { confirm, ConfirmDialog } = useConfirm();
+  const { prompt, PromptDialog } = usePrompt();
+  const { toast, ToastContainer } = useToast();
   const [showInfo, setShowInfo] = useState(false);
+  const [showThemeModal, setShowThemeModal] = useState(false);
   const [isLibraryOpen, setIsLibraryOpen] = useState(false);
   const isAdmin = true; // If not logged in (local mode), user is their own admin
 
   if (!isHydrated) return null;
+
+  const currentTheme = state.settings.theme || { bg: "#000000", text: "#f4f4f5" };
+  const isDawn = currentTheme.id === "dawn";
+  const isSepia = currentTheme.bg === "#fdf6e3";
+  const isIPhone = typeof window !== "undefined" && /iPhone/.test(navigator.userAgent);
+
+  const setTheme = (bg: string, text: string, id?: string) => {
+    setState(prev => ({
+      ...prev,
+      settings: {
+        ...prev.settings,
+        theme: { bg, text, id }
+      }
+    }));
+  };
+
+  const handleEditName = async () => {
+    const currentName = user?.user_metadata?.display_name || user?.email?.split("@")[0] || "";
+    const newName = await prompt({
+      title: "Update Name",
+      placeholder: "Enter your name...",
+      defaultValue: currentName,
+      submitLabel: "Save",
+    });
+
+    if (newName && newName.trim() && supabase) {
+      const { error } = await supabase.auth.updateUser({
+        data: { display_name: newName.trim() }
+      });
+
+      if (error) {
+        toast("Failed to update name", "error");
+      } else {
+        toast("Name updated!");
+      }
+    }
+  };
 
   const chapters = Object.values(state.chapters).sort((a, b) => 
     new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
@@ -88,6 +129,8 @@ export default function Home() {
   return (
     <div className="space-y-8 py-4">
       <ConfirmDialog />
+      <PromptDialog />
+      <ToastContainer />
       <header className="flex justify-between items-center relative">
         <Link 
           href="/chapter" 
@@ -98,6 +141,22 @@ export default function Home() {
         </Link>
         <h1 className="text-lg font-bold uppercase tracking-widest absolute left-1/2 -translate-x-1/2">HOME</h1>
         <div className="flex gap-2">
+          <button 
+            onClick={() => setShowThemeModal(true)}
+            className="p-2.5 text-[var(--theme-ui-subtext)] hover:text-white transition-colors bg-[var(--surface)] rounded-full border border-[var(--surface-border)]"
+            aria-label="Change theme"
+          >
+            <Palette size={22} />
+          </button>
+          {user && (
+            <button 
+              onClick={handleEditName}
+              className="p-2.5 text-[var(--theme-ui-subtext)] hover:text-white transition-colors bg-[var(--surface)] rounded-full border border-[var(--surface-border)]"
+              aria-label="User settings"
+            >
+              <User size={22} />
+            </button>
+          )}
           <Link 
             href="/group"
             className={`p-2.5 transition-colors rounded-full border border-[var(--surface-border)] ${user ? "text-orange-500 bg-orange-500/10" : "text-[var(--theme-ui-subtext)] bg-[var(--surface)]"}`}
@@ -112,6 +171,16 @@ export default function Home() {
           </button>
         </div>
       </header>
+
+      {showThemeModal && (
+        <ThemeModal
+          currentTheme={currentTheme}
+          onSetTheme={setTheme}
+          onClose={() => setShowThemeModal(false)}
+          isSepia={isSepia}
+          isIPhone={isIPhone}
+        />
+      )}
 
       {/* Recall & Learn Next Section */}
       {selectedChapter && <HomeRecallSection />}
