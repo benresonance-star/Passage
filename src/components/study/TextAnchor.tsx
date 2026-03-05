@@ -44,12 +44,6 @@ export function TextAnchor({
     return hideWords(scriptureText, clozeLevel, section.id);
   }, [stage, clozeLevel, scriptureVerses, section.id]);
 
-  const reciteLines = useMemo(() => {
-    if (stage !== "recite") return [];
-    const scriptureText = scriptureVerses.map(v => v.text).join(" ");
-    return splitIntoLines(scriptureText);
-  }, [stage, scriptureVerses]);
-
   if (stage === "cloze") {
     return (
       <div className="animate-in fade-in duration-500 px-6 md:px-12 my-auto max-w-2xl mx-auto w-full">
@@ -60,36 +54,12 @@ export function TextAnchor({
     );
   }
 
-  if (stage === "recite") {
-    return (
-      <div className="space-y-3 px-6 md:px-12 animate-in fade-in duration-500 max-w-2xl mx-auto w-full py-8">
-        {reciteLines.map((line, i) => {
-          const isRevealed = reciteRevealedVerses?.has(i);
-          return (
-            <div
-              key={i}
-              onClick={() => onReciteReveal?.(i)}
-              className={`p-4 rounded-xl transition-all duration-300 cursor-pointer border ${
-                isRevealed
-                  ? "bg-[var(--theme-ui-bg)] shadow-lg border-[var(--theme-ui-border)]"
-                  : "bg-[var(--theme-ui-bg)] text-transparent border-transparent opacity-40"
-              }`}
-              style={{ touchAction: 'pan-y' }}
-            >
-              <p className="text-lg leading-relaxed select-none">{line}</p>
-            </div>
-          );
-        })}
-      </div>
-    );
-  }
-
-  // Read, Soak, Flow all share the same verse layout
+  // Read, Soak, Flow, and Recite all share the same verse layout to maintain text anchoring
   let globalWordIdx = 0;
 
   return (
-    <div className={`px-6 md:px-12 my-auto max-w-2xl mx-auto w-full ${stage === "soak" ? "soak-breathe-text" : ""}`}>
-      <div className="chunk-text-bold text-center leading-relaxed">
+    <div className={`px-6 md:px-12 my-auto max-w-2xl mx-auto w-full ${stage === "soak" ? "soak-breathe-text" : ""} ${stage === "recite" ? "py-8" : ""}`}>
+      <div className={`chunk-text-bold text-center leading-relaxed ${stage === "recite" ? "space-y-4" : ""}`}>
         {section.verses.map((v, vIdx) => {
           if (v.type === "heading") {
             return (
@@ -111,6 +81,9 @@ export function TextAnchor({
           const isSoakFocused = stage === "soak" && soakHighlighted?.has(scriptureIdx);
           const isSoakDimmed = stage === "soak" && !soakHighlighted?.has(scriptureIdx);
 
+          const isRecite = stage === "recite";
+          const isRevealed = reciteRevealedVerses?.has(scriptureIdx);
+
           const words = v.text
             .replace(/\[LINEBREAK\]/g, " ")
             .split(/\s+/)
@@ -119,8 +92,24 @@ export function TextAnchor({
           const verseEl = (
             <span
               key={vIdx}
-              className={`inline-block mb-4 ${stage === "soak" ? "cursor-pointer" : ""}`}
-              onClick={stage === "soak" ? () => onSoakVerseToggle?.(scriptureIdx) : undefined}
+              className={`transition-all duration-300 ${
+                isRecite 
+                  ? "block p-4 rounded-xl border text-left cursor-pointer" 
+                  : "inline-block mb-4"
+              } ${
+                stage === "soak" ? "cursor-pointer" : ""
+              } ${
+                isRecite && isRevealed 
+                  ? "bg-[var(--theme-ui-bg)] shadow-lg border-[var(--theme-ui-border)]" 
+                  : isRecite 
+                  ? "bg-[var(--theme-ui-bg)] text-transparent border-transparent opacity-40" 
+                  : ""
+              }`}
+              onClick={() => {
+                if (isRecite) onReciteReveal?.(scriptureIdx);
+                else if (stage === "soak") onSoakVerseToggle?.(scriptureIdx);
+              }}
+              style={isRecite ? { touchAction: 'pan-y' } : undefined}
             >
               {words.map((word) => {
                 const wi = globalWordIdx++;
@@ -174,6 +163,13 @@ export function TextAnchor({
         <div className="mt-6 text-center h-5">
           <p className={`text-sm italic animate-in fade-in duration-1000 ${isDawn ? "text-white/50" : "text-zinc-500"}`}>
             Breathe with the word.
+          </p>
+        </div>
+      )}
+      {stage === "recite" && (
+        <div className="mt-6 text-center h-5">
+          <p className={`text-sm italic ${isDawn ? "text-white/50" : "text-zinc-500"}`}>
+            Reveal the text as you recite.
           </p>
         </div>
       )}

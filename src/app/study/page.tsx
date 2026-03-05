@@ -82,6 +82,7 @@ export default function StudyPage() {
       verseRange: `${memorisedSections[0].verseRange.split('-')[0]}-${memorisedSections[memorisedSections.length - 1].verseRange.split('-').pop()}`,
       verses: memorisedSections.flatMap(s => s.verses),
       text: memorisedSections.map(s => s.text).join(" "),
+      scriptureVerses: memorisedSections.flatMap(s => s.verses.filter(v => v.type === "scripture")),
     };
   }, [sections, activeId, isRecallAll, chapterId, chapter, state.cards]);
 
@@ -94,8 +95,8 @@ export default function StudyPage() {
   const isDawn = currentTheme.id === "dawn";
 
   const scriptureVerses = useMemo(
-    () => activeSection?.verses.filter(v => v.type === "scripture") || [],
-    [activeSection?.verses]
+    () => (activeSection as any).scriptureVerses || activeSection?.verses.filter(v => v.type === "scripture") || [],
+    [activeSection]
   );
 
   // Redirect if no chapter/section
@@ -427,7 +428,7 @@ export default function StudyPage() {
             if (reciteAllRevealed) {
               setReciteRevealed(new Set());
             } else {
-              setReciteRevealed(new Set(Array.from({ length: reciteLines.length }, (_, i) => i)));
+              setReciteRevealed(new Set(Array.from({ length: scriptureVerses.length }, (_, i) => i)));
             }
           }}
           onTypeSubmit={handleSpeakSubmit}
