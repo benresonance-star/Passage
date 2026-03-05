@@ -51,9 +51,7 @@ export default function StudyPage() {
   const [reciteRevealed, setReciteRevealed] = useState<Set<number>>(new Set());
 
   // Cloze state
-  const [clozeLevel, setClozeLevel] = useState<0 | 20 | 40 | 60 | 80 | "mnemonic">(
-    (state.settings.clozeLevel as 0 | 20 | 40 | 60 | 80 | "mnemonic") || "mnemonic"
-  );
+  const [clozeLevel, setClozeLevel] = useState<0 | 20 | 40 | 60 | 80 | "mnemonic">("mnemonic");
 
   // Speak state
   const [typedText, setTypedText] = useState("");
@@ -232,6 +230,7 @@ export default function StudyPage() {
     if (newStage === "soak") setSoakHighlighted(new Set([0]));
     if (newStage === "flow") { setFlowWordIndex(-1); setFlowPlaying(false); }
     if (newStage === "recite") setReciteRevealed(new Set());
+    if (newStage === "cloze") setClozeLevel("mnemonic");
     if (newStage === "type") setTypedText("");
     setStage(newStage);
   }, []);
