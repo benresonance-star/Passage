@@ -52,7 +52,7 @@ export default function StudyPage() {
 
   // Cloze state
   const [clozeLevel, setClozeLevel] = useState<0 | 20 | 40 | 60 | 80 | "mnemonic">(
-    (state.settings.clozeLevel as 0 | 20 | 40 | 60 | 80 | "mnemonic") || 20
+    (state.settings.clozeLevel as 0 | 20 | 40 | 60 | 80 | "mnemonic") || "mnemonic"
   );
 
   // Speak state
