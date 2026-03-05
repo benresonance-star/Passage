@@ -51,8 +51,8 @@ export function HomeRecallSection() {
         activeChunkId: { ...prev.settings.activeChunkId, [chapterId]: memorisedSections[0].id }
       }
     }));
-    // Navigate to study page with a recall flag
-    router.push("/study?mode=recall");
+    // Navigate to study page with recallAll flag
+    router.push("/study?mode=recall&recallAll=true");
   };
 
   const displayName = user?.user_metadata?.display_name || user?.email?.split("@")[0] || "Friend";

@@ -1,4 +1,4 @@
-# Passage - Bible Chapter Memoriser (v3.8.0)
+# Passage - Bible Chapter Memoriser (v3.8.1)
 
 ## AI Agent Protocol (Mandatory)
 
@@ -44,7 +44,7 @@ A fast, offline-capable iPhone-first PWA for memorising Bible chapters through c
 ```
 HOME (/)
   ├── Greeting ("Hello {name}")
-  ├── Recall button (spaced repetition)
+  ├── Recall button (spaced repetition, combined view)
   ├── Learn Next button (next unmemorised section)
   ├── Active Chapter card
   ├── Library list (collapsible)
@@ -232,7 +232,7 @@ interface BCMState {
 The dashboard and library manager.
 
 - **Greeting**: "Hello {name}" (using profile data) with a welcoming subtitle.
-- **Recall Button**: Spaced repetition action. Visible if at least one section is memorised. Enabled only when the recall timer (based on the shortest interval of all memorised sections) has elapsed. Triggers a "recite through" flow in `/study`.
+- **Recall Button**: Spaced repetition action. Visible if at least one section is memorised. Enabled only when the recall timer (based on the shortest interval of all memorised sections) has elapsed. Triggers a "recite through" flow in `/study` with all memorised sections loaded as a combined view, jumping directly to the **Reveal** stage with **Mnemonic (ABC)** mode enabled.
 - **Learn Next Button**: Automatically identifies the next unmemorised section and navigates to `/study` to begin learning.
 - **Header**: Displays centered "HOME" title and a collapsible top actions bar.
 - **Top Actions** (collapsible pill, same pattern as Chapter page):
@@ -293,6 +293,7 @@ Immersive verse-by-verse meditation screen.
 Multi-mode practice screen for the active chunk. Modes are sequential or selectable.
 
 - **Header**: "Attend", "Abide", "Breathe", etc. title centered. Subtitle shows verse range and chapter title.
+- **Recall Mode**: Triggered from the Home page Recall button. Loads all memorised sections as a single combined section, starts at the **Reveal** stage, and sets **Recollect** to **Mnemonic (ABC)** mode.
 
 1. **Attend**: Full text with verse structure, headings optional. Three action buttons at the bottom:
     - **Breathe**: Enters Breathe Mode.
@@ -339,7 +340,7 @@ A unified single-screen practice flow that guides the user through a practice se
 **Practice Units:** Users choose between "Chunks" (groups of ~4 verses) or "Verses" (single verse) via a segmented toggle on the Chapter page header. Both use the `PracticeSection` type (same shape as `Chunk`). SM2 cards are tracked independently for each unit size — IDs don't collide (`-v9-12` for chunks, `-v9` for single verses).
 
 **Entry Points:**
-- **Recall button**: On Home page, triggers a "recite through" flow starting at the Speak stage for all memorised sections.
+- **Recall button**: On Home page, triggers a "recite through" flow starting at the **Reveal** stage for all memorised sections combined.
 - **Learn Next button**: On Home page, navigates to the next unmemorised section.
 - **Practice pill**: Appears on the active (highlighted) chunk/verse card on the Chapter page. Long-press activates a section, then tap the pill to enter Practice.
 - **Review page**: "Practice" button per chunk navigates to `/study`.
@@ -446,6 +447,7 @@ The spaced repetition system (`lib/scheduler.ts`) uses a modified SM-2 algorithm
 **Recall Logic:**
 - **Shortest Interval Spacing**: Spacing for the entire chapter is determined by the shortest interval among all memorised sections. This ensures the user consolidates the entire learnt section together.
 - **Recall Due Status**: Calculated via `getRecallDueStatus()`, which checks if the earliest `nextDueAt` among memorised cards has passed.
+- **Combined Recall View**: When entering via the Recall button, all memorised sections are concatenated into a single virtual section for a continuous "recite through" experience.
 
 **Streak system** (`lib/streak.ts`): Tracks daily practice streaks per chapter. Resets if gap > 1 day.
 

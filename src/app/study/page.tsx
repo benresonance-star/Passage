@@ -23,14 +23,16 @@ export default function StudyPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const isRecallMode = searchParams.get("mode") === "recall";
+  const isRecallAll = searchParams.get("recallAll") === "true";
   useWakeLock();
 
   const [stage, setStage] = useState<StudyStage>("read");
 
-  // If in recall mode, jump straight to Speak stage
+  // If in recall mode, jump straight to Reveal stage and set ABC mode
   useEffect(() => {
     if (isRecallMode) {
-      setStage("type");
+      setStage("recite");
+      setClozeLevel("mnemonic");
     }
   }, [isRecallMode]);
 
@@ -69,7 +71,21 @@ export default function StudyPage() {
     [chapter, studyUnit]
   );
   const activeId = chapterId ? state.settings.activeChunkId[chapterId] : null;
-  const activeSection = sections.find(s => s.id === activeId);
+  const activeSection = useMemo(() => {
+    const baseSection = sections.find(s => s.id === activeId);
+    if (!isRecallAll || !chapterId || !chapter) return baseSection;
+
+    // Combined section for Recall All mode
+    const memorisedSections = sections.filter(s => state.cards[chapterId]?.[s.id]?.isMemorised);
+    if (memorisedSections.length === 0) return baseSection;
+
+    return {
+      id: `recall-all-${chapterId}`,
+      verseRange: `${memorisedSections[0].verseRange.split('-')[0]}-${memorisedSections[memorisedSections.length - 1].verseRange.split('-').pop()}`,
+      verses: memorisedSections.flatMap(s => s.verses),
+      text: memorisedSections.map(s => s.text).join(" "),
+    };
+  }, [sections, activeId, isRecallAll, chapterId, chapter, state.cards]);
 
   const words = useMemo(
     () => activeSection?.text.split(/\s+/).filter(w => w.length > 0) || [],
@@ -239,7 +255,7 @@ export default function StudyPage() {
   }, [stage, reciteRevealed, reciteLines.length]);
 
   const handleContinue = useCallback(() => {
-    if (isRecallMode && chapterId) {
+    if (isRecallMode && !isRecallAll && chapterId) {
       // Find all memorised sections
       const memorisedSections = Object.values(state.cards[chapterId] || {})
         .filter(c => c.isMemorised)
@@ -256,14 +272,14 @@ export default function StudyPage() {
             activeChunkId: { ...prev.settings.activeChunkId, [chapterId]: nextRecall.id }
           }
         }));
-        setStage("type");
+        setStage("recite"); // Jump to Reveal for next section too
         setTypedText("");
         setDiffResults(null);
         return;
       }
     }
     router.push("/chapter");
-  }, [isRecallMode, chapterId, activeId, state.cards, router, setState]);
+  }, [isRecallMode, isRecallAll, chapterId, activeId, state.cards, router, setState]);
 
   if (!isHydrated) return null;
   if (!chapter || !chapterId || !activeSection) return <EmptyState />;

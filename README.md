@@ -1,10 +1,10 @@
-# Passage - Bible Chapter Memoriser (v3.8.0)
+# Passage - Bible Chapter Memoriser (v3.8.1)
 
 An iPhone-first PWA for memorising Bible chapters through chunked practice, immersive soaking, spaced repetition, and shared group progress tracking with cross-device cloud sync.
 
 ## Features
 
-- **Home Dashboard**: A central landing page with a personalised greeting, a "Recall" button for spaced repetition (based on the shortest interval of memorised sections), a "Learn Next" button for seamless progression, and a collapsible Library list.
+- **Home Dashboard**: A central landing page with a personalised greeting, a "Recall" button for spaced repetition (based on the shortest interval of memorised sections, loading all memorised content into a combined view), a "Learn Next" button for seamless progression, and a collapsible Library list.
 - **Guided Practice Session**: Single-screen flow from reading to recall with 7 stages — Attend, Abide (inline verse-focus), Breathe (natural speech-paced rhythmic reading), Reveal (tap-to-reveal), Recollect (scaffolded word-hiding), Speak (free recall), and Result (accuracy feedback with SM-2 grading). Text stays anchored in the same position across all stages.
 - **My Progress**: Unified view of memorisation progress with bidirectional sync between Parts and Verses. Access via the Home page or active chapter card. Includes a centered header and back navigation.
 - **Practice Units**: Choose between practicing "Parts" (groups of ~4 verses) or individual "Verses" via a toggle on the Chapter page. Both track SM-2 progress independently but share memorisation state.
