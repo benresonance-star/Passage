@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useBCM } from "@/context/BCMContext";
-import { Play, BookOpen, Upload, ChevronRight, Award, Trash2, Trophy, Info, X, Users, RefreshCw, ArrowLeft, Wind, ChevronDown, Palette, User } from "lucide-react";
+import { Play, BookOpen, Upload, ChevronRight, Award, Trash2, Trophy, Info, X, Users, RefreshCw, ArrowLeft, Wind, ChevronDown, Palette, User, Settings } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/lib/supabase";
 import { useEffect, useCallback } from "react";
@@ -11,6 +11,7 @@ import { TeamBoard } from "@/components/TeamBoard";
 import { HomeRecallSection } from "@/components/HomeRecallSection";
 import { ThemeModal } from "@/components/ThemeModal";
 import { useConfirm, usePrompt, useToast } from "@/components/AppModal";
+import { useScrollAwareTopActions } from "@/hooks/useScrollAwareTopActions";
 import { AnimatePresence, motion } from "framer-motion";
 import pkg from "../../package.json";
 
@@ -54,6 +55,7 @@ export default function Home() {
   const [showInfo, setShowInfo] = useState(false);
   const [showThemeModal, setShowThemeModal] = useState(false);
   const [isLibraryOpen, setIsLibraryOpen] = useState(false);
+  const { isCollapsed: topCollapsed, setCollapsed: setTopCollapsed, resetCollapseTimer: resetTopTimer } = useScrollAwareTopActions();
   const isAdmin = true; // If not logged in (local mode), user is their own admin
 
   if (!isHydrated) return null;
@@ -140,35 +142,61 @@ export default function Home() {
           <ArrowLeft size={22} />
         </Link>
         <h1 className="text-lg font-bold uppercase tracking-widest absolute left-1/2 -translate-x-1/2">HOME</h1>
-        <div className="flex gap-2">
-          <button 
-            onClick={() => setShowThemeModal(true)}
-            className="p-2.5 text-[var(--theme-ui-subtext)] hover:text-white transition-colors bg-[var(--surface)] rounded-full border border-[var(--surface-border)]"
-            aria-label="Change theme"
+        <div 
+          className="relative h-10 will-change-[clip-path,opacity]"
+          onClick={() => topCollapsed && (setTopCollapsed(false), resetTopTimer())}
+        >
+          <div 
+            className={`flex gap-1 p-1 transition-all duration-500 ease-in-out shadow-lg rounded-full overflow-hidden ${
+              topCollapsed ? "top-pill-clip bg-transparent border-transparent" : "top-full-clip bg-[var(--theme-ui-bg)] border border-white/10"
+            }`}
           >
-            <Palette size={22} />
-          </button>
-          {user && (
-            <button 
-              onClick={handleEditName}
-              className="p-2.5 text-[var(--theme-ui-subtext)] hover:text-white transition-colors bg-[var(--surface)] rounded-full border border-[var(--surface-border)]"
-              aria-label="User settings"
+            <div className={`flex gap-1 transition-all duration-500 ${topCollapsed ? "opacity-0 scale-95 pointer-events-none" : "opacity-100 scale-100"}`}>
+              <button 
+                onClick={(e) => { e.stopPropagation(); setShowThemeModal(true); resetTopTimer(); }}
+                className="p-2 rounded-xl transition-colors text-zinc-500"
+                aria-label="Change theme"
+              >
+                <Palette size={20} />
+              </button>
+              {user && (
+                <button 
+                  onClick={(e) => { e.stopPropagation(); handleEditName(); resetTopTimer(); }}
+                  className="p-2 rounded-xl transition-colors text-zinc-500"
+                  aria-label="User settings"
+                >
+                  <User size={20} />
+                </button>
+              )}
+              <Link 
+                href="/group"
+                onClick={(e) => { e.stopPropagation(); resetTopTimer(); }}
+                className={`p-2 rounded-xl transition-colors ${user ? "text-orange-500" : "text-zinc-500"}`}
+              >
+                <Users size={20} />
+              </Link>
+              <button 
+                onClick={(e) => { e.stopPropagation(); setShowInfo(true); resetTopTimer(); }}
+                className="p-2 rounded-xl transition-colors text-zinc-500"
+              >
+                <Info size={20} />
+              </button>
+            </div>
+            <button
+              onClick={(e) => {
+                if (topCollapsed) {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setTopCollapsed(false);
+                  resetTopTimer();
+                }
+              }}
+              className={`p-2 rounded-xl transition-colors text-zinc-500 ${topCollapsed ? "bg-[var(--theme-ui-bg)] border border-white/10 shadow-md" : ""}`}
+              aria-label="Settings"
             >
-              <User size={22} />
+              <Settings size={20} />
             </button>
-          )}
-          <Link 
-            href="/group"
-            className={`p-2.5 transition-colors rounded-full border border-[var(--surface-border)] ${user ? "text-orange-500 bg-orange-500/10" : "text-[var(--theme-ui-subtext)] bg-[var(--surface)]"}`}
-          >
-            <Users size={22} />
-          </Link>
-          <button 
-            onClick={() => setShowInfo(true)}
-            className="p-2.5 text-[var(--theme-ui-subtext)] hover:text-white transition-colors bg-[var(--surface)] rounded-full border border-[var(--surface-border)]"
-          >
-            <Info size={22} />
-          </button>
+          </div>
         </div>
       </header>
 
