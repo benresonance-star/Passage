@@ -47,7 +47,7 @@ HOME (/)
   ├── Recall button (spaced repetition)
   ├── Learn Next button (next unmemorised section)
   ├── Active Chapter card
-  ├── Library list
+  ├── Library list (collapsible)
   ├── Memorised Chapters
   └── Info Modal
         
@@ -234,9 +234,9 @@ The dashboard and library manager.
 - **Greeting**: "Hello {name}" (using profile data) with a welcoming subtitle.
 - **Recall Button**: Spaced repetition action. Visible if at least one section is memorised. Enabled only when the recall timer (based on the shortest interval of all memorised sections) has elapsed. Triggers a "recite through" flow in `/study`.
 - **Learn Next Button**: Automatically identifies the next unmemorised section and navigates to `/study` to begin learning.
-- **Header**: Displays centered "LIBRARY" title with a back arrow to the Chapter page (`/chapter`), Group icon (links to `/group`), and Info icon.
+- **Header**: Displays centered "HOME" title with a back arrow to the Chapter page (`/chapter`), Group icon (links to `/group`), and Info icon.
 - **Active Chapter Card**: Shows title, version abbreviation, verse/chunk counts, memorised progress (`n / m Chunks`), trophy icon when fully memorised. Two action buttons: Read Chapter and My Progress.
-- **Library List**: All chapters sorted by creation date (newest first). Each row shows title, memorised count, and a delete button (admin only). The currently active chapter is marked with an "ACTIVE" label and includes a "Progress" button next to the trash can. An "Add New Chapter" button (dashed border, admin only) links to `/import`.
+- **Library List**: Collapsible section toggled by a chevron arrow. All chapters sorted by creation date (newest first). Each row shows title, memorised count, and a delete button (admin only). The currently active chapter is marked with an "ACTIVE" label and includes a "Progress" button next to the trash can. An "Add New Chapter" button (dashed border, admin only) links to `/import`.
 - **Memorised Chapters**: Separate section for fully memorised chapters with amber/gold styling and trophy icons.
 - **Info Modal**: Centered pop-up card with a 7-step meditative memorisation guide ("How to Memorise a Chapter"). Uses zoom-in animation and high-contrast styling.
 - **Group Button**: Top-right icon linking to `/group`. Highlighted orange when logged in.

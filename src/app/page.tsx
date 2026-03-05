@@ -3,13 +3,14 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useBCM } from "@/context/BCMContext";
-import { Play, BookOpen, Upload, ChevronRight, Award, Trash2, Trophy, Info, X, Users, RefreshCw, ArrowLeft, Wind } from "lucide-react";
+import { Play, BookOpen, Upload, ChevronRight, Award, Trash2, Trophy, Info, X, Users, RefreshCw, ArrowLeft, Wind, ChevronDown } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/lib/supabase";
 import { useEffect } from "react";
 import { TeamBoard } from "@/components/TeamBoard";
 import { HomeRecallSection } from "@/components/HomeRecallSection";
 import { useConfirm } from "@/components/AppModal";
+import { AnimatePresence, motion } from "framer-motion";
 import pkg from "../../package.json";
 
 const GUIDE_ITEMS = [
@@ -48,6 +49,7 @@ export default function Home() {
   const { user } = useAuth();
   const { confirm, ConfirmDialog } = useConfirm();
   const [showInfo, setShowInfo] = useState(false);
+  const [isLibraryOpen, setIsLibraryOpen] = useState(false);
   const isAdmin = true; // If not logged in (local mode), user is their own admin
 
   if (!isHydrated) return null;
@@ -94,7 +96,7 @@ export default function Home() {
         >
           <ArrowLeft size={22} />
         </Link>
-        <h1 className="text-lg font-bold uppercase tracking-widest absolute left-1/2 -translate-x-1/2">LIBRARY</h1>
+        <h1 className="text-lg font-bold uppercase tracking-widest absolute left-1/2 -translate-x-1/2">HOME</h1>
         <div className="flex gap-2">
           <Link 
             href="/group"
@@ -184,55 +186,77 @@ export default function Home() {
           )}
 
           <div className="space-y-3">
-            <h3 className="text-sm font-medium text-[var(--theme-ui-subtext)] uppercase tracking-wider px-1">Library</h3>
-            <div className="grid gap-3">
-              {chapters.map((ch) => (
-                <div 
-                  key={ch.id}
-                  onClick={() => handleSwitch(ch.id)}
-                  className={`flex items-center justify-between p-4 rounded-xl border transition-all active:scale-[0.98] ${
-                    selectedChapter && ch.id === selectedChapter.id 
-                      ? "bg-white/5 border-white/20" 
-                      : "bg-[var(--surface)] border-[var(--surface-border)] active:bg-[var(--surface-alt)]"
-                  }`}
+            <button 
+              onClick={() => setIsLibraryOpen(!isLibraryOpen)}
+              className="flex items-center justify-between w-full px-1 group"
+            >
+              <h3 className="text-sm font-medium text-[var(--theme-ui-subtext)] uppercase tracking-wider group-hover:text-white transition-colors">Library</h3>
+              <ChevronDown 
+                size={18} 
+                className={`text-[var(--theme-ui-subtext)] transition-transform duration-300 ${isLibraryOpen ? "rotate-180" : ""}`} 
+              />
+            </button>
+            
+            <AnimatePresence>
+              {isLibraryOpen && (
+                <motion.div 
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: "auto", opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.3, ease: "easeInOut" }}
+                  className="overflow-hidden"
                 >
-                  <div className="flex items-center gap-4">
-                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center border ${
-                      selectedChapter && ch.id === selectedChapter.id ? "bg-white/10 border-white/30 text-white" : "bg-[var(--surface-alt)] border-[var(--surface-border)] text-white"
-                    }`}>
-                      <BookOpen size={20} />
-                    </div>
-                    <div>
-                      <p className={`font-bold ${selectedChapter && ch.id === selectedChapter.id ? "text-white" : "text-white"}`}>
-                        {ch.bookName} {ch.title}
-                        {selectedChapter && ch.id === selectedChapter.id && (
-                          <span className="ml-2 text-[10px] font-black text-orange-500 bg-orange-500/10 px-1.5 py-0.5 rounded-md tracking-tighter">ACTIVE</span>
-                        )}
-                      </p>
-                      <p className={`text-[10px] uppercase tracking-widest font-bold ${selectedChapter && ch.id === selectedChapter.id ? "text-white/60" : "text-white/70"}`}>
-                        {state.versions[ch.versionId]?.abbreviation || ch.versionId} • {Object.values(state.cards[ch.id] || {}).filter(c => c.isMemorised).length} / {ch.chunks.length} Memorised
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-1">
+                  <div className="grid gap-3 pt-1 pb-2">
+                    {chapters.map((ch) => (
+                      <div 
+                        key={ch.id}
+                        onClick={() => handleSwitch(ch.id)}
+                        className={`flex items-center justify-between p-4 rounded-xl border transition-all active:scale-[0.98] ${
+                          selectedChapter && ch.id === selectedChapter.id 
+                            ? "bg-white/5 border-white/20" 
+                            : "bg-[var(--surface)] border-[var(--surface-border)] active:bg-[var(--surface-alt)]"
+                        }`}
+                      >
+                        <div className="flex items-center gap-4">
+                          <div className={`w-10 h-10 rounded-lg flex items-center justify-center border ${
+                            selectedChapter && ch.id === selectedChapter.id ? "bg-white/10 border-white/30 text-white" : "bg-[var(--surface-alt)] border-[var(--surface-border)] text-white"
+                          }`}>
+                            <BookOpen size={20} />
+                          </div>
+                          <div>
+                            <p className={`font-bold ${selectedChapter && ch.id === selectedChapter.id ? "text-white" : "text-white"}`}>
+                              {ch.bookName} {ch.title}
+                              {selectedChapter && ch.id === selectedChapter.id && (
+                                <span className="ml-2 text-[10px] font-black text-orange-500 bg-orange-500/10 px-1.5 py-0.5 rounded-md tracking-tighter">ACTIVE</span>
+                              )}
+                            </p>
+                            <p className={`text-[10px] uppercase tracking-widest font-bold ${selectedChapter && ch.id === selectedChapter.id ? "text-white/60" : "text-white/70"}`}>
+                              {state.versions[ch.versionId]?.abbreviation || ch.versionId} • {Object.values(state.cards[ch.id] || {}).filter(c => c.isMemorised).length} / {ch.chunks.length} Memorised
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          {isAdmin && (
+                            <button onClick={(e) => handleDelete(ch.id, e)} className={`p-2 transition-colors ${selectedChapter && ch.id === selectedChapter.id ? "text-white/60 hover:text-red-500" : "text-white/70 hover:text-red-500"}`}>
+                              <Trash2 size={18} />
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    ))}
                     {isAdmin && (
-                      <button onClick={(e) => handleDelete(ch.id, e)} className={`p-2 transition-colors ${selectedChapter && ch.id === selectedChapter.id ? "text-white/60 hover:text-red-500" : "text-white/70 hover:text-red-500"}`}>
-                        <Trash2 size={18} />
-                      </button>
+                      <Link
+                        href="/import"
+                        className="flex items-center justify-center gap-3 p-4 bg-[var(--surface)] border border-dashed border-[var(--surface-border)] rounded-xl text-[var(--theme-ui-subtext)] hover:text-orange-500 hover:border-orange-500/50 transition-all"
+                      >
+                        <Upload size={20} />
+                        <span className="font-bold">Add New Chapter</span>
+                      </Link>
                     )}
                   </div>
-                </div>
-              ))}
-              {isAdmin && (
-                <Link
-                  href="/import"
-                  className="flex items-center justify-center gap-3 p-4 bg-[var(--surface)] border border-dashed border-[var(--surface-border)] rounded-xl text-[var(--theme-ui-subtext)] hover:text-orange-500 hover:border-orange-500/50 transition-all"
-                >
-                  <Upload size={20} />
-                  <span className="font-bold">Add New Chapter</span>
-                </Link>
+                </motion.div>
               )}
-            </div>
+            </AnimatePresence>
           </div>
 
           {memorisedChapters.length > 0 && (
