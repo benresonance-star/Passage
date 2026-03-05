@@ -8,6 +8,7 @@ import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/lib/supabase";
 import { useEffect } from "react";
 import { TeamBoard } from "@/components/TeamBoard";
+import { HomeRecallSection } from "@/components/HomeRecallSection";
 import { useConfirm } from "@/components/AppModal";
 import pkg from "../../package.json";
 
@@ -109,6 +110,9 @@ export default function Home() {
           </button>
         </div>
       </header>
+
+      {/* Recall & Learn Next Section */}
+      {selectedChapter && <HomeRecallSection />}
 
       {/* Info Modal */}
       {showInfo && (

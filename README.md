@@ -1,14 +1,15 @@
-# Passage - Bible Chapter Memoriser (v3.7.6)
+# Passage - Bible Chapter Memoriser (v3.8.0)
 
 An iPhone-first PWA for memorising Bible chapters through chunked practice, immersive soaking, spaced repetition, and shared group progress tracking with cross-device cloud sync.
 
 ## Features
 
+- **Home Dashboard**: A central landing page with a personalised greeting, a "Recall" button for spaced repetition (based on the shortest interval of memorised sections), and a "Learn Next" button for seamless progression.
 - **Guided Practice Session**: Single-screen flow from reading to recall with 7 stages — Attend, Abide (inline verse-focus), Breathe (natural speech-paced rhythmic reading), Reveal (tap-to-reveal), Recollect (scaffolded word-hiding), Speak (free recall), and Result (accuracy feedback with SM-2 grading). Text stays anchored in the same position across all stages.
 - **My Progress**: Unified view of memorisation progress with bidirectional sync between Parts and Verses. Access via the Home page or active chapter card. Includes a centered header and back navigation.
 - **Practice Units**: Choose between practicing "Parts" (groups of ~4 verses) or individual "Verses" via a toggle on the Chapter page. Both track SM-2 progress independently but share memorisation state.
 - **Soak Mode**: Full-screen verse-by-verse meditation with a 3-second Psalm 46:10 introductory screen, breathing gradient background, double-buffer crossfade transitions, and wake lock. Supports swipe navigation on mobile and click navigation on desktop.
-- **Spaced Repetition**: Modified SM-2 algorithm with auto-promotion to memorised after 3 consecutive high scores.
+- **Spaced Repetition**: Modified SM-2 algorithm with auto-promotion to memorised after 3 consecutive high scores. Spacing for recall sessions is optimized for consolidation by using the shortest interval among memorised sections.
 - **Theme Engine**: 7 presets (OLED, Amber, Midnight, Sepia, Night Dusk, Classic, Dawn) with CSS custom properties and animated gradients.
 - **Cloud Sync**: Cross-device synchronisation via Supabase with realtime subscriptions and timestamp-based conflict resolution.
 - **Practice Groups**: Shared progress boards, invite links, admin-controlled chapter libraries, and member management.

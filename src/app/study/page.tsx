@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import Link from "next/link";
 import { useBCM } from "@/context/BCMContext";
 import { useAuth } from "@/context/AuthContext";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useWakeLock } from "@/hooks/useWakeLock";
 import { getSections, splitIntoLines } from "@/lib/parser";
 import { getWordDelay, DEFAULT_TUNING, type SpeechTuning } from "@/lib/speech";
@@ -21,9 +21,18 @@ export default function StudyPage() {
   const { state, setState, isHydrated, syncProgress } = useBCM();
   const { user } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const isRecallMode = searchParams.get("mode") === "recall";
   useWakeLock();
 
   const [stage, setStage] = useState<StudyStage>("read");
+
+  // If in recall mode, jump straight to Speak stage
+  useEffect(() => {
+    if (isRecallMode) {
+      setStage("type");
+    }
+  }, [isRecallMode]);
 
   // Flow state
   const [flowWordIndex, setFlowWordIndex] = useState(-1);
@@ -229,6 +238,33 @@ export default function StudyPage() {
     return reciteRevealed.size > 0 && reciteRevealed.size >= reciteLines.length;
   }, [stage, reciteRevealed, reciteLines.length]);
 
+  const handleContinue = useCallback(() => {
+    if (isRecallMode && chapterId) {
+      // Find all memorised sections
+      const memorisedSections = Object.values(state.cards[chapterId] || {})
+        .filter(c => c.isMemorised)
+        .sort((a, b) => new Date(a.nextDueAt).getTime() - new Date(b.nextDueAt).getTime());
+      
+      const currentIndex = memorisedSections.findIndex(s => s.id === activeId);
+      const nextRecall = memorisedSections[currentIndex + 1];
+
+      if (nextRecall) {
+        setState(prev => ({
+          ...prev,
+          settings: {
+            ...prev.settings,
+            activeChunkId: { ...prev.settings.activeChunkId, [chapterId]: nextRecall.id }
+          }
+        }));
+        setStage("type");
+        setTypedText("");
+        setDiffResults(null);
+        return;
+      }
+    }
+    router.push("/chapter");
+  }, [isRecallMode, chapterId, activeId, state.cards, router, setState]);
+
   if (!isHydrated) return null;
   if (!chapter || !chapterId || !activeSection) return <EmptyState />;
 
@@ -382,7 +418,7 @@ export default function StudyPage() {
           onTypeSubmit={handleSpeakSubmit}
           canSubmit={typedText.trim().length > 0}
           onTryAgain={() => { setTypedText(""); handleStageChange("type"); }}
-          onContinue={() => router.push("/chapter")}
+          onContinue={handleContinue}
           accuracy={diffResults?.accuracy}
         />
       </div>

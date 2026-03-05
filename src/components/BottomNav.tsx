@@ -2,10 +2,11 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BookOpen, Play, Droplets, RefreshCw, Wind } from "lucide-react";
+import { BookOpen, Play, Droplets, RefreshCw, Wind, Home } from "lucide-react";
 import { useBCM } from "@/context/BCMContext";
 
 const NAV_ITEMS = [
+  { label: "Home", href: "/", icon: Home },
   { label: "Chapter", href: "/chapter", icon: BookOpen },
   { label: "Soak", href: "/soak", icon: Droplets },
   { label: "Practice", href: "/study", icon: Wind },

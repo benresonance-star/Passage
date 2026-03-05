@@ -190,7 +190,9 @@ export function ThemeContent({ children }: { children: React.ReactNode }) {
               // Only navigate if hydrated, otherwise wait for hydration
               if (isHydrated) {
                 setIsNavigating(true);
-                router.push("/chapter");
+                // The user wants to land on Home (/) after the splash sequence.
+                // Since the app already starts at /, we just need to hide the meditation screen.
+                setShowMeditation(false);
               } else {
                 // This is a rare edge case where meditation ends before hydration.
                 // We'll just hide the meditation screen and let the user land on Home,

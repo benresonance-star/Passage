@@ -1,4 +1,4 @@
-# Passage - Bible Chapter Memoriser (v3.7.6)
+# Passage - Bible Chapter Memoriser (v3.8.0)
 
 ## AI Agent Protocol (Mandatory)
 
@@ -42,13 +42,17 @@ A fast, offline-capable iPhone-first PWA for memorising Bible chapters through c
 ### A. Screen Map & Navigation Model
 
 ```
-LIBRARY (/)
+HOME (/)
+  ├── Greeting ("Hello {name}")
+  ├── Recall button (spaced repetition)
+  ├── Learn Next button (next unmemorised section)
   ├── Active Chapter card
   ├── Library list
   ├── Memorised Chapters
   └── Info Modal
         
 Tab Bar (BottomNav — fixed pill)
+  ├── Home     (/)
   ├── Chapter  (/chapter)
   ├── Soak     (/soak)
   └── Practice (/study)
@@ -63,14 +67,15 @@ Legacy Routes (still accessible, not in nav)
 Modal / Push Routes
   ├── Import   (/import)
   ├── Group    (/group)
-  └── ThemeModal (overlay within /chapter)
+  ├── ThemeModal (overlay within /chapter)
 ```
 
 **Navigation rules:**
 - The bottom nav is a collapsible pill (`BottomNav.tsx`). It collapses to a book icon on scroll and expands on tap.
 - Soak, Practice, and Review tabs are disabled when no chapter is selected.
 - Tapping an already-active tab resets its state (dispatches `bcm-reset-practice` / `bcm-reset-recite` custom events).
-- The Home screen (`/`) is reached via the Settings cog in the Chapter header, not from the tab bar.
+- The Home screen (`/`) is the default landing page after the splash sequence.
+- The bottom nav now includes a Home icon for easy access to the library and recall features.
 
 **Swift mapping:** `TabView` with 4 tabs + `NavigationStack` for push routes (Import, Group). Home becomes the root of a `NavigationStack` wrapping the tab view.
 
@@ -92,12 +97,12 @@ All app state lives in a single `BCMState` object managed by `BCMContext` (React
 ```
 layout.tsx
   └── ThemeContent (applies CSS vars, manages splash/meditation sequence)
-        ├── SplashScreen → MeditationScreen → App content
+        ├── SplashScreen → MeditationScreen → App content (landing on /)
         ├── BottomNav (collapsible pill, scroll-aware)
         └── Page views (/, /chapter, /soak, /practice, /review, /import, /group)
 ```
 
-**Shared components:** `EmptyState`, `TeamBoard`, `ThemeModal`, `LibrarySelector`, `FlowControls`, `AppModal` (confirm/toast).
+**Shared components:** `EmptyState`, `TeamBoard`, `ThemeModal`, `LibrarySelector`, `FlowControls`, `AppModal` (confirm/toast), `HomeRecallSection`.
 
 ---
 
@@ -222,10 +227,13 @@ interface BCMState {
 
 ## 5. Screens
 
-### A. LIBRARY (`/`)
+### A. HOME (`/`)
 
 The dashboard and library manager.
 
+- **Greeting**: "Hello {name}" (using profile data) with a welcoming subtitle.
+- **Recall Button**: Spaced repetition action. Visible if at least one section is memorised. Enabled only when the recall timer (based on the shortest interval of all memorised sections) has elapsed. Triggers a "recite through" flow in `/study`.
+- **Learn Next Button**: Automatically identifies the next unmemorised section and navigates to `/study` to begin learning.
 - **Header**: Displays centered "LIBRARY" title with a back arrow to the Chapter page (`/chapter`), Group icon (links to `/group`), and Info icon.
 - **Active Chapter Card**: Shows title, version abbreviation, verse/chunk counts, memorised progress (`n / m Chunks`), trophy icon when fully memorised. Two action buttons: Read Chapter and My Progress.
 - **Library List**: All chapters sorted by creation date (newest first). Each row shows title, memorised count, and a delete button (admin only). The currently active chapter is marked with an "ACTIVE" label and includes a "Progress" button next to the trash can. An "Add New Chapter" button (dashed border, admin only) links to `/import`.
@@ -305,7 +313,7 @@ Multi-mode practice screen for the active chunk. Modes are sequential or selecta
 5. **Result**: Word-level diff display.
     - Accuracy percentage with CheckCircle icon.
     - Word-by-word results: correct words in white (or gold in Dawn), missing words in faded orange.
-    - "Try Again" button resets to Speak Mode. "Continue" returns to `/chapter`.
+    - "Try Again" button resets to Speak Mode. "Continue" returns to `/chapter` (or next recall target in Recall Mode).
     - SM-2 card update happens automatically on submission.
 
 6. **Reveal**: Oral practice with tap-to-reveal lines.
@@ -325,6 +333,8 @@ A unified single-screen practice flow that guides the user through a practice se
 **Practice Units:** Users choose between "Chunks" (groups of ~4 verses) or "Verses" (single verse) via a segmented toggle on the Chapter page header. Both use the `PracticeSection` type (same shape as `Chunk`). SM2 cards are tracked independently for each unit size — IDs don't collide (`-v9-12` for chunks, `-v9` for single verses).
 
 **Entry Points:**
+- **Recall button**: On Home page, triggers a "recite through" flow starting at the Speak stage for all memorised sections.
+- **Learn Next button**: On Home page, navigates to the next unmemorised section.
 - **Practice pill**: Appears on the active (highlighted) chunk/verse card on the Chapter page. Long-press activates a section, then tap the pill to enter Practice.
 - **Review page**: "Practice" button per chunk navigates to `/study`.
 - **Bottom nav**: Practice tab in the navigation bar.
@@ -337,7 +347,7 @@ A unified single-screen practice flow that guides the user through a practice se
 4. **Reveal**: Text split into sentence-based lines (`splitIntoLines`). Lines are hidden (transparent, 40% opacity). Tap to reveal individual lines. Reveal All / Hide All toggle.
 5. **Recollect**: Deterministic word hiding at configurable levels (0%, 20%, 40%, 60%, 80%, Mnemonic). Uses `hideWords()` and `generateMnemonic()` from `lib/cloze.ts`.
 6. **Speak**: Section text hidden, replaced by auto-growing textarea. "Submit" calculates diff and advances to Result.
-7. **Result**: Word-level diff display with accuracy percentage. SM-2 grading happens automatically. "Try Again" returns to Speak. "Done" exits to `/chapter`.
+7. **Result**: Word-level diff display with accuracy percentage. SM-2 grading happens automatically. "Try Again" returns to Speak. "Done" exits to `/chapter` (or next recall target in Recall Mode).
 
 **Stage Navigation:**
 - Bottom bar with stage indicator dots (current stage is elongated pill, completed stages are filled, future stages are faded).
@@ -427,6 +437,10 @@ The spaced repetition system (`lib/scheduler.ts`) uses a modified SM-2 algorithm
 
 **Minimum ease:** 1.3 (floor).
 
+**Recall Logic:**
+- **Shortest Interval Spacing**: Spacing for the entire chapter is determined by the shortest interval among all memorised sections. This ensures the user consolidates the entire learnt section together.
+- **Recall Due Status**: Calculated via `getRecallDueStatus()`, which checks if the earliest `nextDueAt` among memorised cards has passed.
+
 **Streak system** (`lib/streak.ts`): Tracks daily practice streaks per chapter. Resets if gap > 1 day.
 
 ### B. Theme Engine
@@ -509,7 +523,7 @@ The `bible_library` Supabase table stores pre-loaded Bible content verse by vers
 ### B. Bottom Navigation
 - **Collapsible pill**: Fixed at bottom centre, rounded-[32px], max-width `md`.
 - **Collapsed state**: `nav-pill-clip` CSS clip-path shrinks to a small pill showing a BookOpen icon. Background uses `color-mix` with transparency + `backdrop-blur-md`.
-- **Expanded state**: `nav-full-clip` shows 3 nav items in a grid (Chapter, Soak, Practice).
+- **Expanded state**: `nav-full-clip` shows 4 nav items in a grid (Home, Chapter, Soak, Practice).
 - **Scroll-aware**: Parent layout (`ThemeContent`) manages collapse state based on scroll events.
 - **Liquid transition**: `clip-path` animation over 500ms `ease-in-out` for smooth shape morphing.
 - **Disabled items**: Soak and Practice are greyed out (20% opacity, `pointer-events-none`) when no chapter is selected.
@@ -518,7 +532,7 @@ The `bible_library` Supabase table stores pre-loaded Bible content verse by vers
 ### C. Splash & Meditation Sequence
 - **SplashScreen**: Displays "Passage" title and "Dwell in the Word" subtitle on the breathing gradient background. Uses Cormorant Garamond Light. Subtitle fades in after 1.5s. Holds for 5s, then fades out over 900ms. Shown once per session (tracked via `sessionStorage`).
 - **MeditationScreen**: Displays a sequence of meditation verses after the splash screen. Transitions seamlessly from splash (fires `onFadeStart` while splash still covers screen).
-- **Sequence**: SplashScreen → (fade) → MeditationScreen (Proverbs 3:5-6) → (tap) → MeditationScreen (Isaiah 26:3) → (tap) → App content. Managed by `ThemeContent` via `showSplash` and `showMeditation` state.
+- **Sequence**: SplashScreen → (fade) → MeditationScreen (Proverbs 3:5-6) → (tap) → MeditationScreen (Isaiah 26:3) → (tap) → App content (lands on `/`). Managed by `ThemeContent` via `showSplash` and `showMeditation` state.
 
 ### D. Animations
 - **Page transitions**: `animate-in fade-in duration-500` for content appearance.

@@ -1,10 +1,48 @@
-import { SM2Card } from "@/types";
+import { SM2Card, BCMState, StudySection } from "@/types";
+import { getSections } from "./parser";
 
 /**
  * Auto-promotion threshold: once a card has been successfully recalled
  * this many times in a row with high scores, it is marked as memorised.
  */
 const MEMORISED_REP_THRESHOLD = 3;
+
+/**
+ * Finds the next section to learn (the first one not memorised).
+ */
+export function getLearnNextSection(chapterId: string, state: BCMState): StudySection | null {
+  const chapter = state.chapters[chapterId];
+  if (!chapter) return null;
+  
+  const unit = state.settings.studyUnit || "chunk";
+  const sections = getSections(chapter, unit);
+  const chapterCards = state.cards[chapterId] || {};
+  
+  return sections.find(s => !chapterCards[s.id]?.isMemorised) || null;
+}
+
+/**
+ * Determines if a recall session is due for the chapter.
+ * Based on the shortest interval of all memorised sections.
+ */
+export function getRecallDueStatus(chapterId: string, state: BCMState): { isDue: boolean; nextDueAt: string | null } {
+  const chapterCards = state.cards[chapterId] || {};
+  const memorisedCards = Object.values(chapterCards).filter(c => c.isMemorised);
+  
+  if (memorisedCards.length === 0) return { isDue: false, nextDueAt: null };
+  
+  // Find the earliest nextDueAt among memorised cards
+  const earliestDue = memorisedCards.reduce((earliest, card) => {
+    const cardDue = new Date(card.nextDueAt).getTime();
+    return cardDue < earliest ? cardDue : earliest;
+  }, Infinity);
+  
+  const now = Date.now();
+  return {
+    isDue: now >= earliestDue,
+    nextDueAt: earliestDue === Infinity ? null : new Date(earliestDue).toISOString()
+  };
+}
 
 export function updateCard(card: SM2Card, score: number): SM2Card {
   const newCard = { ...card };
