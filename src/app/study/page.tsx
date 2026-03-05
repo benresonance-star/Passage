@@ -16,6 +16,7 @@ import { StageControls } from "@/components/study/StageControls";
 import { SpeechTuningOverlay } from "@/components/study/SpeechTuningOverlay";
 import { EmptyState } from "@/components/EmptyState";
 import { CheckCircle2, ArrowLeft } from "lucide-react";
+import { Verse, StudySection } from "@/types";
 
 export default function StudyPage() {
   const { state, setState, isHydrated, syncProgress } = useBCM();
@@ -69,13 +70,13 @@ export default function StudyPage() {
     [chapter, studyUnit]
   );
   const activeId = chapterId ? state.settings.activeChunkId[chapterId] : null;
-  const activeSection = useMemo(() => {
+  const activeSection = useMemo((): StudySection | null => {
     const baseSection = sections.find(s => s.id === activeId);
-    if (!isRecallAll || !chapterId || !chapter) return baseSection;
+    if (!isRecallAll || !chapterId || !chapter) return baseSection || null;
 
     // Combined section for Recall All mode
     const memorisedSections = sections.filter(s => state.cards[chapterId]?.[s.id]?.isMemorised);
-    if (memorisedSections.length === 0) return baseSection;
+    if (memorisedSections.length === 0) return baseSection || null;
 
     return {
       id: `recall-all-${chapterId}`,
@@ -83,7 +84,7 @@ export default function StudyPage() {
       verses: memorisedSections.flatMap(s => s.verses),
       text: memorisedSections.map(s => s.text).join(" "),
       scriptureVerses: memorisedSections.flatMap(s => s.verses.filter(v => v.type === "scripture")),
-    };
+    } as any;
   }, [sections, activeId, isRecallAll, chapterId, chapter, state.cards]);
 
   const words = useMemo(
@@ -95,7 +96,7 @@ export default function StudyPage() {
   const isDawn = currentTheme.id === "dawn";
 
   const scriptureVerses = useMemo(
-    () => (activeSection as any).scriptureVerses || activeSection?.verses.filter(v => v.type === "scripture") || [],
+    () => (activeSection as any)?.scriptureVerses || activeSection?.verses.filter(v => v.type === "scripture") || [],
     [activeSection]
   );
 
@@ -245,7 +246,7 @@ export default function StudyPage() {
   }, [activeSection, typedText, handleGrade]);
 
   const reciteLines = useMemo(() => {
-    const text = scriptureVerses.map(v => v.text).join(" ");
+    const text = scriptureVerses.map((v: Verse) => v.text).join(" ");
     return text ? splitIntoLines(text) : [];
   }, [scriptureVerses]);
 
