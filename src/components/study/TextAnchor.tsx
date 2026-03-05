@@ -39,9 +39,10 @@ export function TextAnchor({
 
   const clozeText = useMemo(() => {
     if (stage !== "cloze") return "";
-    if (clozeLevel === "mnemonic") return generateMnemonic(section.text);
-    return hideWords(section.text, clozeLevel, section.id);
-  }, [stage, clozeLevel, section.text, section.id]);
+    const scriptureText = scriptureVerses.map(v => v.text).join("\n\n");
+    if (clozeLevel === "mnemonic") return generateMnemonic(scriptureText);
+    return hideWords(scriptureText, clozeLevel, section.id);
+  }, [stage, clozeLevel, scriptureVerses, section.id]);
 
   const reciteLines = useMemo(() => {
     if (stage !== "recite") return [];
@@ -118,7 +119,7 @@ export function TextAnchor({
           const verseEl = (
             <span
               key={vIdx}
-              className={`inline ${stage === "soak" ? "cursor-pointer" : ""}`}
+              className={`inline-block mb-4 ${stage === "soak" ? "cursor-pointer" : ""}`}
               onClick={stage === "soak" ? () => onSoakVerseToggle?.(scriptureIdx) : undefined}
             >
               {words.map((word) => {
