@@ -178,6 +178,7 @@ interface PromptState {
   title: string;
   placeholder: string;
   submitLabel: string;
+  defaultValue: string;
   resolve: ((value: string | null) => void) | null;
 }
 
@@ -187,6 +188,7 @@ export function usePrompt() {
     title: "",
     placeholder: "",
     submitLabel: "Submit",
+    defaultValue: "",
     resolve: null,
   });
   const [input, setInput] = useState("");
@@ -195,14 +197,17 @@ export function usePrompt() {
     title: string;
     placeholder?: string;
     submitLabel?: string;
+    defaultValue?: string;
   }): Promise<string | null> => {
-    setInput("");
+    const val = options.defaultValue || "";
+    setInput(val);
     return new Promise((resolve) => {
       setState({
         open: true,
         title: options.title,
         placeholder: options.placeholder || "",
         submitLabel: options.submitLabel || "Submit",
+        defaultValue: val,
         resolve,
       });
     });
@@ -222,6 +227,7 @@ export function usePrompt() {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder={state.placeholder}
+          onFocus={(e) => e.currentTarget.select()}
           className="w-full bg-[var(--input-bg)] border border-[var(--surface-border)] rounded-2xl py-4 px-5 text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50 transition-all mb-6"
           onKeyDown={(e) => {
             if (e.key === "Enter" && input.trim()) handleClose(input.trim());
