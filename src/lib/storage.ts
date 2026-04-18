@@ -2,6 +2,7 @@ import { BCMState, SM2Card, Chapter } from "@/types";
 import { ROMANS_8_SEED } from "./seed";
 import { parseChapter, chunkVerses, getChapterSlug } from "./parser";
 import { hydrateChapterAudio } from "@/modules/audio/manifest";
+import { getDefaultBackingTracks } from "@/modules/audio/library";
 
 const STORAGE_KEY = "bcm_v1_state";
 
@@ -10,6 +11,7 @@ export const INITIAL_STATE: BCMState = {
     niv: { id: "niv", name: "New International Version", abbreviation: "NIV" },
   },
   chapters: {},
+  defaultBackingTracks: getDefaultBackingTracks(),
   selectedChapterId: null,
   cards: {},
   stats: {},
@@ -22,8 +24,25 @@ export const INITIAL_STATE: BCMState = {
       bg: "#000000",
       text: "#f4f4f5",
     },
+    activeStudyTrackId: null,
+    activeSoakTrackId: null,
   },
 };
+
+function withAudioDefaults(state: BCMState): BCMState {
+  return {
+    ...state,
+    defaultBackingTracks:
+      state.defaultBackingTracks?.length > 0
+        ? state.defaultBackingTracks
+        : getDefaultBackingTracks(),
+    settings: {
+      ...state.settings,
+      activeStudyTrackId: state.settings.activeStudyTrackId ?? null,
+      activeSoakTrackId: state.settings.activeSoakTrackId ?? null,
+    },
+  };
+}
 
 function seedData(state: BCMState): BCMState {
   const { title, verses } = parseChapter(ROMANS_8_SEED.fullText!);
@@ -134,7 +153,7 @@ export function loadState(): BCMState {
           }
         }
       };
-      return hydrateStoredChapters(migratedState);
+      return withAudioDefaults(hydrateStoredChapters(migratedState));
     }
 
     // Migration for v2.1 (adding Bible Version and Book Name)
@@ -181,11 +200,11 @@ export function loadState(): BCMState {
         migratedState.selectedChapterId = getChapterSlug(sel.title, sel.bookName || "Romans", sel.versionId || "niv");
       }
 
-      return hydrateStoredChapters(migratedState);
+      return withAudioDefaults(hydrateStoredChapters(migratedState));
     }
 
     // If library became empty after deletions, we don't re-seed (respect user choice)
-    return hydrateStoredChapters(parsed);
+    return withAudioDefaults(hydrateStoredChapters(parsed));
   } catch (e) {
     console.error("Failed to load state:", e);
     return INITIAL_STATE;

@@ -62,6 +62,7 @@ export interface ChapterStats {
 export interface BCMState {
   versions: Record<string, BibleVersion>;
   chapters: Record<string, Chapter>;
+  defaultBackingTracks: ChunkAudioRef[];
   selectedChapterId: string | null;
   cards: Record<string, Record<string, SM2Card>>; // Keyed by chapterId, then chunkId
   stats: Record<string, ChapterStats>; // Keyed by chapterId
@@ -78,6 +79,8 @@ export interface BCMState {
     };
     highlightedWords?: string[]; // Array of normalized words to highlight
     studyUnit?: StudyUnit;
+    activeStudyTrackId?: string | null;
+    activeSoakTrackId?: string | null;
   };
 }
 

@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
-import Link from "next/link";
 import { useBCM } from "@/context/BCMContext";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -15,7 +14,8 @@ import { TextAnchor, type StudyStage } from "@/components/study/TextAnchor";
 import { StageControls } from "@/components/study/StageControls";
 import { SpeechTuningOverlay } from "@/components/study/SpeechTuningOverlay";
 import { EmptyState } from "@/components/EmptyState";
-import { CheckCircle2, ArrowLeft } from "lucide-react";
+import { MinimalAudioPlayer } from "@/modules/audio/MinimalAudioPlayer";
+import { CheckCircle2 } from "lucide-react";
 import { Verse, StudySection } from "@/types";
 
 export default function StudyPage() {
@@ -25,6 +25,7 @@ export default function StudyPage() {
   const searchParams = useSearchParams();
   const isRecallMode = searchParams.get("mode") === "recall";
   const isRecallAll = searchParams.get("recallAll") === "true";
+  const requestedSongMode = searchParams.get("mode") === "song";
   useWakeLock();
 
   const [stage, setStage] = useState<StudyStage>("read");
@@ -47,6 +48,7 @@ export default function StudyPage() {
 
   // Soak state — set of highlighted scripture-verse indices (toggle on tap)
   const [soakHighlighted, setSoakHighlighted] = useState<Set<number>>(new Set([0]));
+  const [songTextDimmed, setSongTextDimmed] = useState(false);
 
   // Recite state
   const [reciteRevealed, setReciteRevealed] = useState<Set<number>>(new Set());
@@ -99,6 +101,21 @@ export default function StudyPage() {
     () => (activeSection as any)?.scriptureVerses || activeSection?.verses.filter(v => v.type === "scripture") || [],
     [activeSection]
   );
+  const songTracks = state.defaultBackingTracks;
+  const isSongMode = requestedSongMode && songTracks.length > 0;
+  const selectedStudyTrackId = state.settings.activeStudyTrackId ?? null;
+  const allScriptureVerseIndexes = useMemo(
+    () => new Set(Array.from({ length: scriptureVerses.length }, (_, index) => index)),
+    [scriptureVerses.length],
+  );
+
+  useEffect(() => {
+    if (requestedSongMode && !isRecallMode) {
+      setStage("soak");
+      setSongTextDimmed(false);
+      setSoakHighlighted(allScriptureVerseIndexes);
+    }
+  }, [requestedSongMode, isRecallMode, allScriptureVerseIndexes]);
 
   // Redirect if no chapter/section
   useEffect(() => {
@@ -229,13 +246,20 @@ export default function StudyPage() {
 
   const handleStageChange = useCallback((newStage: StudyStage) => {
     // Reset stage-specific state when transitioning
-    if (newStage === "soak") setSoakHighlighted(new Set([0]));
+    if (newStage === "soak") {
+      setSoakHighlighted(
+        isSongMode
+          ? allScriptureVerseIndexes
+          : new Set([0]),
+      );
+      setSongTextDimmed(false);
+    }
     if (newStage === "flow") { setFlowWordIndex(-1); setFlowPlaying(false); }
     if (newStage === "recite") setReciteRevealed(new Set());
     if (newStage === "cloze") setClozeLevel("mnemonic");
     if (newStage === "type") setTypedText("");
     setStage(newStage);
-  }, []);
+  }, [allScriptureVerseIndexes, isSongMode]);
 
   const handleSpeakSubmit = useCallback(async () => {
     if (!activeSection) return;
@@ -377,8 +401,13 @@ export default function StudyPage() {
             section={activeSection}
             stage={stage}
             isDawn={isDawn}
+            songMode={isSongMode}
+            songTextDimmed={songTextDimmed}
             soakHighlighted={soakHighlighted}
             onSoakVerseToggle={(idx) => {
+              if (isSongMode) {
+                return;
+              }
               setSoakHighlighted(prev => {
                 const next = new Set(prev);
                 if (next.has(idx)) next.delete(idx); else next.add(idx);
@@ -402,11 +431,33 @@ export default function StudyPage() {
 
       {/* Bottom controls */}
       <div className="relative z-30">
+        {stage === "soak" && isSongMode ? (
+          <div className="px-4 pb-2">
+            <div className="max-w-2xl mx-auto flex justify-center">
+              <MinimalAudioPlayer
+                tracks={songTracks}
+                selectedTrackId={selectedStudyTrackId}
+                onTrackChange={(track) => {
+                  setState((prev) => ({
+                    ...prev,
+                    settings: {
+                      ...prev.settings,
+                      activeStudyTrackId: track.id,
+                    },
+                  }));
+                }}
+              />
+            </div>
+          </div>
+        ) : null}
         <StageControls
           stage={stage}
           isDawn={isDawn}
           onStageChange={handleStageChange}
           onExit={() => router.push("/chapter")}
+          songMode={isSongMode}
+          songTextDimmed={songTextDimmed}
+          onSongTextDimToggle={() => setSongTextDimmed((prev) => !prev)}
           flowPlaying={flowPlaying}
           onFlowToggle={() => {
             if (!flowPlaying && flowWordIndex < 0) setFlowWordIndex(0);

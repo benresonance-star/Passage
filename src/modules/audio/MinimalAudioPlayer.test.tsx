@@ -148,4 +148,91 @@ describe("MinimalAudioPlayer", () => {
 
     expect(toggleButton?.getAttribute("aria-expanded")).toBe("false");
   });
+
+  it("shows an explicit track selector when multiple tracks exist", () => {
+    act(() => {
+      root.render(
+        <MinimalAudioPlayer
+          tracks={[
+            {
+              id: "track-1",
+              title: "No Condemnation",
+              storageKey: "music/Romans 8 Verses 1-4 NIV/No Condemnation.mp3",
+            },
+            {
+              id: "track-2",
+              title: "Walk in the Spirit",
+              storageKey: "music/Romans 8 Verses 1-4 NIV/Walk in the Spirit.mp3",
+            },
+          ]}
+        />,
+      );
+    });
+
+    const toggleButton = container.querySelector(
+      '[data-testid="soak-audio-toggle"]',
+    ) as HTMLButtonElement | null;
+
+    act(() => {
+      toggleButton?.click();
+    });
+
+    const trackSelect = container.querySelector(
+      '[data-testid="audio-track-select"]',
+    ) as HTMLSelectElement | null;
+
+    expect(trackSelect).not.toBeNull();
+    expect(trackSelect?.value).toBe("0");
+
+    act(() => {
+      trackSelect!.value = "1";
+      trackSelect!.dispatchEvent(new Event("change", { bubbles: true }));
+    });
+
+    expect(trackSelect?.value).toBe("1");
+  });
+
+  it("reports track changes and shows track type labels when requested", () => {
+    const handleTrackChange = vi.fn();
+
+    act(() => {
+      root.render(
+        <MinimalAudioPlayer
+          tracks={[
+            {
+              id: "track-1",
+              title: "Presence",
+              storageKey: "music/Instrumental Study Tracks/Presence.mp3",
+            },
+            {
+              id: "track-2",
+              title: "No Condemnation",
+              storageKey: "music/Romans 8 Verses 1-4 NIV/No Condemnation.mp3",
+            },
+          ]}
+          selectedTrackId="track-2"
+          onTrackChange={handleTrackChange}
+          showTrackTypeLabels
+        />,
+      );
+    });
+
+    const toggleButton = container.querySelector(
+      '[data-testid="soak-audio-toggle"]',
+    ) as HTMLButtonElement | null;
+
+    act(() => {
+      toggleButton?.click();
+    });
+
+    const trackSelect = container.querySelector(
+      '[data-testid="audio-track-select"]',
+    ) as HTMLSelectElement | null;
+
+    expect(trackSelect?.value).toBe("1");
+    expect(trackSelect?.textContent).toContain("Presence (Instrumental)");
+    expect(trackSelect?.textContent).toContain("No Condemnation (Vocals)");
+    expect(handleTrackChange).toHaveBeenCalled();
+    expect(handleTrackChange.mock.calls.at(-1)?.[0]?.id).toBe("track-2");
+  });
 });

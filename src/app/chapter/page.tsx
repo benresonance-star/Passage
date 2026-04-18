@@ -2,7 +2,7 @@
 
 import { useBCM } from "@/context/BCMContext";
 import { useAuth } from "@/context/AuthContext";
-import { Eye, EyeOff, Award, Palette, Settings, Eraser, Play } from "lucide-react";
+import { Eye, EyeOff, Award, Palette, Settings, Eraser, Play, Music4 } from "lucide-react";
 import Link from "next/link";
 import { useState, useRef, useMemo } from "react";
 import { EmptyState } from "@/components/EmptyState";
@@ -348,6 +348,20 @@ export default function ChapterPage() {
                         <Play size={10} className="fill-current" />
                         Practice
                       </Link>
+                      {state.defaultBackingTracks.length > 0 ? (
+                        <Link
+                          href="/study?mode=song"
+                          onClick={(e) => e.stopPropagation()}
+                          className={`flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all ${
+                            isDawn
+                              ? "bg-black/20 text-white border border-white/20"
+                              : "bg-[var(--surface)] text-[var(--theme-text)] border border-[var(--surface-border)]"
+                          }`}
+                        >
+                          <Music4 size={10} />
+                          Song
+                        </Link>
+                      ) : null}
                     </div>
                   )}
                 </div>

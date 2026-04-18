@@ -2,12 +2,16 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { ChunkAudioRef } from "@/types";
-import { Music4, Pause, Play, SkipBack, SkipForward } from "lucide-react";
+import { Music4, Pause, Play } from "lucide-react";
+import { getTrackTypeLabel } from "./library";
 import { useChunkAudio } from "./useChunkAudio";
 
 interface MinimalAudioPlayerProps {
   tracks: ChunkAudioRef[];
   className?: string;
+  selectedTrackId?: string | null;
+  onTrackChange?: (track: ChunkAudioRef) => void;
+  showTrackTypeLabels?: boolean;
 }
 
 const AUTO_COLLAPSE_MS = 3000;
@@ -26,8 +30,12 @@ function formatDuration(seconds: number): string {
 export function MinimalAudioPlayer({
   tracks,
   className = "",
+  selectedTrackId = null,
+  onTrackChange,
+  showTrackTypeLabels = false,
 }: MinimalAudioPlayerProps) {
   const collapseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastReportedTrackIdRef = useRef<string | null>(null);
   const [isExpanded, setIsExpanded] = useState(false);
   const {
     currentTrack,
@@ -38,17 +46,12 @@ export function MinimalAudioPlayer({
     progress,
     error,
     togglePlayback,
-    nextTrack,
-    previousTrack,
+    selectTrack,
   } = useChunkAudio(tracks);
 
-  if (!currentTrack) {
-    return null;
-  }
-
-  const isPlaying = status === "playing";
-  const showLoadingState = status === "loading";
-  const collapsedOpacity = isPlaying ? 0.24 : 0.12;
+  const selectedTrackIndex = selectedTrackId
+    ? tracks.findIndex((track) => track.id === selectedTrackId)
+    : -1;
 
   const clearCollapseTimer = useCallback(() => {
     if (collapseTimerRef.current) {
@@ -81,6 +84,40 @@ export function MinimalAudioPlayer({
       clearCollapseTimer();
     };
   }, [clearCollapseTimer]);
+
+  useEffect(() => {
+    if (selectedTrackIndex >= 0 && selectedTrackIndex !== currentTrackIndex) {
+      void selectTrack(selectedTrackIndex);
+    }
+  }, [currentTrackIndex, selectedTrackIndex, selectTrack]);
+
+  useEffect(() => {
+    if (
+      !currentTrack ||
+      !onTrackChange ||
+      (selectedTrackId !== null && currentTrack.id !== selectedTrackId) ||
+      lastReportedTrackIdRef.current === currentTrack.id
+    ) {
+      return;
+    }
+
+    lastReportedTrackIdRef.current = currentTrack.id;
+    onTrackChange(currentTrack);
+  }, [currentTrack, onTrackChange, selectedTrackId]);
+
+  const currentTrackTypeLabel = showTrackTypeLabels
+    ? currentTrack
+      ? getTrackTypeLabel(currentTrack)
+      : null
+    : null;
+
+  if (!currentTrack) {
+    return null;
+  }
+
+  const isPlaying = status === "playing";
+  const showLoadingState = status === "loading";
+  const collapsedOpacity = isPlaying ? 0.24 : 0.12;
 
   return (
     <div
@@ -123,20 +160,6 @@ export function MinimalAudioPlayer({
             isExpanded ? "opacity-100 scale-100" : "opacity-0 scale-95 pointer-events-none"
           }`}
         >
-          {hasMultipleTracks && (
-            <button
-              type="button"
-              onClick={() => {
-                handleExpandedInteraction();
-                void previousTrack();
-              }}
-              className="rounded-full p-2 text-white/65 transition hover:text-white active:scale-95"
-              aria-label="Previous audio track"
-            >
-              <SkipBack size={15} />
-            </button>
-          )}
-
           <button
             type="button"
             onClick={() => {
@@ -151,16 +174,44 @@ export function MinimalAudioPlayer({
 
           <div className="min-w-0 flex-1">
             <div className="truncate text-[11px] font-medium tracking-[0.16em] uppercase text-white/70">
-              {currentTrack.title}
+              {hasMultipleTracks ? "Backing Track" : currentTrack.title}
             </div>
             <div className="mt-1 flex items-center justify-between gap-3">
-              <div className="min-w-0 truncate text-[12px] text-white/90">
-                {showLoadingState ? "Loading..." : currentTrack.source || "Music"}
+              <div className="min-w-0 flex-1 text-white/90">
+                {hasMultipleTracks ? (
+                  <select
+                    value={currentTrackIndex}
+                    onChange={(event) => {
+                      handleExpandedInteraction();
+                      void selectTrack(Number(event.target.value));
+                    }}
+                    className="w-full appearance-none bg-transparent text-[12px] leading-tight outline-none"
+                    aria-label="Choose backing track"
+                    data-testid="audio-track-select"
+                  >
+                    {tracks.map((track, index) => (
+                      <option key={track.id} value={index} className="bg-zinc-900 text-white">
+                        {showTrackTypeLabels
+                          ? `${track.title} (${getTrackTypeLabel(track)})`
+                          : track.title}
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <div className="min-w-0 truncate text-[12px]">
+                    {showLoadingState
+                      ? "Loading..."
+                      : currentTrackTypeLabel ?? currentTrack.source ?? "Music"}
+                  </div>
+                )}
               </div>
               <div className="shrink-0 text-[11px] text-white/45">
                 {hasMultipleTracks ? `${currentTrackIndex + 1}/${tracks.length}` : formatDuration(duration)}
               </div>
             </div>
+            {hasMultipleTracks && currentTrackTypeLabel ? (
+              <div className="mt-1 text-[11px] text-white/55">{currentTrackTypeLabel}</div>
+            ) : null}
             <div className="mt-2 h-px overflow-hidden rounded-full bg-white/10">
               <div
                 className="h-full bg-white/40 transition-[width] duration-300"
@@ -171,20 +222,6 @@ export function MinimalAudioPlayer({
               <div className="mt-2 text-[11px] text-amber-200/80">{error}</div>
             ) : null}
           </div>
-
-          {hasMultipleTracks && (
-            <button
-              type="button"
-              onClick={() => {
-                handleExpandedInteraction();
-                void nextTrack();
-              }}
-              className="rounded-full p-2 text-white/65 transition hover:text-white active:scale-95"
-              aria-label="Next audio track"
-            >
-              <SkipForward size={15} />
-            </button>
-          )}
         </div>
       </div>
     </div>

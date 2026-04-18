@@ -19,6 +19,9 @@ interface StageControlsProps {
   isDawn: boolean;
   onStageChange: (stage: StudyStage) => void;
   onExit: () => void;
+  songMode?: boolean;
+  songTextDimmed?: boolean;
+  onSongTextDimToggle?: () => void;
   // Flow controls
   flowPlaying?: boolean;
   onFlowToggle?: () => void;
@@ -48,6 +51,9 @@ export function StageControls({
   isDawn,
   onStageChange,
   onExit,
+  songMode,
+  songTextDimmed,
+  onSongTextDimToggle,
   flowPlaying,
   onFlowToggle,
   flowWpm = 100,
@@ -158,6 +164,26 @@ export function StageControls({
             <button onClick={onReciteRevealToggle} className="flex items-center gap-2 px-4 py-2 rounded-full text-[var(--theme-ui-subtext)] text-xs">
               {reciteAllRevealed ? <EyeOff size={14} /> : <Eye size={14} />}
               {reciteAllRevealed ? "Hide All" : "Reveal All"}
+            </button>
+          </div>
+        )}
+
+        {stage === "soak" && songMode && (
+          <div className="flex justify-center animate-in fade-in duration-300 w-full">
+            <button
+              onClick={onSongTextDimToggle}
+              className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs border transition-all ${
+                songTextDimmed
+                  ? isDawn
+                    ? "bg-white/20 text-white border-white/30"
+                    : "bg-orange-500/15 text-orange-300 border-orange-500/30"
+                  : isDawn
+                    ? "bg-white/5 text-white/70 border-white/15"
+                    : "bg-[var(--surface)] text-[var(--theme-ui-subtext)] border-[var(--surface-border)]"
+              }`}
+            >
+              {songTextDimmed ? <Eye size={14} /> : <EyeOff size={14} />}
+              {songTextDimmed ? "Show Text" : "Dim Text"}
             </button>
           </div>
         )}

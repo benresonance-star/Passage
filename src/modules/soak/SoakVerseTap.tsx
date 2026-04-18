@@ -118,6 +118,8 @@ function soakReducer(state: SoakState, action: SoakAction): SoakState {
 export interface SoakVerseTapProps {
   section: SoakSection;
   tracks?: ChunkAudioRef[];
+  selectedTrackId?: string | null;
+  onTrackChange?: (track: ChunkAudioRef) => void;
   /** Optional class to apply a custom font (e.g. from next/font). */
   fontClassName?: string;
   /** Called when the user taps the exit icon. */
@@ -127,6 +129,8 @@ export interface SoakVerseTapProps {
 export function SoakVerseTap({
   section,
   tracks = [],
+  selectedTrackId = null,
+  onTrackChange,
   fontClassName = "",
   onExit,
 }: SoakVerseTapProps) {
@@ -435,7 +439,13 @@ export function SoakVerseTap({
           className="fixed bottom-0 left-0 right-0 z-[104] flex justify-center pointer-events-none"
           style={{ paddingBottom: "max(env(safe-area-inset-bottom), 92px)" }}
         >
-          <MinimalAudioPlayer tracks={tracks} className="pointer-events-auto" />
+          <MinimalAudioPlayer
+            tracks={tracks}
+            className="pointer-events-auto"
+            selectedTrackId={selectedTrackId}
+            onTrackChange={onTrackChange}
+            showTrackTypeLabels
+          />
         </div>
       ) : null}
 

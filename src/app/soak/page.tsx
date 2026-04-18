@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useBCM } from "@/context/BCMContext";
 import { useRouter } from "next/navigation";
 import { useWakeLock } from "@/hooks/useWakeLock";
@@ -9,6 +9,7 @@ import { SoakIntro } from "@/components/SoakIntro";
 import type { SoakSection } from "@/modules/soak/types";
 import { Cormorant_Garamond } from "next/font/google";
 import { AnimatePresence } from "framer-motion";
+import { mergeTrackLibraries } from "@/modules/audio/library";
 
 const soakFont = Cormorant_Garamond({
   subsets: ["latin"],
@@ -16,7 +17,7 @@ const soakFont = Cormorant_Garamond({
 });
 
 export default function SoakPage() {
-  const { state, isHydrated } = useBCM();
+  const { state, setState, isHydrated } = useBCM();
   const router = useRouter();
   useWakeLock();
 
@@ -28,7 +29,11 @@ export default function SoakPage() {
     ? state.settings.activeChunkId[chapterId]
     : null;
   const activeChunk = chapter?.chunks.find((c) => c.id === activeChunkId);
-  const activeChunkTracks = activeChunk?.audio ?? [];
+  const soakTracks = useMemo(
+    () => mergeTrackLibraries(state.defaultBackingTracks, activeChunk?.audio ?? []),
+    [activeChunk?.audio, state.defaultBackingTracks],
+  );
+  const selectedSoakTrackId = state.settings.activeSoakTrackId ?? null;
 
   useEffect(() => {
     if (isHydrated && !chapter) {
@@ -93,7 +98,17 @@ export default function SoakPage() {
           <SoakVerseTap
             key="soak"
             section={section}
-            tracks={activeChunkTracks}
+            tracks={soakTracks}
+            selectedTrackId={selectedSoakTrackId}
+            onTrackChange={(track) => {
+              setState((prev) => ({
+                ...prev,
+                settings: {
+                  ...prev.settings,
+                  activeSoakTrackId: track.id,
+                },
+              }));
+            }}
             fontClassName={soakFont.className}
             onExit={() => router.push("/chapter")}
           />

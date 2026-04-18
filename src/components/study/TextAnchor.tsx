@@ -11,6 +11,8 @@ interface TextAnchorProps {
   section: StudySection;
   stage: StudyStage;
   isDawn: boolean;
+  songMode?: boolean;
+  songTextDimmed?: boolean;
   soakHighlighted?: Set<number>;
   onSoakVerseToggle?: (scriptureIdx: number) => void;
   flowWordIndex?: number;
@@ -24,6 +26,8 @@ export function TextAnchor({
   section,
   stage,
   isDawn,
+  songMode = false,
+  songTextDimmed = false,
   soakHighlighted,
   onSoakVerseToggle,
   flowWordIndex = -1,
@@ -78,8 +82,9 @@ export function TextAnchor({
           }
 
           const scriptureIdx = scriptureVerses.indexOf(v);
-          const isSoakFocused = stage === "soak" && soakHighlighted?.has(scriptureIdx);
-          const isSoakDimmed = stage === "soak" && !soakHighlighted?.has(scriptureIdx);
+          const isSongSoak = stage === "soak" && songMode;
+          const isSoakFocused = stage === "soak" && !isSongSoak && soakHighlighted?.has(scriptureIdx);
+          const isSoakDimmed = stage === "soak" && !isSongSoak && !soakHighlighted?.has(scriptureIdx);
 
           const isRecite = stage === "recite";
           const isRevealed = reciteRevealedVerses?.has(scriptureIdx);
@@ -97,7 +102,7 @@ export function TextAnchor({
                   ? "block p-4 rounded-xl border text-left cursor-pointer" 
                   : "inline-block mb-4"
               } ${
-                stage === "soak" ? "cursor-pointer" : ""
+                stage === "soak" && !songMode ? "cursor-pointer" : ""
               } ${
                 isRecite && isRevealed 
                   ? "bg-[var(--theme-ui-bg)] shadow-lg border-[var(--theme-ui-border)]" 
@@ -107,7 +112,7 @@ export function TextAnchor({
               }`}
               onClick={() => {
                 if (isRecite) onReciteReveal?.(scriptureIdx);
-                else if (stage === "soak") onSoakVerseToggle?.(scriptureIdx);
+                else if (stage === "soak" && !songMode) onSoakVerseToggle?.(scriptureIdx);
               }}
               style={isRecite ? { touchAction: 'pan-y' } : undefined}
             >
@@ -123,6 +128,7 @@ export function TextAnchor({
                     className="inline"
                     style={{
                       transition: "color 0.8s ease-out, text-shadow 0.8s ease-out, opacity 0.8s ease-out",
+                      ...(isSongSoak && songTextDimmed ? { opacity: 0.14 } : {}),
                       ...(isSoakDimmed ? { opacity: 0.15 } : {}),
                       ...(isSoakFocused ? { opacity: 1 } : {}),
                       ...(isFlowHidden ? { opacity: 0 } : {}),
@@ -153,7 +159,11 @@ export function TextAnchor({
       {stage === "soak" && (
         <div className="mt-6 text-center h-5">
           <p className={`text-sm italic ${isDawn ? "text-white/50" : "text-zinc-500"}`}>
-            {scriptureVerses.length > 1
+            {songMode
+              ? songTextDimmed
+                ? "Text dimmed. Sing with the backing track."
+                : "Sing with the passage."
+              : scriptureVerses.length > 1
               ? `${soakHighlighted?.size || 0} of ${scriptureVerses.length} verses focused`
               : "Abide in this verse."}
           </p>

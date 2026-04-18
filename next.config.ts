@@ -1,4 +1,8 @@
 import withPWAInit from "@ducanh2912/next-pwa";
+import { dirname } from "node:path";
+import { fileURLToPath } from "node:url";
+
+const projectRoot = dirname(fileURLToPath(import.meta.url));
 
 const withPWA = withPWAInit({
   dest: "public",
@@ -7,7 +11,7 @@ const withPWA = withPWAInit({
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  /* config options here */
+  outputFileTracingRoot: projectRoot,
 };
 
 export default withPWA(nextConfig);

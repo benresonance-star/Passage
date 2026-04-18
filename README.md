@@ -1,4 +1,4 @@
-# Passage - Bible Chapter Memoriser (v3.9.0)
+# Passage - Bible Chapter Memoriser (v3.10.0)
 
 An iPhone-first PWA for memorising Bible chapters through chunked practice, immersive soaking, spaced repetition, and shared group progress tracking with cross-device cloud sync.
 
@@ -9,7 +9,8 @@ An iPhone-first PWA for memorising Bible chapters through chunked practice, imme
 - **My Progress**: Unified view of memorisation progress with bidirectional sync between Parts and Verses. Access via the Home page or active chapter card. Includes a centered header and back navigation.
 - **Practice Units**: Choose between practicing "Parts" (groups of ~4 verses) or individual "Verses" via a toggle on the Chapter page. Both track SM-2 progress independently but share memorisation state.
 - **Soak Mode**: Full-screen verse-by-verse meditation with a 3-second Psalm 46:10 introductory screen, breathing gradient background, double-buffer crossfade transitions, and wake lock. Supports swipe navigation on mobile and click navigation on desktop.
-- **Chunk Audio**: Abide can now show a minimalist music player when the selected chunk has associated tracks. Playback stays lazy, supports multiple tracks per chunk, and resolves to Vercel-safe `/music/...` URLs by default.
+- **Study Backing Library**: Practice / Abide now uses a global instrumental backing-track library (`Presence`, `Stillness`) that is independent of the active verse or chunk, while keeping the text-dimming flow for sung rehearsal.
+- **Soak Audio Library**: Soak always offers the default instrumental library, appends any chunk-linked tracks for the active section, and labels selections as instrumental or vocal based on their source path.
 - **Spaced Repetition**: Modified SM-2 algorithm with auto-promotion to memorised after 3 consecutive high scores. Spacing for recall sessions is optimized for consolidation by using the shortest interval among memorised sections.
 - **Theme Engine**: 7 presets (OLED, Amber, Midnight, Sepia, Night Dusk, Classic, Dawn) with CSS custom properties and animated gradients.
 - **Cloud Sync**: Cross-device synchronisation via Supabase with realtime subscriptions and timestamp-based conflict resolution.
@@ -73,7 +74,7 @@ npm run dev
 
 The app deploys automatically from the `main` branch via Vercel. Environment variables (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`) are managed in the Vercel dashboard. `NEXT_PUBLIC_AUDIO_BASE_URL` is optional and only needed when audio is hosted off-origin. PWA assets are generated at build time.
 
-For same-origin audio on Vercel, deploy MP3s under `public/music/...`; those files are served at `/music/...`. The top-level `music/` folder can be used as a local source directory, but it is not web-served unless copied into `public/`.
+For same-origin audio on Vercel, deploy MP3s under `public/music/...`; those files are served at `/music/...`. The top-level `music/` folder can be used as a local source directory, but it is not web-served unless copied into `public/`. The default study backing library currently ships from `public/music/Instrumental Study Tracks/...`, while chunk-linked Soak tracks continue to resolve from their own `storageKey` paths.
 
 ## iPhone Installation
 

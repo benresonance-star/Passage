@@ -1,4 +1,4 @@
-# Passage - Bible Chapter Memoriser (v3.9.0)
+# Passage - Bible Chapter Memoriser (v3.10.0)
 
 ## AI Agent Protocol (Mandatory)
 
@@ -178,6 +178,7 @@ interface ChapterStats {
 interface BCMState {
   versions: Record<string, BibleVersion>;
   chapters: Record<string, Chapter>;
+  defaultBackingTracks: ChunkAudioRef[];
   selectedChapterId: string | null;
   cards: Record<string, Record<string, SM2Card>>;   // [chapterId][chunkId]
   stats: Record<string, ChapterStats>;               // [chapterId]
@@ -194,6 +195,8 @@ interface BCMState {
     };
     highlightedWords?: string[];         // Normalised words highlighted by the user
     studyUnit?: PracticeUnit;               // "chunk" (default) or "verse" — controls practice section granularity
+    activeStudyTrackId?: string | null;
+    activeSoakTrackId?: string | null;
   };
 }
 ```
@@ -276,6 +279,7 @@ Full chapter text view with interactive chunked layout.
 - **Practice & Memorised Actions**: When a section is active, a small action group appears in the section header row (right-aligned):
     - **Memorised Toggle** (Award icon): Toggles the `isMemorised` state for that section. Styled amber when memorised, zinc when not.
     - **Practice Pill**: Navigates to `/study`.
+    - **Song Pill**: Navigates to `/study?mode=song` when the default backing library is available. It is no longer gated by chunk-linked audio.
 - **Word Highlighting**: Tap any word to toggle it as highlighted (gold `#FFCB1F`, bold, with glow). Highlights are stored in `settings.highlightedWords` as normalised (lowercase, no punctuation) strings. All instances of the same normalised word are highlighted across the chapter.
 - **Memorised Overlay**: When `showMemorised` is on, memorised chunks are styled with `--chunk-memorised` colour.
 - **Line Breaks**: Verse text containing `[LINEBREAK]` markers is rendered with `<br>` elements.
@@ -293,9 +297,11 @@ Immersive verse-by-verse meditation screen.
 - **Breathing Background**: CSS animation (`soak-breathe` class in `breathe.css`) creates a slowly animating gradient background.
 - **Font**: Cormorant Garamond (Light 300, Regular 400, Bold 700).
 - **Verse Indicator**: Top-centre shows `"n / total"` in faint uppercase text.
-- **Conditional Music Playback**: If the active chunk has one or more `ChunkAudioRef` entries, a minimalist bottom-centered player appears above the exit affordance. If no tracks exist, no audio controls are rendered.
+- **Default Audio Library**: Soak always exposes the global instrumental backing library (`Presence`, `Stillness`) even when the active chunk has no chunk-linked audio.
+- **Merged Track Library**: If the active chunk has `ChunkAudioRef` entries, Soak appends them after the default instrumentals, de-duplicates by `track.id`, and treats the full list as one curated selector.
 - **Lazy Audio Loading**: Track URLs are resolved only when the user presses play. The player uses the browser `HTMLAudioElement` with no eager fetch on first paint, preserving bandwidth.
-- **Multi-track Support**: Chunks may have multiple tracks. Previous/next controls appear only when more than one track is available, and only the selected track is loaded.
+- **Multi-track Support**: Soak can switch among the merged library through the expanded selector, and only the selected track is loaded.
+- **Track Labels**: The selector shows whether each track is `Instrumental` or `Vocals`, inferred from the source path (`Instrumental Study Tracks` => instrumental; other `/music/...` paths => vocals).
 - **Exit**: Bottom-centre X button, initially nearly invisible (opacity 0.12). Tap the bottom zone or centre zone to reveal it (3s auto-hide). Tap the revealed button to exit back to `/chapter`.
 - **Cooldown**: 800ms minimum dwell time before navigation is allowed.
 - **Wake Lock**: Screen stays on via `useWakeLock` hook.
@@ -357,13 +363,14 @@ A unified single-screen practice flow that guides the user through a practice se
 - **Recall button**: On Home page, triggers a "recite through" flow starting at the **Reveal** stage for all memorised sections combined.
 - **Learn Next button**: On Home page, navigates to the next unmemorised section.
 - **Practice pill**: Appears on the active (highlighted) chunk/verse card on the Chapter page. Long-press activates a section, then tap the pill to enter Practice.
+- **Song pill**: Appears on the active Chapter card when the default backing library exists and routes into `/study?mode=song`.
 - **Review page**: "Practice" button per chunk navigates to `/study`.
 - **Bottom nav**: Practice tab in the navigation bar.
 
 **Stages (ordered by desirable difficulty):**
 
 1. **Attend**: Full section text, normal styling. Subtitle: "Attend to the text carefully."
-2. **Abide**: Inline verse-focus mode — current verse at full opacity, others dimmed to ~15%. Tap left/right zones to navigate between verses. Breathing gradient background overlay. Verse counter shown below text.
+2. **Abide**: Inline verse-focus mode — current verse at full opacity, others dimmed to ~15%. Tap left/right zones to navigate between verses. Breathing gradient background overlay. Verse counter shown below text. When entered via `?mode=song`, Abide switches to the global instrumental backing library instead of chunk audio, keeps the scripture visible, and lets the learner dim the text while singing.
 3. **Breathe**: Word-by-word timed illumination with natural speech pacing and rhythmic prosody. Words transition from unread to read styling at user-controlled WPM, adjusted by a syllable-based timing model that accounts for word complexity, punctuation pauses (occurring after the word is revealed), and speech-like prosody (speeding up function words, accelerating in the middle of phrases, and adding weight to proper nouns). Controls: play/pause, skip forward/back, reset, WPM slider, focus mode toggle (hides unread words).
 4. **Reveal**: Text split into sentence-based lines (`splitIntoLines`). Lines are hidden (transparent, 40% opacity). Tap to reveal individual lines. Reveal All / Hide All toggle.
 5. **Recollect**: Deterministic word hiding at configurable levels (0%, 20%, 40%, 60%, 80%, Mnemonic). Uses `hideWords()` and `generateMnemonic()` from `lib/cloze.ts`.
@@ -531,17 +538,20 @@ The `bible_library` Supabase table stores pre-loaded Bible content verse by vers
 - **Output**: `{ results: DiffResult[], accuracy: number }` where accuracy = `(correct / totalExpected) × 100`, rounded.
 - **DiffResult statuses**: `correct`, `wrong`, `missing`, `extra`.
 
-### G. Chunk Audio
+### G. Audio Libraries
 
-The reusable chunk-audio system lives under `src/modules/audio` and is designed so Abide can use it now while other screens can adopt it later.
+The reusable audio system lives under `src/modules/audio` and now supports two complementary sources:
 
-- **Manifest-first association**: `manifest.ts` maps deterministic `chapterId` / `chunkId` pairs to one or more `ChunkAudioRef` records.
-- **Hydration**: `hydrateChapterAudio()` augments seeded, imported, and synced chapter payloads with optional `chunk.audio` metadata without changing the rest of the chapter flow.
+- **Default backing library**: `defaultBackingTracks` in `BCMState` stores the global instrumental library used by Study / Abide and also shown in Soak for every chapter.
+- **Chunk-linked tracks**: `manifest.ts` plus `hydrateChapterAudio()` continue to augment seeded, imported, and synced chapter payloads with optional `chunk.audio` metadata for Soak-specific vocal or text-linked tracks.
+- **Merged Soak library**: Soak combines the global defaults with any active-chunk tracks, keeps default instrumentals first, de-duplicates by `track.id`, and remembers its own selected track independently from Study.
+- **Study independence**: Study song mode no longer depends on `activeSection.audio`; it reads only from the default backing library and stores its selected track separately in settings.
+- **Track labeling**: `library.ts` derives `Instrumental` / `Vocals` labels from the `storageKey` path for Soak’s selector UI.
 - **Resolver**: `resolveTrackUrl()` returns:
   - absolute `http(s)` URLs unchanged
   - `${NEXT_PUBLIC_AUDIO_BASE_URL}/{encodedPath}` when an external host is configured
   - same-origin `/{encodedPath}` when no external base is configured, which is the default Vercel behavior
-- **Player ownership**: `useChunkAudio()` owns playback lifecycle, lazy loading, track switching, cleanup, timing state, and error state. `MinimalAudioPlayer.tsx` renders the restrained transport UI.
+- **Player ownership**: `useChunkAudio()` owns playback lifecycle, lazy loading, track switching, cleanup, timing state, and error state. `MinimalAudioPlayer.tsx` renders the restrained transport UI and selector.
 - **Caching**: Resolved URLs are memoized in-memory for the current session only; audio binary data is not persisted in app state.
 
 ---
@@ -609,3 +619,4 @@ The reusable chunk-audio system lives under `src/modules/audio` and is designed 
 - **Version Sync**: The version in `package.json`, the specification heading, the `README.md` heading, and the in-app version label must always match. Bump all four together on any release.
 - **GitHub Push**: After any successful app update, all changes (including specification updates) must be committed and pushed to the remote repository.
 - **Static Audio on Vercel**: Audio intended for same-origin playback must be deployed under `public/music/...`, which Vercel exposes at `/music/...`. The top-level `music/` folder may still exist locally as an authoring/source directory, but it is not web-served unless copied into `public/`.
+- **Default Instrumental Source**: The current global Study / Soak backing library is served from `public/music/Instrumental Study Tracks/...` (`Presence.mp3`, `Stillness.mp3`).
