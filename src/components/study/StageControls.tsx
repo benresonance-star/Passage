@@ -2,6 +2,7 @@
 
 import { ChevronLeft, ChevronRight, X, Play, Pause, RotateCcw, SkipBack, SkipForward, Eye, EyeOff } from "lucide-react";
 import type { StudyStage } from "./TextAnchor";
+import type { AbideTextVisibility } from "@/app/study/audioState";
 
 const STAGES: StudyStage[] = ["read", "soak", "flow", "recite", "cloze", "type", "result"];
 const STAGE_LABELS: Record<StudyStage, string> = {
@@ -19,9 +20,9 @@ interface StageControlsProps {
   isDawn: boolean;
   onStageChange: (stage: StudyStage) => void;
   onExit: () => void;
-  songMode?: boolean;
-  songTextDimmed?: boolean;
-  onSongTextDimToggle?: () => void;
+  showAbideTextToggle?: boolean;
+  abideTextVisibility?: AbideTextVisibility;
+  onAbideTextVisibilityCycle?: () => void;
   // Flow controls
   flowPlaying?: boolean;
   onFlowToggle?: () => void;
@@ -51,9 +52,9 @@ export function StageControls({
   isDawn,
   onStageChange,
   onExit,
-  songMode,
-  songTextDimmed,
-  onSongTextDimToggle,
+  showAbideTextToggle,
+  abideTextVisibility = "normal",
+  onAbideTextVisibilityCycle,
   flowPlaying,
   onFlowToggle,
   flowWpm = 100,
@@ -168,22 +169,33 @@ export function StageControls({
           </div>
         )}
 
-        {stage === "soak" && songMode && (
+        {stage === "soak" && showAbideTextToggle && (
           <div className="flex justify-center animate-in fade-in duration-300 w-full">
             <button
-              onClick={onSongTextDimToggle}
-              className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs border transition-all ${
-                songTextDimmed
-                  ? isDawn
-                    ? "bg-white/20 text-white border-white/30"
-                    : "bg-orange-500/15 text-orange-300 border-orange-500/30"
-                  : isDawn
-                    ? "bg-white/5 text-white/70 border-white/15"
-                    : "bg-[var(--surface)] text-[var(--theme-ui-subtext)] border-[var(--surface-border)]"
+              onClick={onAbideTextVisibilityCycle}
+              className={`p-2 transition-colors ${
+                isDawn ? "text-white/65 hover:text-white/85" : "text-[var(--theme-ui-subtext)] hover:text-[var(--theme-text)]"
               }`}
+              aria-label={`Cycle text visibility (${abideTextVisibility})`}
+              title={`Text visibility: ${abideTextVisibility}`}
             >
-              {songTextDimmed ? <Eye size={14} /> : <EyeOff size={14} />}
-              {songTextDimmed ? "Show Text" : "Dim Text"}
+              {abideTextVisibility === "off" ? (
+                <EyeOff
+                  size={18}
+                  strokeWidth={1.9}
+                  className={isDawn ? "opacity-75" : "opacity-70"}
+                />
+              ) : (
+                <Eye
+                  size={18}
+                  strokeWidth={1.9}
+                  className={
+                    abideTextVisibility === "dim"
+                      ? isDawn ? "opacity-75" : "opacity-70"
+                      : isDawn ? "opacity-95" : "opacity-90"
+                  }
+                />
+              )}
             </button>
           </div>
         )}

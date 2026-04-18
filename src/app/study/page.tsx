@@ -15,7 +15,12 @@ import { StageControls } from "@/components/study/StageControls";
 import { SpeechTuningOverlay } from "@/components/study/SpeechTuningOverlay";
 import { EmptyState } from "@/components/EmptyState";
 import { MinimalAudioPlayer } from "@/modules/audio/MinimalAudioPlayer";
-import { isSongEntryMode, shouldRenderAbideAudioPlayer } from "./audioState";
+import {
+  cycleAbideTextVisibility,
+  isSongEntryMode,
+  shouldRenderAbideAudioPlayer,
+  type AbideTextVisibility,
+} from "./audioState";
 import { CheckCircle2 } from "lucide-react";
 import { Verse, StudySection } from "@/types";
 
@@ -49,7 +54,7 @@ export default function StudyPage() {
 
   // Soak state — set of highlighted scripture-verse indices (toggle on tap)
   const [soakHighlighted, setSoakHighlighted] = useState<Set<number>>(new Set([0]));
-  const [songTextDimmed, setSongTextDimmed] = useState(false);
+  const [abideTextVisibility, setAbideTextVisibility] = useState<AbideTextVisibility>("normal");
 
   // Recite state
   const [reciteRevealed, setReciteRevealed] = useState<Set<number>>(new Set());
@@ -114,7 +119,7 @@ export default function StudyPage() {
   useEffect(() => {
     if (requestedSongMode && !isRecallMode) {
       setStage("soak");
-      setSongTextDimmed(false);
+      setAbideTextVisibility("normal");
       setSoakHighlighted(allScriptureVerseIndexes);
     }
   }, [requestedSongMode, isRecallMode, allScriptureVerseIndexes]);
@@ -254,7 +259,7 @@ export default function StudyPage() {
           ? allScriptureVerseIndexes
           : new Set([0]),
       );
-      setSongTextDimmed(false);
+      setAbideTextVisibility("normal");
     }
     if (newStage === "flow") { setFlowWordIndex(-1); setFlowPlaying(false); }
     if (newStage === "recite") setReciteRevealed(new Set());
@@ -404,7 +409,8 @@ export default function StudyPage() {
             stage={stage}
             isDawn={isDawn}
             songMode={isSongMode}
-            songTextDimmed={songTextDimmed}
+            hasAbideAudioSupport={shouldShowAbideAudioPlayer}
+            abideTextVisibility={abideTextVisibility}
             soakHighlighted={soakHighlighted}
             onSoakVerseToggle={(idx) => {
               if (isSongMode) {
@@ -457,9 +463,11 @@ export default function StudyPage() {
           isDawn={isDawn}
           onStageChange={handleStageChange}
           onExit={() => router.push("/chapter")}
-          songMode={isSongMode}
-          songTextDimmed={songTextDimmed}
-          onSongTextDimToggle={() => setSongTextDimmed((prev) => !prev)}
+          showAbideTextToggle={shouldShowAbideAudioPlayer}
+          abideTextVisibility={abideTextVisibility}
+          onAbideTextVisibilityCycle={() => {
+            setAbideTextVisibility((prev) => cycleAbideTextVisibility(prev));
+          }}
           flowPlaying={flowPlaying}
           onFlowToggle={() => {
             if (!flowPlaying && flowWordIndex < 0) setFlowWordIndex(0);

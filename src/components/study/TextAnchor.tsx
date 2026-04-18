@@ -4,6 +4,7 @@ import { useMemo } from "react";
 import { hideWords, generateMnemonic } from "@/lib/cloze";
 import { splitIntoLines } from "@/lib/parser";
 import type { StudySection } from "@/types";
+import type { AbideTextVisibility } from "@/app/study/audioState";
 
 export type StudyStage = "read" | "soak" | "flow" | "recite" | "cloze" | "type" | "result";
 
@@ -12,7 +13,8 @@ interface TextAnchorProps {
   stage: StudyStage;
   isDawn: boolean;
   songMode?: boolean;
-  songTextDimmed?: boolean;
+  hasAbideAudioSupport?: boolean;
+  abideTextVisibility?: AbideTextVisibility;
   soakHighlighted?: Set<number>;
   onSoakVerseToggle?: (scriptureIdx: number) => void;
   flowWordIndex?: number;
@@ -27,7 +29,8 @@ export function TextAnchor({
   stage,
   isDawn,
   songMode = false,
-  songTextDimmed = false,
+  hasAbideAudioSupport = false,
+  abideTextVisibility = "normal",
   soakHighlighted,
   onSoakVerseToggle,
   flowWordIndex = -1,
@@ -47,6 +50,8 @@ export function TextAnchor({
     if (clozeLevel === "mnemonic") return generateMnemonic(scriptureText);
     return hideWords(scriptureText, clozeLevel, section.id);
   }, [stage, clozeLevel, scriptureVerses, section.id]);
+  const isAbideWithAudio = stage === "soak" && hasAbideAudioSupport;
+  const isSongSoak = stage === "soak" && (songMode || isAbideWithAudio);
 
   if (stage === "cloze") {
     return (
@@ -82,7 +87,6 @@ export function TextAnchor({
           }
 
           const scriptureIdx = scriptureVerses.indexOf(v);
-          const isSongSoak = stage === "soak" && songMode;
           const isSoakFocused = stage === "soak" && !isSongSoak && soakHighlighted?.has(scriptureIdx);
           const isSoakDimmed = stage === "soak" && !isSongSoak && !soakHighlighted?.has(scriptureIdx);
 
@@ -102,7 +106,7 @@ export function TextAnchor({
                   ? "block p-4 rounded-xl border text-left cursor-pointer" 
                   : "inline-block mb-4"
               } ${
-                stage === "soak" && !songMode ? "cursor-pointer" : ""
+                stage === "soak" && !isSongSoak ? "cursor-pointer" : ""
               } ${
                 isRecite && isRevealed 
                   ? "bg-[var(--theme-ui-bg)] shadow-lg border-[var(--theme-ui-border)]" 
@@ -112,7 +116,7 @@ export function TextAnchor({
               }`}
               onClick={() => {
                 if (isRecite) onReciteReveal?.(scriptureIdx);
-                else if (stage === "soak" && !songMode) onSoakVerseToggle?.(scriptureIdx);
+                else if (stage === "soak" && !isSongSoak) onSoakVerseToggle?.(scriptureIdx);
               }}
               style={isRecite ? { touchAction: 'pan-y' } : undefined}
             >
@@ -128,7 +132,9 @@ export function TextAnchor({
                     className="inline"
                     style={{
                       transition: "color 0.8s ease-out, text-shadow 0.8s ease-out, opacity 0.8s ease-out",
-                      ...(isSongSoak && songTextDimmed ? { opacity: 0.14 } : {}),
+                      ...(isSongSoak && abideTextVisibility === "normal" ? { opacity: 1 } : {}),
+                      ...(isSongSoak && abideTextVisibility === "dim" ? { opacity: 0.14 } : {}),
+                      ...(isSongSoak && abideTextVisibility === "off" ? { opacity: 0 } : {}),
                       ...(isSoakDimmed ? { opacity: 0.15 } : {}),
                       ...(isSoakFocused ? { opacity: 1 } : {}),
                       ...(isFlowHidden ? { opacity: 0 } : {}),
@@ -159,9 +165,11 @@ export function TextAnchor({
       {stage === "soak" && (
         <div className="mt-6 text-center h-5">
           <p className={`text-sm italic ${isDawn ? "text-white/50" : "text-zinc-500"}`}>
-            {songMode
-              ? songTextDimmed
+            {isSongSoak
+              ? abideTextVisibility === "dim"
                 ? "Text dimmed. Sing with the backing track."
+                : abideTextVisibility === "off"
+                ? "Text hidden. Sing from memory."
                 : "Sing with the passage."
               : scriptureVerses.length > 1
               ? `${soakHighlighted?.size || 0} of ${scriptureVerses.length} verses focused`

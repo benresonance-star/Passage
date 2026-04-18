@@ -1,4 +1,4 @@
-# Passage - Bible Chapter Memoriser (v3.10.1)
+# Passage - Bible Chapter Memoriser (v3.10.2)
 
 ## AI Agent Protocol (Mandatory)
 
@@ -370,7 +370,7 @@ A unified single-screen practice flow that guides the user through a practice se
 **Stages (ordered by desirable difficulty):**
 
 1. **Attend**: Full section text, normal styling. Subtitle: "Attend to the text carefully."
-2. **Abide**: Inline verse-focus mode — current verse at full opacity, others dimmed to ~15%. Tap left/right zones to navigate between verses. Breathing gradient background overlay. Verse counter shown below text. The backing player appears whenever the global instrumental library exists. When entered via `?mode=song`, Abide additionally enables the song-focused text-dimming behavior and auto-enters the stage for sung rehearsal.
+2. **Abide**: Inline verse-focus mode — current verse at full opacity, others dimmed to ~15%. Tap left/right zones to navigate between verses. Breathing gradient background overlay. Verse counter shown below text. The backing player appears whenever the global instrumental library exists. A muted eye icon sits alongside the Abide controls and cycles the text through `normal` → `dim` → `off` on each tap. When entered via `?mode=song`, Abide still auto-enters the stage for sung rehearsal, but the same three-state visibility control is now used instead of a binary dim toggle.
 3. **Breathe**: Word-by-word timed illumination with natural speech pacing and rhythmic prosody. Words transition from unread to read styling at user-controlled WPM, adjusted by a syllable-based timing model that accounts for word complexity, punctuation pauses (occurring after the word is revealed), and speech-like prosody (speeding up function words, accelerating in the middle of phrases, and adding weight to proper nouns). Controls: play/pause, skip forward/back, reset, WPM slider, focus mode toggle (hides unread words).
 4. **Reveal**: Text split into sentence-based lines (`splitIntoLines`). Lines are hidden (transparent, 40% opacity). Tap to reveal individual lines. Reveal All / Hide All toggle.
 5. **Recollect**: Deterministic word hiding at configurable levels (0%, 20%, 40%, 60%, 80%, Mnemonic). Uses `hideWords()` and `generateMnemonic()` from `lib/cloze.ts`.
@@ -546,6 +546,7 @@ The reusable audio system lives under `src/modules/audio` and now supports two c
 - **Chunk-linked tracks**: `manifest.ts` plus `hydrateChapterAudio()` continue to augment seeded, imported, and synced chapter payloads with optional `chunk.audio` metadata for Soak-specific vocal or text-linked tracks.
 - **Merged Soak library**: Soak combines the global defaults with any active-chunk tracks, keeps default instrumentals first, de-duplicates by `track.id`, and remembers its own selected track independently from Study.
 - **Study independence**: Study backing audio no longer depends on `activeSection.audio`; Abide reads from the default backing library and stores its selected track separately in settings, while the dedicated Song entry only layers on song-specific UX.
+- **Abide text support control**: The Practice / Abide stage now renders an icon-only eye control in the same soft muted style as the music trigger. It cycles between fully visible text, dimmed rehearsal text, and hidden text so users can progressively move from reading to memory while staying with the backing track.
 - **Track labeling**: `library.ts` derives `Instrumental` / `Vocals` labels from the `storageKey` path for Soak’s selector UI.
 - **Resolver**: `resolveTrackUrl()` returns:
   - absolute `http(s)` URLs unchanged

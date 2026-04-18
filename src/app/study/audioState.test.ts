@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { hasBackingTracks, isSongEntryMode, shouldRenderAbideAudioPlayer } from "./audioState";
+import {
+  cycleAbideTextVisibility,
+  hasBackingTracks,
+  isSongEntryMode,
+  shouldRenderAbideAudioPlayer,
+} from "./audioState";
 
 const backingTracks = [
   {
@@ -25,5 +30,11 @@ describe("study audio state", () => {
     expect(shouldRenderAbideAudioPlayer("soak", backingTracks)).toBe(true);
     expect(shouldRenderAbideAudioPlayer("read", backingTracks)).toBe(false);
     expect(shouldRenderAbideAudioPlayer("soak", [])).toBe(false);
+  });
+
+  it("cycles the Abide text visibility through normal, dim, and off", () => {
+    expect(cycleAbideTextVisibility("normal")).toBe("dim");
+    expect(cycleAbideTextVisibility("dim")).toBe("off");
+    expect(cycleAbideTextVisibility("off")).toBe("normal");
   });
 });
