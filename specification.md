@@ -1,4 +1,4 @@
-# Passage - Bible Chapter Memoriser (v3.10.0)
+# Passage - Bible Chapter Memoriser (v3.10.1)
 
 ## AI Agent Protocol (Mandatory)
 
@@ -300,7 +300,7 @@ Immersive verse-by-verse meditation screen.
 - **Default Audio Library**: Soak always exposes the global instrumental backing library (`Presence`, `Stillness`) even when the active chunk has no chunk-linked audio.
 - **Merged Track Library**: If the active chunk has `ChunkAudioRef` entries, Soak appends them after the default instrumentals, de-duplicates by `track.id`, and treats the full list as one curated selector.
 - **Lazy Audio Loading**: Track URLs are resolved only when the user presses play. The player uses the browser `HTMLAudioElement` with no eager fetch on first paint, preserving bandwidth.
-- **Multi-track Support**: Soak can switch among the merged library through the expanded selector, and only the selected track is loaded.
+- **Multi-track Support**: Soak can switch among the merged library through the expanded selector, and only the selected track is loaded. Persisted track selection no longer overrides a fresh user choice.
 - **Track Labels**: The selector shows whether each track is `Instrumental` or `Vocals`, inferred from the source path (`Instrumental Study Tracks` => instrumental; other `/music/...` paths => vocals).
 - **Exit**: Bottom-centre X button, initially nearly invisible (opacity 0.12). Tap the bottom zone or centre zone to reveal it (3s auto-hide). Tap the revealed button to exit back to `/chapter`.
 - **Cooldown**: 800ms minimum dwell time before navigation is allowed.
@@ -370,7 +370,7 @@ A unified single-screen practice flow that guides the user through a practice se
 **Stages (ordered by desirable difficulty):**
 
 1. **Attend**: Full section text, normal styling. Subtitle: "Attend to the text carefully."
-2. **Abide**: Inline verse-focus mode — current verse at full opacity, others dimmed to ~15%. Tap left/right zones to navigate between verses. Breathing gradient background overlay. Verse counter shown below text. When entered via `?mode=song`, Abide switches to the global instrumental backing library instead of chunk audio, keeps the scripture visible, and lets the learner dim the text while singing.
+2. **Abide**: Inline verse-focus mode — current verse at full opacity, others dimmed to ~15%. Tap left/right zones to navigate between verses. Breathing gradient background overlay. Verse counter shown below text. The backing player appears whenever the global instrumental library exists. When entered via `?mode=song`, Abide additionally enables the song-focused text-dimming behavior and auto-enters the stage for sung rehearsal.
 3. **Breathe**: Word-by-word timed illumination with natural speech pacing and rhythmic prosody. Words transition from unread to read styling at user-controlled WPM, adjusted by a syllable-based timing model that accounts for word complexity, punctuation pauses (occurring after the word is revealed), and speech-like prosody (speeding up function words, accelerating in the middle of phrases, and adding weight to proper nouns). Controls: play/pause, skip forward/back, reset, WPM slider, focus mode toggle (hides unread words).
 4. **Reveal**: Text split into sentence-based lines (`splitIntoLines`). Lines are hidden (transparent, 40% opacity). Tap to reveal individual lines. Reveal All / Hide All toggle.
 5. **Recollect**: Deterministic word hiding at configurable levels (0%, 20%, 40%, 60%, 80%, Mnemonic). Uses `hideWords()` and `generateMnemonic()` from `lib/cloze.ts`.
@@ -545,7 +545,7 @@ The reusable audio system lives under `src/modules/audio` and now supports two c
 - **Default backing library**: `defaultBackingTracks` in `BCMState` stores the global instrumental library used by Study / Abide and also shown in Soak for every chapter.
 - **Chunk-linked tracks**: `manifest.ts` plus `hydrateChapterAudio()` continue to augment seeded, imported, and synced chapter payloads with optional `chunk.audio` metadata for Soak-specific vocal or text-linked tracks.
 - **Merged Soak library**: Soak combines the global defaults with any active-chunk tracks, keeps default instrumentals first, de-duplicates by `track.id`, and remembers its own selected track independently from Study.
-- **Study independence**: Study song mode no longer depends on `activeSection.audio`; it reads only from the default backing library and stores its selected track separately in settings.
+- **Study independence**: Study backing audio no longer depends on `activeSection.audio`; Abide reads from the default backing library and stores its selected track separately in settings, while the dedicated Song entry only layers on song-specific UX.
 - **Track labeling**: `library.ts` derives `Instrumental` / `Vocals` labels from the `storageKey` path for Soak’s selector UI.
 - **Resolver**: `resolveTrackUrl()` returns:
   - absolute `http(s)` URLs unchanged

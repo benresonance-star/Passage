@@ -15,6 +15,7 @@ import { StageControls } from "@/components/study/StageControls";
 import { SpeechTuningOverlay } from "@/components/study/SpeechTuningOverlay";
 import { EmptyState } from "@/components/EmptyState";
 import { MinimalAudioPlayer } from "@/modules/audio/MinimalAudioPlayer";
+import { isSongEntryMode, shouldRenderAbideAudioPlayer } from "./audioState";
 import { CheckCircle2 } from "lucide-react";
 import { Verse, StudySection } from "@/types";
 
@@ -102,7 +103,8 @@ export default function StudyPage() {
     [activeSection]
   );
   const songTracks = state.defaultBackingTracks;
-  const isSongMode = requestedSongMode && songTracks.length > 0;
+  const isSongMode = isSongEntryMode(requestedSongMode, songTracks);
+  const shouldShowAbideAudioPlayer = shouldRenderAbideAudioPlayer(stage, songTracks);
   const selectedStudyTrackId = state.settings.activeStudyTrackId ?? null;
   const allScriptureVerseIndexes = useMemo(
     () => new Set(Array.from({ length: scriptureVerses.length }, (_, index) => index)),
@@ -431,7 +433,7 @@ export default function StudyPage() {
 
       {/* Bottom controls */}
       <div className="relative z-30">
-        {stage === "soak" && isSongMode ? (
+        {shouldShowAbideAudioPlayer ? (
           <div className="px-4 pb-2">
             <div className="max-w-2xl mx-auto flex justify-center">
               <MinimalAudioPlayer

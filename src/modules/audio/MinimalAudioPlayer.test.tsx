@@ -232,7 +232,55 @@ describe("MinimalAudioPlayer", () => {
     expect(trackSelect?.value).toBe("1");
     expect(trackSelect?.textContent).toContain("Presence (Instrumental)");
     expect(trackSelect?.textContent).toContain("No Condemnation (Vocals)");
-    expect(handleTrackChange).toHaveBeenCalled();
-    expect(handleTrackChange.mock.calls.at(-1)?.[0]?.id).toBe("track-2");
+    expect(handleTrackChange).not.toHaveBeenCalled();
+  });
+
+  it("does not snap back to the persisted track after a user selection", () => {
+    const handleTrackChange = vi.fn();
+
+    act(() => {
+      root.render(
+        <MinimalAudioPlayer
+          tracks={[
+            {
+              id: "track-1",
+              title: "Presence",
+              storageKey: "music/Instrumental Study Tracks/Presence.mp3",
+            },
+            {
+              id: "track-2",
+              title: "No Condemnation",
+              storageKey: "music/Romans 8 Verses 1-4 NIV/No Condemnation.mp3",
+            },
+          ]}
+          selectedTrackId="track-1"
+          onTrackChange={handleTrackChange}
+          showTrackTypeLabels
+        />,
+      );
+    });
+
+    const toggleButton = container.querySelector(
+      '[data-testid="soak-audio-toggle"]',
+    ) as HTMLButtonElement | null;
+
+    act(() => {
+      toggleButton?.click();
+    });
+
+    const trackSelect = container.querySelector(
+      '[data-testid="audio-track-select"]',
+    ) as HTMLSelectElement | null;
+
+    expect(trackSelect?.value).toBe("0");
+
+    act(() => {
+      trackSelect!.value = "1";
+      trackSelect!.dispatchEvent(new Event("change", { bubbles: true }));
+    });
+
+    expect(trackSelect?.value).toBe("1");
+    expect(handleTrackChange).toHaveBeenCalledTimes(1);
+    expect(handleTrackChange.mock.calls[0]?.[0]?.id).toBe("track-2");
   });
 });

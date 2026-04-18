@@ -35,7 +35,7 @@ export function MinimalAudioPlayer({
   showTrackTypeLabels = false,
 }: MinimalAudioPlayerProps) {
   const collapseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const lastReportedTrackIdRef = useRef<string | null>(null);
+  const lastSyncedSelectionKeyRef = useRef<string | null>(null);
   const [isExpanded, setIsExpanded] = useState(false);
   const {
     currentTrack,
@@ -86,24 +86,25 @@ export function MinimalAudioPlayer({
   }, [clearCollapseTimer]);
 
   useEffect(() => {
-    if (selectedTrackIndex >= 0 && selectedTrackIndex !== currentTrackIndex) {
-      void selectTrack(selectedTrackIndex);
-    }
-  }, [currentTrackIndex, selectedTrackIndex, selectTrack]);
+    const selectionKey =
+      selectedTrackId === null
+        ? null
+        : `${selectedTrackId}:${tracks.map((track) => track.id).join("|")}`;
 
-  useEffect(() => {
-    if (
-      !currentTrack ||
-      !onTrackChange ||
-      (selectedTrackId !== null && currentTrack.id !== selectedTrackId) ||
-      lastReportedTrackIdRef.current === currentTrack.id
-    ) {
+    if (selectionKey === lastSyncedSelectionKeyRef.current) {
       return;
     }
 
-    lastReportedTrackIdRef.current = currentTrack.id;
-    onTrackChange(currentTrack);
-  }, [currentTrack, onTrackChange, selectedTrackId]);
+    lastSyncedSelectionKeyRef.current = selectionKey;
+
+    if (selectedTrackId === null) {
+      return;
+    }
+
+    if (selectedTrackIndex >= 0 && selectedTrackIndex !== currentTrackIndex) {
+      void selectTrack(selectedTrackIndex);
+    }
+  }, [currentTrackIndex, selectedTrackId, selectedTrackIndex, selectTrack, tracks]);
 
   const currentTrackTypeLabel = showTrackTypeLabels
     ? currentTrack
@@ -183,7 +184,14 @@ export function MinimalAudioPlayer({
                     value={currentTrackIndex}
                     onChange={(event) => {
                       handleExpandedInteraction();
-                      void selectTrack(Number(event.target.value));
+                      const nextTrackIndex = Number(event.target.value);
+                      const nextTrack = tracks[nextTrackIndex];
+
+                      if (nextTrack) {
+                        onTrackChange?.(nextTrack);
+                      }
+
+                      void selectTrack(nextTrackIndex);
                     }}
                     className="w-full appearance-none bg-transparent text-[12px] leading-tight outline-none"
                     aria-label="Choose backing track"
