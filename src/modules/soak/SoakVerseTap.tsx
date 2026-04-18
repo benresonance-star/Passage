@@ -433,7 +433,7 @@ export function SoakVerseTap({
       {tracks.length > 0 ? (
         <div
           className="fixed bottom-0 left-0 right-0 z-[104] flex justify-center pointer-events-none"
-          style={{ paddingBottom: "max(env(safe-area-inset-bottom), 84px)" }}
+          style={{ paddingBottom: "max(env(safe-area-inset-bottom), 92px)" }}
         >
           <MinimalAudioPlayer tracks={tracks} className="pointer-events-auto" />
         </div>
