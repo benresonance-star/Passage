@@ -28,6 +28,7 @@ export default function SoakPage() {
     ? state.settings.activeChunkId[chapterId]
     : null;
   const activeChunk = chapter?.chunks.find((c) => c.id === activeChunkId);
+  const activeChunkTracks = activeChunk?.audio ?? [];
 
   useEffect(() => {
     if (isHydrated && !chapter) {
@@ -92,6 +93,7 @@ export default function SoakPage() {
           <SoakVerseTap
             key="soak"
             section={section}
+            tracks={activeChunkTracks}
             fontClassName={soakFont.className}
             onExit={() => router.push("/chapter")}
           />

@@ -6,6 +6,7 @@ import { useBCM } from "@/context/BCMContext";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/lib/supabase";
 import { parseChapter, chunkVerses, getChapterSlug } from "@/lib/parser";
+import { hydrateChapterAudio } from "@/modules/audio/manifest";
 import { SM2Card, Chapter, BibleVersion, Verse, Chunk } from "@/types";
 import { ArrowLeft, Save, AlertTriangle, Check, BookOpen, Type, ChevronDown, Eye, Globe } from "lucide-react";
 import Link from "next/link";
@@ -56,8 +57,6 @@ export default function ImportPage() {
         }
       };
       fetchAdminStatus();
-    } else {
-      setIsAdmin(true); // Local mode
     }
   }, [user]);
 
@@ -185,7 +184,7 @@ export default function ImportPage() {
       };
     });
 
-    const newChapter: Chapter = {
+    const newChapter: Chapter = hydrateChapterAudio({
       id: chapterId,
       versionId: finalVersion,
       bookName: finalBook,
@@ -194,7 +193,7 @@ export default function ImportPage() {
       verses: finalVerses,
       chunks: finalChunks,
       createdAt: now,
-    };
+    });
 
     // Global Library Sync (Admin Only) - Do this BEFORE redirecting
     if (pushToGlobal && isAdmin) {

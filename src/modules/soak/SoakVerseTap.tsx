@@ -3,6 +3,8 @@
 import { useReducer, useEffect, useCallback, useRef, useState } from "react";
 import { tokenizeVerse } from "./tokenize";
 import type { SoakSection } from "./types";
+import type { ChunkAudioRef } from "@/types";
+import { MinimalAudioPlayer } from "@/modules/audio/MinimalAudioPlayer";
 import { X } from "lucide-react";
 import "./breathe.css";
 
@@ -115,6 +117,7 @@ function soakReducer(state: SoakState, action: SoakAction): SoakState {
 
 export interface SoakVerseTapProps {
   section: SoakSection;
+  tracks?: ChunkAudioRef[];
   /** Optional class to apply a custom font (e.g. from next/font). */
   fontClassName?: string;
   /** Called when the user taps the exit icon. */
@@ -123,6 +126,7 @@ export interface SoakVerseTapProps {
 
 export function SoakVerseTap({
   section,
+  tracks = [],
   fontClassName = "",
   onExit,
 }: SoakVerseTapProps) {
@@ -145,15 +149,19 @@ export function SoakVerseTap({
   }, []);
 
   /* ── Reducer ─────────────────────────────────────────────────────── */
-  const [state, dispatch] = useReducer(soakReducer, {
-    currentIndex: 0,
-    activeSlot: "a" as const,
-    slotA: 0,
-    slotB: 0,
-    phase: "idle" as Phase,
-    highlightedWords: new Set<string>(),
-    lastChangeTs: Date.now(),
-  });
+  const [state, dispatch] = useReducer(
+    soakReducer,
+    undefined,
+    (): SoakState => ({
+      currentIndex: 0,
+      activeSlot: "a",
+      slotA: 0,
+      slotB: 0,
+      phase: "idle",
+      highlightedWords: new Set<string>(),
+      lastChangeTs: Date.now(),
+    }),
+  );
 
   /* ── Phase transition effects ────────────────────────────────────── */
   useEffect(() => {
@@ -421,6 +429,15 @@ export function SoakVerseTap({
           {verseIndicator}
         </span>
       </div>
+
+      {tracks.length > 0 ? (
+        <div
+          className="fixed bottom-0 left-0 right-0 z-[104] flex justify-center pointer-events-none"
+          style={{ paddingBottom: "max(env(safe-area-inset-bottom), 84px)" }}
+        >
+          <MinimalAudioPlayer tracks={tracks} className="pointer-events-auto" />
+        </div>
+      ) : null}
 
       {/* Bottom exit zone — tap to reveal, tap icon to exit */}
       <div

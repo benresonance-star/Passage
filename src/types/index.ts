@@ -4,11 +4,21 @@ export interface Verse {
   type: "scripture" | "heading";
 }
 
+export interface ChunkAudioRef {
+  id: string;
+  title: string;
+  storageKey: string;
+  durationSec?: number;
+  artist?: string;
+  source?: string;
+}
+
 export interface Chunk {
   id: string;
   verseRange: string; // e.g. "1-3"
   verses: Verse[];
   text: string;
+  audio?: ChunkAudioRef[];
 }
 
 export type StudySection = Chunk;

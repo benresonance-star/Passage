@@ -9,6 +9,7 @@ import { getChapterSlug } from "@/lib/parser";
 import { shouldResetStreak } from "@/lib/streak";
 import { syncMemorisedState } from "@/lib/scheduler";
 import type { RealtimeChannel } from "@supabase/supabase-js";
+import { hydrateChapterAudio } from "@/modules/audio/manifest";
 
 import { deleteChapterData, deleteSharedProgress } from "@/services/vault";
 
@@ -101,7 +102,7 @@ export function BCMProvider({ children }: { children: React.ReactNode }) {
           }, (payload) => {
             const row = payload.new as DbUserChapter | undefined;
             if (row?.data) {
-              const updatedChapter = row.data;
+              const updatedChapter = hydrateChapterAudio(row.data);
               const chapterId = row.chapter_id;
               setState(prev => ({
                 ...prev,
@@ -197,7 +198,7 @@ export function BCMProvider({ children }: { children: React.ReactNode }) {
       await client.from('user_chapters').upsert({
         user_id: user.id,
         chapter_id: chapter.id,
-        data: chapter,
+        data: hydrateChapterAudio(chapter),
         updated_at: new Date().toISOString()
       }, { onConflict: 'user_id,chapter_id' });
     } catch (err) {
@@ -223,7 +224,7 @@ export function BCMProvider({ children }: { children: React.ReactNode }) {
         
         // Merge chapters
         (chapters as DbUserChapter[] | null)?.forEach((row) => {
-          newState.chapters[row.chapter_id] = row.data;
+          newState.chapters[row.chapter_id] = hydrateChapterAudio(row.data);
         });
 
         // Merge cards with conflict resolution

@@ -1,4 +1,4 @@
-# Passage - Bible Chapter Memoriser (v3.8.1)
+# Passage - Bible Chapter Memoriser (v3.9.0)
 
 An iPhone-first PWA for memorising Bible chapters through chunked practice, immersive soaking, spaced repetition, and shared group progress tracking with cross-device cloud sync.
 
@@ -9,6 +9,7 @@ An iPhone-first PWA for memorising Bible chapters through chunked practice, imme
 - **My Progress**: Unified view of memorisation progress with bidirectional sync between Parts and Verses. Access via the Home page or active chapter card. Includes a centered header and back navigation.
 - **Practice Units**: Choose between practicing "Parts" (groups of ~4 verses) or individual "Verses" via a toggle on the Chapter page. Both track SM-2 progress independently but share memorisation state.
 - **Soak Mode**: Full-screen verse-by-verse meditation with a 3-second Psalm 46:10 introductory screen, breathing gradient background, double-buffer crossfade transitions, and wake lock. Supports swipe navigation on mobile and click navigation on desktop.
+- **Chunk Audio**: Abide can now show a minimalist music player when the selected chunk has associated tracks. Playback stays lazy, supports multiple tracks per chunk, and resolves to Vercel-safe `/music/...` URLs by default.
 - **Spaced Repetition**: Modified SM-2 algorithm with auto-promotion to memorised after 3 consecutive high scores. Spacing for recall sessions is optimized for consolidation by using the shortest interval among memorised sections.
 - **Theme Engine**: 7 presets (OLED, Amber, Midnight, Sepia, Night Dusk, Classic, Dawn) with CSS custom properties and animated gradients.
 - **Cloud Sync**: Cross-device synchronisation via Supabase with realtime subscriptions and timestamp-based conflict resolution.
@@ -45,6 +46,8 @@ npm install
 ```env
 NEXT_PUBLIC_SUPABASE_URL=your-supabase-url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
+# Optional: use when audio should come from a CDN/storage origin
+# NEXT_PUBLIC_AUDIO_BASE_URL=https://cdn.example.com
 ```
 
 4. Run the development server:
@@ -68,7 +71,9 @@ npm run dev
 
 ## Deployment
 
-The app deploys automatically from the `main` branch via Vercel. Environment variables (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`) are managed in the Vercel dashboard. PWA assets are generated at build time.
+The app deploys automatically from the `main` branch via Vercel. Environment variables (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`) are managed in the Vercel dashboard. `NEXT_PUBLIC_AUDIO_BASE_URL` is optional and only needed when audio is hosted off-origin. PWA assets are generated at build time.
+
+For same-origin audio on Vercel, deploy MP3s under `public/music/...`; those files are served at `/music/...`. The top-level `music/` folder can be used as a local source directory, but it is not web-served unless copied into `public/`.
 
 ## iPhone Installation
 

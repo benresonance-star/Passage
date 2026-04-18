@@ -1,4 +1,4 @@
-# Passage - Bible Chapter Memoriser (v3.8.1)
+# Passage - Bible Chapter Memoriser (v3.9.0)
 
 ## AI Agent Protocol (Mandatory)
 
@@ -117,11 +117,21 @@ interface Verse {
   type: "scripture" | "heading";
 }
 
+interface ChunkAudioRef {
+  id: string;
+  title: string;
+  storageKey: string;         // Stable path-like key, usually under public/music/... on Vercel
+  durationSec?: number;
+  artist?: string;
+  source?: string;
+}
+
 interface Chunk {
   id: string;                 // Deterministic slug: "{chapterId}-v{range}"
   verseRange: string;         // e.g. "1-4"
   verses: Verse[];
   text: string;               // Flattened scripture text (no headings)
+  audio?: ChunkAudioRef[];    // Optional music tracks associated with this section
 }
 
 type PracticeSection = Chunk;    // A chunk or a single verse — same shape
@@ -283,10 +293,14 @@ Immersive verse-by-verse meditation screen.
 - **Breathing Background**: CSS animation (`soak-breathe` class in `breathe.css`) creates a slowly animating gradient background.
 - **Font**: Cormorant Garamond (Light 300, Regular 400, Bold 700).
 - **Verse Indicator**: Top-centre shows `"n / total"` in faint uppercase text.
+- **Conditional Music Playback**: If the active chunk has one or more `ChunkAudioRef` entries, a minimalist bottom-centered player appears above the exit affordance. If no tracks exist, no audio controls are rendered.
+- **Lazy Audio Loading**: Track URLs are resolved only when the user presses play. The player uses the browser `HTMLAudioElement` with no eager fetch on first paint, preserving bandwidth.
+- **Multi-track Support**: Chunks may have multiple tracks. Previous/next controls appear only when more than one track is available, and only the selected track is loaded.
 - **Exit**: Bottom-centre X button, initially nearly invisible (opacity 0.12). Tap the bottom zone or centre zone to reveal it (3s auto-hide). Tap the revealed button to exit back to `/chapter`.
 - **Cooldown**: 800ms minimum dwell time before navigation is allowed.
 - **Wake Lock**: Screen stays on via `useWakeLock` hook.
 - **Data mapping**: Headings are stripped — only `"scripture"` type verses are shown.
+- **Track Resolution**: Audio metadata is attached at the chunk level via the shared audio manifest/hydration helpers. On Vercel, path-like `storageKey` values resolve to same-origin `/music/...` URLs by default, with `NEXT_PUBLIC_AUDIO_BASE_URL` available as an override for future CDN hosting.
 
 ### D. Practice (`/study`)
 
@@ -517,6 +531,19 @@ The `bible_library` Supabase table stores pre-loaded Bible content verse by vers
 - **Output**: `{ results: DiffResult[], accuracy: number }` where accuracy = `(correct / totalExpected) × 100`, rounded.
 - **DiffResult statuses**: `correct`, `wrong`, `missing`, `extra`.
 
+### G. Chunk Audio
+
+The reusable chunk-audio system lives under `src/modules/audio` and is designed so Abide can use it now while other screens can adopt it later.
+
+- **Manifest-first association**: `manifest.ts` maps deterministic `chapterId` / `chunkId` pairs to one or more `ChunkAudioRef` records.
+- **Hydration**: `hydrateChapterAudio()` augments seeded, imported, and synced chapter payloads with optional `chunk.audio` metadata without changing the rest of the chapter flow.
+- **Resolver**: `resolveTrackUrl()` returns:
+  - absolute `http(s)` URLs unchanged
+  - `${NEXT_PUBLIC_AUDIO_BASE_URL}/{encodedPath}` when an external host is configured
+  - same-origin `/{encodedPath}` when no external base is configured, which is the default Vercel behavior
+- **Player ownership**: `useChunkAudio()` owns playback lifecycle, lazy loading, track switching, cleanup, timing state, and error state. `MinimalAudioPlayer.tsx` renders the restrained transport UI.
+- **Caching**: Resolved URLs are memoized in-memory for the current session only; audio binary data is not persisted in app state.
+
 ---
 
 ## 7. UI/UX Patterns
@@ -575,9 +602,10 @@ The `bible_library` Supabase table stores pre-loaded Bible content verse by vers
 - **Backend**: Supabase handles Auth, Postgres Database, and Realtime subscriptions.
 - **Realtime Publication**: `supabase_realtime` includes `shared_progress`, `user_chapters`, `user_cards`, and `user_stats`.
 - **Bible Library**: The `bible_library` table is pre-populated with verse-by-verse Bible content and is read-only for clients.
-- **Environment**: Keys (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`) are managed in Vercel.
+- **Environment**: Keys (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`) are managed in Vercel. `NEXT_PUBLIC_AUDIO_BASE_URL` is optional and only needed when audio should be served from a separate CDN or storage origin.
 - **CI/CD**: Automatic deployments from `main` branch via Vercel.
 - **Build**: `next build --webpack`. PWA assets generated at build time.
 - **Testing**: `vitest run` for unit tests, `vitest` for watch mode.
 - **Version Sync**: The version in `package.json`, the specification heading, the `README.md` heading, and the in-app version label must always match. Bump all four together on any release.
 - **GitHub Push**: After any successful app update, all changes (including specification updates) must be committed and pushed to the remote repository.
+- **Static Audio on Vercel**: Audio intended for same-origin playback must be deployed under `public/music/...`, which Vercel exposes at `/music/...`. The top-level `music/` folder may still exist locally as an authoring/source directory, but it is not web-served unless copied into `public/`.

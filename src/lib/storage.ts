@@ -1,6 +1,7 @@
 import { BCMState, SM2Card, Chapter } from "@/types";
 import { ROMANS_8_SEED } from "./seed";
 import { parseChapter, chunkVerses, getChapterSlug } from "./parser";
+import { hydrateChapterAudio } from "@/modules/audio/manifest";
 
 const STORAGE_KEY = "bcm_v1_state";
 
@@ -48,7 +49,7 @@ function seedData(state: BCMState): BCMState {
     };
   });
 
-  const starterChapter: Chapter = {
+  const starterChapter: Chapter = hydrateChapterAudio({
     id: chapterId,
     versionId,
     bookName,
@@ -57,7 +58,7 @@ function seedData(state: BCMState): BCMState {
     verses,
     chunks,
     createdAt: now,
-  };
+  });
 
   return {
     ...state,
@@ -70,6 +71,26 @@ function seedData(state: BCMState): BCMState {
       activeChunkId: { [chapterId]: chunks[0]?.id || null }
     }
   };
+}
+
+function hydrateStoredChapters(state: BCMState): BCMState {
+  let changed = false;
+  const hydratedChapters = Object.fromEntries(
+    Object.entries(state.chapters).map(([chapterId, chapter]) => {
+      const hydratedChapter = hydrateChapterAudio(chapter);
+      if (hydratedChapter !== chapter) {
+        changed = true;
+      }
+      return [chapterId, hydratedChapter];
+    }),
+  );
+
+  return changed
+    ? {
+        ...state,
+        chapters: hydratedChapters,
+      }
+    : state;
 }
 
 export function loadState(): BCMState {
@@ -113,7 +134,7 @@ export function loadState(): BCMState {
           }
         }
       };
-      return migratedState;
+      return hydrateStoredChapters(migratedState);
     }
 
     // Migration for v2.1 (adding Bible Version and Book Name)
@@ -160,11 +181,11 @@ export function loadState(): BCMState {
         migratedState.selectedChapterId = getChapterSlug(sel.title, sel.bookName || "Romans", sel.versionId || "niv");
       }
 
-      return migratedState;
+      return hydrateStoredChapters(migratedState);
     }
 
     // If library became empty after deletions, we don't re-seed (respect user choice)
-    return parsed;
+    return hydrateStoredChapters(parsed);
   } catch (e) {
     console.error("Failed to load state:", e);
     return INITIAL_STATE;
