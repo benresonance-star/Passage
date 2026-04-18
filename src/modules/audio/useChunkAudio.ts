@@ -18,6 +18,7 @@ export function useChunkAudio(tracks: ChunkAudioRef[]): ChunkAudioController {
   const resolvedTrackIdRef = useRef<string | null>(null);
 
   const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
+  const [isLooping, setIsLooping] = useState(false);
   const [status, setStatus] = useState<ChunkAudioStatus>("idle");
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -34,6 +35,7 @@ export function useChunkAudio(tracks: ChunkAudioRef[]): ChunkAudioController {
 
     const audio = new Audio();
     audio.preload = "none";
+    audio.loop = isLooping;
 
     audio.addEventListener("play", () => setStatus("playing"));
     audio.addEventListener("pause", () => {
@@ -56,7 +58,7 @@ export function useChunkAudio(tracks: ChunkAudioRef[]): ChunkAudioController {
 
     audioRef.current = audio;
     return audio;
-  }, []);
+  }, [isLooping]);
 
   const loadTrack = useCallback(
     (track: ChunkAudioRef, audio: HTMLAudioElement) => {
@@ -149,6 +151,18 @@ export function useChunkAudio(tracks: ChunkAudioRef[]): ChunkAudioController {
     await play();
   }, [pause, play, status]);
 
+  const toggleLoop = useCallback(() => {
+    setIsLooping((prev) => {
+      const next = !prev;
+
+      if (audioRef.current) {
+        audioRef.current.loop = next;
+      }
+
+      return next;
+    });
+  }, []);
+
   const nextTrack = useCallback(async () => {
     if (!hasMultipleTracks) {
       return;
@@ -181,6 +195,12 @@ export function useChunkAudio(tracks: ChunkAudioRef[]): ChunkAudioController {
   }, [currentTrackIndex, tracks]);
 
   useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.loop = isLooping;
+    }
+  }, [isLooping]);
+
+  useEffect(() => {
     return () => {
       teardownAudio(audioRef.current);
       audioRef.current = null;
@@ -194,6 +214,7 @@ export function useChunkAudio(tracks: ChunkAudioRef[]): ChunkAudioController {
       currentTrack,
       currentTrackIndex: effectiveTrackIndex,
       hasMultipleTracks,
+      isLooping,
       status,
       currentTime,
       duration,
@@ -202,6 +223,7 @@ export function useChunkAudio(tracks: ChunkAudioRef[]): ChunkAudioController {
       play,
       pause,
       togglePlayback,
+      toggleLoop,
       nextTrack,
       previousTrack,
       selectTrack,
@@ -213,12 +235,14 @@ export function useChunkAudio(tracks: ChunkAudioRef[]): ChunkAudioController {
       effectiveTrackIndex,
       error,
       hasMultipleTracks,
+      isLooping,
       nextTrack,
       pause,
       play,
       previousTrack,
       selectTrack,
       status,
+      toggleLoop,
       togglePlayback,
       tracks,
     ],

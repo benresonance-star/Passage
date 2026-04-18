@@ -7,6 +7,7 @@ export interface ChunkAudioController {
   currentTrack: ChunkAudioRef | null;
   currentTrackIndex: number;
   hasMultipleTracks: boolean;
+  isLooping: boolean;
   status: ChunkAudioStatus;
   currentTime: number;
   duration: number;
@@ -15,6 +16,7 @@ export interface ChunkAudioController {
   play: () => Promise<void>;
   pause: () => void;
   togglePlayback: () => Promise<void>;
+  toggleLoop: () => void;
   nextTrack: () => Promise<void>;
   previousTrack: () => Promise<void>;
   selectTrack: (index: number) => Promise<void>;

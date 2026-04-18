@@ -9,12 +9,19 @@ import { MinimalAudioPlayer } from "./MinimalAudioPlayer";
   true;
 
 class MockAudio {
+  static instances: MockAudio[] = [];
+
   preload = "none";
   src = "";
   duration = 120;
   currentTime = 0;
   ended = false;
+  loop = false;
   private listeners = new Map<string, Set<() => void>>();
+
+  constructor() {
+    MockAudio.instances.push(this);
+  }
 
   addEventListener(event: string, listener: () => void) {
     const listeners = this.listeners.get(event) ?? new Set<() => void>();
@@ -51,6 +58,7 @@ describe("MinimalAudioPlayer", () => {
   beforeEach(() => {
     vi.useFakeTimers();
     vi.stubGlobal("Audio", MockAudio);
+    MockAudio.instances = [];
     container = document.createElement("div");
     document.body.appendChild(container);
     root = createRoot(container);
@@ -282,5 +290,51 @@ describe("MinimalAudioPlayer", () => {
     expect(trackSelect?.value).toBe("1");
     expect(handleTrackChange).toHaveBeenCalledTimes(1);
     expect(handleTrackChange.mock.calls[0]?.[0]?.id).toBe("track-2");
+  });
+
+  it("allows the current track to loop", () => {
+    act(() => {
+      root.render(
+        <MinimalAudioPlayer
+          tracks={[
+            {
+              id: "track-1",
+              title: "Presence",
+              storageKey: "music/Instrumental Study Tracks/Presence.mp3",
+            },
+          ]}
+        />,
+      );
+    });
+
+    const toggleButton = container.querySelector(
+      '[data-testid="soak-audio-toggle"]',
+    ) as HTMLButtonElement | null;
+
+    act(() => {
+      toggleButton?.click();
+    });
+
+    const loopButton = container.querySelector(
+      '[data-testid="audio-loop-toggle"]',
+    ) as HTMLButtonElement | null;
+    const playButton = container.querySelector(
+      '[aria-label="Play audio track"]',
+    ) as HTMLButtonElement | null;
+
+    expect(loopButton?.getAttribute("aria-pressed")).toBe("false");
+
+    act(() => {
+      loopButton?.click();
+    });
+
+    expect(loopButton?.getAttribute("aria-pressed")).toBe("true");
+
+    act(() => {
+      playButton?.click();
+    });
+
+    expect(MockAudio.instances).toHaveLength(1);
+    expect(MockAudio.instances[0]?.loop).toBe(true);
   });
 });

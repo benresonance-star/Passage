@@ -1,4 +1,4 @@
-# Passage - Bible Chapter Memoriser (v3.10.2)
+# Passage - Bible Chapter Memoriser (v3.10.3)
 
 An iPhone-first PWA for memorising Bible chapters through chunked practice, immersive soaking, spaced repetition, and shared group progress tracking with cross-device cloud sync.
 
@@ -10,6 +10,7 @@ An iPhone-first PWA for memorising Bible chapters through chunked practice, imme
 - **Practice Units**: Choose between practicing "Parts" (groups of ~4 verses) or individual "Verses" via a toggle on the Chapter page. Both track SM-2 progress independently but share memorisation state.
 - **Soak Mode**: Full-screen verse-by-verse meditation with a 3-second Psalm 46:10 introductory screen, breathing gradient background, double-buffer crossfade transitions, and wake lock. Supports swipe navigation on mobile and click navigation on desktop.
 - **Study Backing Library**: Practice / Abide now uses a global instrumental backing-track library (`Presence`, `Stillness`) that is independent of the active verse or chunk. The player appears in Abide whenever the backing library exists, and a muted eye icon lets the user cycle passage visibility through normal, dim, and off while rehearsing with the backing track.
+- **Shared Audio Controls**: The minimalist audio player now includes a subtle loop toggle, so the current backing track can repeat continuously in either Study / Abide or Soak.
 - **Soak Audio Library**: Soak always offers the default instrumental library, appends any chunk-linked tracks for the active section, and labels selections as instrumental or vocal based on their source path.
 - **Spaced Repetition**: Modified SM-2 algorithm with auto-promotion to memorised after 3 consecutive high scores. Spacing for recall sessions is optimized for consolidation by using the shortest interval among memorised sections.
 - **Theme Engine**: 7 presets (OLED, Amber, Midnight, Sepia, Night Dusk, Classic, Dawn) with CSS custom properties and animated gradients.

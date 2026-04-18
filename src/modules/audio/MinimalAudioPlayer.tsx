@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { ChunkAudioRef } from "@/types";
-import { Music4, Pause, Play } from "lucide-react";
+import { Music4, Pause, Play, Repeat } from "lucide-react";
 import { getTrackTypeLabel } from "./library";
 import { useChunkAudio } from "./useChunkAudio";
 
@@ -45,7 +45,9 @@ export function MinimalAudioPlayer({
     duration,
     progress,
     error,
+    isLooping,
     togglePlayback,
+    toggleLoop,
     selectTrack,
   } = useChunkAudio(tracks);
 
@@ -171,6 +173,24 @@ export function MinimalAudioPlayer({
             aria-label={isPlaying ? "Pause audio track" : "Play audio track"}
           >
             {isPlaying ? <Pause size={16} /> : <Play size={16} className="translate-x-px" />}
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              handleExpandedInteraction();
+              toggleLoop();
+            }}
+            className={`rounded-full border p-2.5 transition active:scale-95 ${
+              isLooping
+                ? "border-white/20 bg-white/16 text-white"
+                : "border-white/10 bg-white/5 text-white/60 hover:bg-white/10 hover:text-white/80"
+            }`}
+            aria-label={isLooping ? "Disable track loop" : "Enable track loop"}
+            aria-pressed={isLooping}
+            data-testid="audio-loop-toggle"
+          >
+            <Repeat size={14} />
           </button>
 
           <div className="min-w-0 flex-1">
